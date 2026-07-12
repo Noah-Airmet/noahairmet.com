@@ -1,0 +1,6 @@
+# Legacy routes from the prior personal site. Final destinations should be
+# confirmed during content migration before launch.
+/blog.html /writing/ 301
+/commitments.html /about/#principles 301
+/pulpit-progress.html https://pulpit.noahairmet.com/progress/ 301
+/posts/template.html /404.html 410

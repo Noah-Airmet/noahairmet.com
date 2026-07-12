@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://noahairmet.com/sitemap-index.xml

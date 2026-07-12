@@ -1,0 +1,16 @@
+---
+import { site } from "../lib/site";
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <p>&copy; {year} {site.name}</p>
+  <nav aria-label="Footer">
+    <ul>
+      <li><a href="/colophon/">Colophon</a></li>
+      <li><a href="/privacy/">Privacy</a></li>
+      <li><a href={site.github}>GitHub</a></li>
+      <li><a href={site.linkedin}>LinkedIn</a></li>
+    </ul>
+  </nav>
+</footer>

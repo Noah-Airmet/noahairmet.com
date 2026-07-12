@@ -1,0 +1,17 @@
+---
+const navItems = [
+  { href: "/work/", label: "Work" },
+  { href: "/writing/", label: "Writing" },
+  { href: "/about/", label: "About" },
+  { href: "mailto:hello@noahairmet.com", label: "Contact" },
+];
+---
+
+<header class="site-header">
+  <a class="site-name" href="/">Noah Airmet</a>
+  <nav aria-label="Primary">
+    <ul>
+      {navItems.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+    </ul>
+  </nav>
+</header>
