@@ -3,10 +3,10 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
 <BaseLayout title="Page not found" path="/404.html" noindex>
-  <section class="page-intro" aria-labelledby="not-found-title">
-    <p class="eyebrow">404</p>
-    <h1 id="not-found-title">Page not found.</h1>
-    <p>The page may have moved, or it may not exist in the new site yet.</p>
-    <p><a href="/">Return home</a></p>
-  </section>
+  <header class="page-hero">
+    <p class="indexed-label"><span>404</span> Not found</p>
+    <h1>This path does not lead anywhere useful.</h1>
+    <p>It may have moved during the rebuild, or it may never have existed.</p>
+    <div class="resume-actions"><a class="solid-link" href="/">Return home</a><a class="underlined-link" href="/work/">Browse work →</a></div>
+  </header>
 </BaseLayout>

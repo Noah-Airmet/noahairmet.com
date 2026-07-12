@@ -1,22 +1,139 @@
 ---
+import { Image } from "astro:assets";
+import portrait from "../assets/noah-airmet.jpg";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { site } from "../lib/site";
 ---
 
 <BaseLayout>
-  <section class="page-intro" aria-labelledby="home-title">
-    <p class="eyebrow">Professional site foundation</p>
-    <h1 id="home-title">Noah Airmet</h1>
-    <p>
-      I build systems, study their risks, and turn what I learn into practical
-      AI governance.
-    </p>
+  <section class="home-hero" aria-labelledby="home-title">
+    <aside class="home-rail" aria-hidden="true">
+      <span>Systems</span><span>Risk</span><span>Responsibility</span>
+    </aside>
+
+    <div class="hero-statement">
+      <p class="indexed-label"><span>01</span> Working thesis</p>
+      <h1 id="home-title">
+        Build the system.<br />
+        <em>Name the risk.</em><br />
+        Make responsibility <strong>visible.</strong>
+      </h1>
+      <div class="hero-deck">
+        <p>
+          I’m a junior software developer and BYU cybersecurity student pursuing
+          AI governance from the inside out: close to the code, the data, and the
+          people who have to make controls work.
+        </p>
+        <a class="underlined-link" href="/work/">Explore selected work <span aria-hidden="true">→</span></a>
+      </div>
+    </div>
+
+    <aside class="hero-profile">
+      <div>
+        <p class="profile-kicker">A practical route into AI governance.</p>
+        <p class="profile-fields">Software development · Security · Institutional controls</p>
+      </div>
+      <figure class="portrait-frame">
+        <Image
+          src={portrait}
+          widths={[480, 720, 960]}
+          sizes="(max-width: 800px) 100vw, 36vw"
+          format="webp"
+          alt="Noah Airmet smiling outdoors"
+          loading="eager"
+          fetchpriority="high"
+        />
+      </figure>
+      <dl class="profile-facts">
+        <div><dt>Now</dt><dd>Junior Developer, Simplicity Group</dd></div>
+        <div><dt>Study</dt><dd>B.S. Cybersecurity, BYU · 2027</dd></div>
+        <div><dt>Focus</dt><dd>AI governance + cybersecurity GRC</dd></div>
+      </dl>
+    </aside>
   </section>
-  <section aria-labelledby="next-title">
-    <h2 id="next-title">Current structure</h2>
-    <p>
-      This clean-room foundation is ready for the lead design pass. The final
-      homepage composition, case-study copy, and visual language are intentionally
-      unresolved here.
-    </p>
+
+  <section class="operating-loop dark-section" aria-labelledby="loop-title">
+    <div class="section-lead">
+      <p class="indexed-label light"><span>02</span> The operating question</p>
+      <h2 id="loop-title">Governance becomes real inside the workflow.</h2>
+      <p>
+        I’m interested in the point where broad principles become concrete
+        decisions: what moves, who decides, what can fail, and what evidence
+        survives.
+      </p>
+    </div>
+    <ol class="loop-list">
+      <li><span class="loop-number">01</span><strong>Build</strong><p>What does the system actually do?</p></li>
+      <li><span class="loop-number">02</span><strong>Trace</strong><p>What data, authority, and dependencies move?</p></li>
+      <li><span class="loop-number risk">03</span><strong>Challenge</strong><p>Where can it fail, mislead, or expose?</p></li>
+      <li><span class="loop-number">04</span><strong>Govern</strong><p>What controls and evidence survive the workflow?</p></li>
+    </ol>
+  </section>
+
+  <section class="selected-work content-section" aria-labelledby="work-title">
+    <div class="section-heading-row">
+      <div>
+        <p class="indexed-label"><span>03</span> Selected work</p>
+        <h2 id="work-title">Learning in public, building in practice.</h2>
+      </div>
+      <a class="underlined-link" href="/work/">All work <span aria-hidden="true">→</span></a>
+    </div>
+
+    <div class="work-feature-list">
+      <article class="work-feature">
+        <p class="work-index">01 / Active study</p>
+        <div>
+          <p class="work-kind">AI governance field guide</p>
+          <h3><a href="/work/ai-grc-field-guide/">A dependency map from compute and capability to institutions and controls.</a></h3>
+          <p>A theory-first program that turns each unit into a practical GRC artifact: assumption registers, control maps, stress tests, and decision memos.</p>
+        </div>
+        <a class="round-link" href="/work/ai-grc-field-guide/" aria-label="Read AI governance field guide case study">↗</a>
+      </article>
+
+      <article class="work-feature">
+        <p class="work-index">02 / Systems research</p>
+        <div>
+          <p class="work-kind">Governing agent-operated systems</p>
+          <h3><a href="/work/governing-agent-systems/">Making authority, evidence, and human intervention legible across AI agents.</a></h3>
+          <p>Applied experiments in scoped capabilities, append-only records, review gates, escalation, and rollback for long-running agent work.</p>
+        </div>
+        <a class="round-link" href="/work/governing-agent-systems/" aria-label="Read governed agent systems case study">↗</a>
+      </article>
+    </div>
+
+    <aside class="independent-project">
+      <p class="work-kind">Independent work, kept distinct</p>
+      <h3>Pulpit</h3>
+      <p>
+        An AI-assisted Latter-day Saint historical archive using OCR, source-linked
+        transcription, provenance metadata, and tiered human review. Its full
+        religious and operational story lives on its own site; I reference it
+        here only where the archival method teaches something transferable.
+      </p>
+      <a href="https://pulpit.noahairmet.com">Visit Pulpit <span aria-hidden="true">↗</span></a>
+    </aside>
+  </section>
+
+  <section class="principles content-section" aria-labelledby="principles-title">
+    <div class="section-heading-row">
+      <div>
+        <p class="indexed-label"><span>04</span> Operating principles</p>
+        <h2 id="principles-title">Controls should clarify responsibility—not decorate it.</h2>
+      </div>
+    </div>
+    <ol class="principle-grid">
+      <li><span>01</span><h3>Protect people and entrusted data.</h3><p>Security, privacy, and human dignity are the purpose of the control—not paperwork around it.</p></li>
+      <li><span>02</span><h3>Keep responsibility legible.</h3><p>AI can assist the work. It cannot absorb accountability for the choices people make with it.</p></li>
+      <li><span>03</span><h3>Build for the real workflow.</h3><p>A policy succeeds only when the people under pressure can understand, follow, and verify it.</p></li>
+    </ol>
+  </section>
+
+  <section class="contact-section" aria-labelledby="contact-title">
+    <p class="indexed-label light"><span>05</span> Start a conversation</p>
+    <h2 id="contact-title">I’m looking for the next place to learn, build, and make AI accountability concrete.</h2>
+    <div>
+      <p>Open to 2027 roles, internships, research collaborations, and conversations about practical AI governance.</p>
+      <a class="contact-button" href={`mailto:${site.email}`}>Email Noah <span aria-hidden="true">↗</span></a>
+    </div>
   </section>
 </BaseLayout>

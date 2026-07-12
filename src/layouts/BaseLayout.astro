@@ -13,6 +13,7 @@ const {
   noindex = false,
 } = Astro.props;
 const canonical = absoluteUrl(path);
+const socialImage = absoluteUrl("/og.png");
 ---
 
 <!doctype html>
@@ -24,14 +25,18 @@ const canonical = absoluteUrl(path);
     <title>{pageTitle(title)}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     {noindex && <meta name="robots" content="noindex" />}
     <meta property="og:type" content="website" />
     <meta property="og:title" content={pageTitle(title)} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Noah Airmet — software, security, and practical AI governance" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#1648c7" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>

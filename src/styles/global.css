@@ -1,5 +1,10 @@
+@import "@fontsource-variable/dm-sans";
+@import "@fontsource/libre-caslon-display/400.css";
+@import "@fontsource/space-mono/400.css";
+@import "@fontsource/space-mono/700.css";
 @import "./reset.css";
 @import "./tokens.css";
 @import "./base.css";
+@import "./pages.css";
 
-@layer reset, tokens, base;
+@layer reset, tokens, base, pages;

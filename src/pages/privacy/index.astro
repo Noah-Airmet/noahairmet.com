@@ -1,14 +1,28 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { site } from "../../lib/site";
 ---
 
-<BaseLayout title="Privacy" description="Privacy notes for noahairmet.com.">
-  <section class="page-intro" aria-labelledby="privacy-title">
-    <p class="eyebrow">Privacy</p>
-    <h1 id="privacy-title">No tracking or forms are planned for v1.</h1>
-    <p>
-      This static site does not include analytics, contact forms, auth, or a
-      database in the foundation.
-    </p>
-  </section>
+<BaseLayout title="Privacy" description="Privacy information for noahairmet.com.">
+  <header class="page-hero">
+    <p class="indexed-label"><span>P</span> Privacy</p>
+    <h1>No cookies, forms, accounts, or behavioral tracking.</h1>
+    <p>This is a static professional site. It is intentionally designed to collect as little visitor information as possible.</p>
+  </header>
+  <div class="page-content">
+    <section class="prose-grid">
+      <h2>What the site collects</h2>
+      <div class="prose">
+        <p>The site itself does not set cookies, maintain user accounts, accept form submissions, or include advertising and session-replay scripts.</p>
+        <p>Cloudflare may process ordinary network and security information required to deliver and protect the site. No client-side analytics beacon is included at launch.</p>
+      </div>
+    </section>
+    <section class="prose-grid">
+      <h2>Contact</h2>
+      <div class="prose">
+        <p>Email links open your own email provider. Any message you send is handled according to that provider’s terms and ordinary email practices.</p>
+        <p>Questions can be sent to <a href={`mailto:${site.email}`}>{site.email}</a>.</p>
+      </div>
+    </section>
+  </div>
 </BaseLayout>
