@@ -2,7 +2,18 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "noahairmet-com",
   "compatibility_date": "2026-07-12",
+  "workers_dev": true,
   "preview_urls": true,
+  "routes": [
+    {
+      "pattern": "noahairmet.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.noahairmet.com",
+      "custom_domain": true
+    }
+  ],
   "assets": {
     "directory": "./dist",
     "not_found_handling": "404-page",

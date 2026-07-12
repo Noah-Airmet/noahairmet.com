@@ -3,10 +3,10 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
 <BaseLayout title="Page not found" path="/404.html" noindex>
-  <header class="page-hero">
-    <p class="indexed-label"><span>404</span> Not found</p>
-    <h1>This path does not lead anywhere useful.</h1>
-    <p>It may have moved during the rebuild, or it may never have existed.</p>
-    <div class="resume-actions"><a class="solid-link" href="/">Return home</a><a class="underlined-link" href="/work/">Browse work →</a></div>
-  </header>
+  <main id="main" class="not-found" tabindex="-1">
+    <p class="module-label">Wrong turn / 404</p>
+    <h1>404</h1>
+    <p>Nothing useful lives at this address.</p>
+    <a href="/">Return to the desk →</a>
+  </main>
 </BaseLayout>

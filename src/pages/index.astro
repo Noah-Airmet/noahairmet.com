@@ -1,139 +1,156 @@
 ---
-import { Image } from "astro:assets";
-import portrait from "../assets/noah-airmet.jpg";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import DitherSignal from "../components/DitherSignal.astro";
+import AmbientField from "../components/AmbientField.astro";
 import { site } from "../lib/site";
 ---
 
 <BaseLayout>
-  <section class="home-hero" aria-labelledby="home-title">
-    <aside class="home-rail" aria-hidden="true">
-      <span>Systems</span><span>Risk</span><span>Responsibility</span>
-    </aside>
+  <AmbientField />
+  <div class="desk-shell">
+    <header class="desk-header">
+      <a class="wordmark" href="/" aria-label="Noah Airmet, home">
+        <span class="wordmark-mark" aria-hidden="true">N/A</span>
+        <span>Noah Airmet</span>
+      </a>
+      <p class="availability">Provo, Utah / graduating 2027</p>
+    </header>
 
-    <div class="hero-statement">
-      <p class="indexed-label"><span>01</span> Working thesis</p>
-      <h1 id="home-title">
-        Build the system.<br />
-        <em>Name the risk.</em><br />
-        Make responsibility <strong>visible.</strong>
-      </h1>
-      <div class="hero-deck">
-        <p>
-          I’m a junior software developer and BYU cybersecurity student pursuing
-          AI governance from the inside out: close to the code, the data, and the
-          people who have to make controls work.
-        </p>
-        <a class="underlined-link" href="/work/">Explore selected work <span aria-hidden="true">→</span></a>
-      </div>
-    </div>
-
-    <aside class="hero-profile">
-      <div>
-        <p class="profile-kicker">A practical route into AI governance.</p>
-        <p class="profile-fields">Software development · Security · Institutional controls</p>
-      </div>
-      <figure class="portrait-frame">
-        <Image
-          src={portrait}
-          widths={[480, 720, 960]}
-          sizes="(max-width: 800px) 100vw, 36vw"
-          format="webp"
-          alt="Noah Airmet smiling outdoors"
-          loading="eager"
-          fetchpriority="high"
-        />
-      </figure>
-      <dl class="profile-facts">
-        <div><dt>Now</dt><dd>Junior Developer, Simplicity Group</dd></div>
-        <div><dt>Study</dt><dd>B.S. Cybersecurity, BYU · 2027</dd></div>
-        <div><dt>Focus</dt><dd>AI governance + cybersecurity GRC</dd></div>
-      </dl>
-    </aside>
-  </section>
-
-  <section class="operating-loop dark-section" aria-labelledby="loop-title">
-    <div class="section-lead">
-      <p class="indexed-label light"><span>02</span> The operating question</p>
-      <h2 id="loop-title">Governance becomes real inside the workflow.</h2>
-      <p>
-        I’m interested in the point where broad principles become concrete
-        decisions: what moves, who decides, what can fail, and what evidence
-        survives.
-      </p>
-    </div>
-    <ol class="loop-list">
-      <li><span class="loop-number">01</span><strong>Build</strong><p>What does the system actually do?</p></li>
-      <li><span class="loop-number">02</span><strong>Trace</strong><p>What data, authority, and dependencies move?</p></li>
-      <li><span class="loop-number risk">03</span><strong>Challenge</strong><p>Where can it fail, mislead, or expose?</p></li>
-      <li><span class="loop-number">04</span><strong>Govern</strong><p>What controls and evidence survive the workflow?</p></li>
-    </ol>
-  </section>
-
-  <section class="selected-work content-section" aria-labelledby="work-title">
-    <div class="section-heading-row">
-      <div>
-        <p class="indexed-label"><span>03</span> Selected work</p>
-        <h2 id="work-title">Learning in public, building in practice.</h2>
-      </div>
-      <a class="underlined-link" href="/work/">All work <span aria-hidden="true">→</span></a>
-    </div>
-
-    <div class="work-feature-list">
-      <article class="work-feature">
-        <p class="work-index">01 / Active study</p>
+    <main id="main" class="desk" tabindex="-1">
+      <section class="intro-card module" aria-labelledby="intro-title">
+        <p class="module-label">Hello / 01</p>
         <div>
-          <p class="work-kind">AI governance field guide</p>
-          <h3><a href="/work/ai-grc-field-guide/">A dependency map from compute and capability to institutions and controls.</a></h3>
-          <p>A theory-first program that turns each unit into a practical GRC artifact: assumption registers, control maps, stress tests, and decision memos.</p>
+          <h1 id="intro-title">I build software and study how AI should be governed.</h1>
+          <p>
+            Cybersecurity student at BYU and junior developer at Simplicity Group.
+            I’m interested in practical AI governance: clear controls, honest evidence,
+            and systems people can actually understand.
+          </p>
         </div>
-        <a class="round-link" href="/work/ai-grc-field-guide/" aria-label="Read AI governance field guide case study">↗</a>
-      </article>
+        <p class="intro-note">College student. Still learning. Serious about the work.</p>
+      </section>
 
-      <article class="work-feature">
-        <p class="work-index">02 / Systems research</p>
+      <DitherSignal />
+
+      <section class="work-card module" id="work" aria-labelledby="work-title">
+        <div class="module-heading">
+          <p class="module-label">Selected work / 02</p>
+          <span>2 projects</span>
+        </div>
+        <h2 id="work-title" class="visually-hidden">Selected work</h2>
+        <div class="project-list">
+          <button class="project-row" type="button" data-dialog="grc-dialog">
+            <span class="project-number">01</span>
+            <span>
+              <strong>AI governance field guide</strong>
+              <small>A practical course of study, built in public.</small>
+            </span>
+            <span class="project-arrow" aria-hidden="true">↗</span>
+          </button>
+          <button class="project-row" type="button" data-dialog="agents-dialog">
+            <span class="project-number">02</span>
+            <span>
+              <strong>Governing agent systems</strong>
+              <small>Experiments in authority, evidence, and intervention.</small>
+            </span>
+            <span class="project-arrow" aria-hidden="true">↗</span>
+          </button>
+        </div>
+      </section>
+
+      <nav class="links-card module" aria-label="Primary links">
+        <p class="module-label">Links / 03</p>
+        <div class="link-grid">
+          <a href="/resume/noah-airmet-resume.pdf">
+            <span>Résumé</span><small>PDF · 1 page</small><b aria-hidden="true">↗</b>
+          </a>
+          <a href={site.github}>
+            <span>GitHub</span><small>Code + experiments</small><b aria-hidden="true">↗</b>
+          </a>
+          <a href={site.linkedin}>
+            <span>LinkedIn</span><small>Experience + education</small><b aria-hidden="true">↗</b>
+          </a>
+          <a href={`mailto:${site.email}`}>
+            <span>Email</span><small>Say hello</small><b aria-hidden="true">↗</b>
+          </a>
+        </div>
+      </nav>
+
+      <aside class="elsewhere-card module" aria-labelledby="elsewhere-title">
         <div>
-          <p class="work-kind">Governing agent-operated systems</p>
-          <h3><a href="/work/governing-agent-systems/">Making authority, evidence, and human intervention legible across AI agents.</a></h3>
-          <p>Applied experiments in scoped capabilities, append-only records, review gates, escalation, and rollback for long-running agent work.</p>
+          <p class="module-label">Elsewhere / independent</p>
+          <h2 id="elsewhere-title">Pulpit</h2>
+          <p>
+            An AI-assisted archive of Latter-day Saint conference talks, with
+            source-linked transcription and human review.
+          </p>
         </div>
-        <a class="round-link" href="/work/governing-agent-systems/" aria-label="Read governed agent systems case study">↗</a>
-      </article>
-    </div>
+        <a href="https://pulpit.noahairmet.com">
+          Visit the separate project <span aria-hidden="true">↗</span>
+        </a>
+      </aside>
+    </main>
 
-    <aside class="independent-project">
-      <p class="work-kind">Independent work, kept distinct</p>
-      <h3>Pulpit</h3>
-      <p>
-        An AI-assisted Latter-day Saint historical archive using OCR, source-linked
-        transcription, provenance metadata, and tiered human review. Its full
-        religious and operational story lives on its own site; I reference it
-        here only where the archival method teaches something transferable.
-      </p>
-      <a href="https://pulpit.noahairmet.com">Visit Pulpit <span aria-hidden="true">↗</span></a>
-    </aside>
-  </section>
+    <footer class="desk-footer">
+      <p>Built with Astro, plain TypeScript, and a tiny canvas renderer.</p>
+      <a href="https://www.tripwire.sh/dither-kit">Dither motif inspired by dither-kit <span aria-hidden="true">↗</span></a>
+    </footer>
+  </div>
 
-  <section class="principles content-section" aria-labelledby="principles-title">
-    <div class="section-heading-row">
-      <div>
-        <p class="indexed-label"><span>04</span> Operating principles</p>
-        <h2 id="principles-title">Controls should clarify responsibility—not decorate it.</h2>
-      </div>
+  <dialog class="project-dialog" id="grc-dialog" aria-labelledby="grc-title">
+    <div class="dialog-topline">
+      <p class="module-label">Project / 01</p>
+      <button type="button" data-close-dialog aria-label="Close project details">Close ×</button>
     </div>
-    <ol class="principle-grid">
-      <li><span>01</span><h3>Protect people and entrusted data.</h3><p>Security, privacy, and human dignity are the purpose of the control—not paperwork around it.</p></li>
-      <li><span>02</span><h3>Keep responsibility legible.</h3><p>AI can assist the work. It cannot absorb accountability for the choices people make with it.</p></li>
-      <li><span>03</span><h3>Build for the real workflow.</h3><p>A policy succeeds only when the people under pressure can understand, follow, and verify it.</p></li>
-    </ol>
-  </section>
+    <h2 id="grc-title">AI governance field guide</h2>
+    <p class="dialog-lede">
+      A theory-first learning project connecting AI capabilities and institutions
+      to the controls practitioners use in real organizations.
+    </p>
+    <dl>
+      <div><dt>Why</dt><dd>I wanted a route into AI GRC that begins with how the systems work—not a glossary of frameworks.</dd></div>
+      <div><dt>Method</dt><dd>Each unit ends in a practical artifact: an assumption register, control map, stress test, or decision memo.</dd></div>
+      <div><dt>Status</dt><dd>Active study project. It will stay candid about what is complete and what is still being learned.</dd></div>
+    </dl>
+    <a class="dialog-link" href="https://github.com/Noah-Airmet">Follow the work on GitHub <span aria-hidden="true">↗</span></a>
+  </dialog>
 
-  <section class="contact-section" aria-labelledby="contact-title">
-    <p class="indexed-label light"><span>05</span> Start a conversation</p>
-    <h2 id="contact-title">I’m looking for the next place to learn, build, and make AI accountability concrete.</h2>
-    <div>
-      <p>Open to 2027 roles, internships, research collaborations, and conversations about practical AI governance.</p>
-      <a class="contact-button" href={`mailto:${site.email}`}>Email Noah <span aria-hidden="true">↗</span></a>
+  <dialog class="project-dialog" id="agents-dialog" aria-labelledby="agents-title">
+    <div class="dialog-topline">
+      <p class="module-label">Project / 02</p>
+      <button type="button" data-close-dialog aria-label="Close project details">Close ×</button>
     </div>
-  </section>
+    <h2 id="agents-title">Governing agent systems</h2>
+    <p class="dialog-lede">
+      Hands-on experiments with agent-operated systems: what an agent may do,
+      what it must record, and where a person should be able to intervene.
+    </p>
+    <dl>
+      <div><dt>Question</dt><dd>How do you keep authority and accountability legible when software can act for long periods on someone’s behalf?</dd></div>
+      <div><dt>Mechanisms</dt><dd>Scoped capabilities, append-only records, review gates, escalation, and rollback.</dd></div>
+      <div><dt>Value</dt><dd>The experiments give me concrete systems to examine instead of treating AI governance as policy text alone.</dd></div>
+    </dl>
+    <a class="dialog-link" href="https://github.com/Noah-Airmet">See related experiments <span aria-hidden="true">↗</span></a>
+  </dialog>
+
+  <script>
+    const triggers = document.querySelectorAll<HTMLElement>("[data-dialog]");
+    const dialogs = document.querySelectorAll<HTMLDialogElement>("dialog.project-dialog");
+
+    for (const trigger of triggers) {
+      trigger.addEventListener("click", () => {
+        const dialog = document.getElementById(trigger.dataset.dialog ?? "");
+        if (dialog instanceof HTMLDialogElement) dialog.showModal();
+      });
+    }
+
+    for (const dialog of dialogs) {
+      dialog.querySelector("[data-close-dialog]")?.addEventListener("click", () => dialog.close());
+      dialog.addEventListener("click", (event) => {
+        const rect = dialog.getBoundingClientRect();
+        const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
+        if (outside) dialog.close();
+      });
+    }
+  </script>
 </BaseLayout>

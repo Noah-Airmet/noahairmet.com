@@ -1,7 +1,21 @@
-# Legacy routes from the prior personal site. Final destinations should be
-# confirmed during content migration before launch.
-/blog.html /writing/ 301
-/commitments.html /about/#principles 301
+# The professional site is intentionally one page. Preserve old bookmarks
+# without preserving the old multi-page architecture.
+/work/* /#work 301
+/work /#work 301
+/writing/* / 301
+/writing / 301
+/about/* /#main 301
+/about /#main 301
+/resume /resume/noah-airmet-resume.pdf 301
+/resume/ /resume/noah-airmet-resume.pdf 301
+/colophon/* / 301
+/colophon / 301
+/privacy/* / 301
+/privacy / 301
+
+# Legacy routes from the prior personal site.
+/blog.html / 301
+/commitments.html /#main 301
 /pulpit-progress.html https://pulpit.noahairmet.com/progress/ 301
 /pulpit.html https://pulpit.noahairmet.com 301
 /corpus-access.html https://corpus.noahairmet.com 302

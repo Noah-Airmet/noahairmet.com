@@ -1,6 +1,4 @@
 ---
-import Header from "../components/Header.astro";
-import Footer from "../components/Footer.astro";
 import { absoluteUrl, pageTitle, site, type PageMeta } from "../lib/site";
 import "../styles/global.css";
 
@@ -13,14 +11,13 @@ const {
   noindex = false,
 } = Astro.props;
 const canonical = absoluteUrl(path);
-const socialImage = absoluteUrl("/og.png");
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <title>{pageTitle(title)}</title>
     <meta name="description" content={description} />
@@ -31,19 +28,11 @@ const socialImage = absoluteUrl("/og.png");
     <meta property="og:title" content={pageTitle(title)} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={socialImage} />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Noah Airmet — software, security, and practical AI governance" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="theme-color" content="#1648c7" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="theme-color" content="#e9e1d2" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
-    <Header />
-    <main id="main" tabindex="-1">
-      <slot />
-    </main>
-    <Footer />
+    <slot />
   </body>
 </html>
