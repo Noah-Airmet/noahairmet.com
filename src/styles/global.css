@@ -1,5 +1,7 @@
+@import "@fontsource-variable/space-grotesk";
+@import "@fontsource/space-mono/400.css";
+@import "@fontsource/space-mono/700.css";
 @import "./reset.css";
-@import "./tokens.css";
-@import "./base.css";
+@import "./site.css";
 
-@layer reset, tokens, base;
+@layer reset, site;

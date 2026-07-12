@@ -1,30 +1,46 @@
 # Content Guide
 
-Use content collections for durable work and writing entries.
+The site intentionally does not use content collections. All visible homepage
+copy and both project dialogs live in `src/pages/index.astro` so the entire
+public story can be reviewed in one place.
 
-## Work
+## Content ceiling
 
-Work entries belong in `src/content/work`. A case study should make the evidence
-grammar explicit:
+The homepage contains:
 
-1. Context and problem.
-2. Noah's role and decision scope.
-3. System boundary.
-4. Risks or failure modes.
-5. Controls and design choices.
-6. Evidence.
-7. Residual risk and limitations.
-8. What changed in Noah's thinking.
+- one short introduction;
+- two selected projects;
+- four primary links;
+- two sourced data points in one instrument panel;
+- one clearly separate reference to Pulpit.
 
-Do not turn Pulpit into a flagship career case study. It can be referenced as
-clearly labeled independent public-interest infrastructure or methodology.
+New material should replace or consolidate existing material before adding a
+route, section, card, or longer scroll. Do not recreate a blog, skills grid,
+principles section, services language, or institution-sized case-study system
+without an explicit change in strategy.
 
-## Writing
+## Updating work
 
-Writing entries belong in `src/content/writing`. Publish only substantive,
-reviewed pieces. Avoid placeholder posts and generic claims.
+Edit the project row and its matching `<dialog>` together in
+`src/pages/index.astro`. Keep each dialog to a short explanation of the problem,
+method, current status, and one honest outbound link. Do not imply that a study
+project is a finished product or that early-career work has institutional
+authority it does not have.
+
+Pulpit remains independent religious work. It may demonstrate archival method,
+OCR, provenance, and AI-assisted scale, but it should not become the career
+site's operational dependency or default professional identity.
+
+## Updating data
+
+`src/components/DitherSignal.astro` contains a dated snapshot, visible values,
+canvas `data-*` values, explanatory labels, and source links. Update all five
+together. Never change a graph shape without changing the visible numbers, and
+never label broader information-security projections as AI GRC job growth.
 
 ## Voice
 
-Be concrete before abstract. State the work honestly as early-career practice
-with real systems experience, not seniority theater.
+Be direct, specific, and comfortable with the fact that Noah is a college
+student. Prefer a short true sentence to abstract strategy language. Avoid
+seniority theater, consultancy jargon, fake metrics, and generic calls to
+"build the future."

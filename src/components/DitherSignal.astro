@@ -1,0 +1,176 @@
+<section class="signal-card" aria-labelledby="signal-title">
+  <div class="signal-heading">
+    <div>
+      <p class="module-label light">Measured context / 04</p>
+      <h2 id="signal-title">Two things I can actually quantify.</h2>
+    </div>
+    <span>Snapshot · Jul 2026</span>
+  </div>
+
+  <div class="evidence-grid">
+    <article class="evidence-item">
+      <div class="evidence-copy">
+        <p class="evidence-kicker">Independent project</p>
+        <h3><strong>1,067</strong> talks indexed</h3>
+        <p>Pulpit currently has 30 of 351 catalogued conferences loaded.</p>
+      </div>
+      <div class="evidence-chart matrix-chart">
+        <canvas
+          data-dither-chart="matrix"
+          data-active="30"
+          data-total="351"
+          data-color="#ff6b60"
+          aria-hidden="true"
+        ></canvas>
+        <div class="chart-scale"><span>30 loaded</span><span>351 total</span></div>
+      </div>
+    </article>
+
+    <article class="evidence-item">
+      <div class="evidence-copy">
+        <p class="evidence-kicker">Broader field · not an AI GRC forecast</p>
+        <h3><strong>+29%</strong> projected growth</h3>
+        <p>U.S. information-security analyst employment, 2024–2034.</p>
+      </div>
+      <div class="evidence-chart bars-chart">
+        <canvas
+          data-dither-chart="bars"
+          data-values="182.8,234.9"
+          data-color="#4c9cff"
+          aria-hidden="true"
+        ></canvas>
+        <div class="bar-labels">
+          <span><b>182.8k</b><small>2024</small></span>
+          <span><b>234.9k</b><small>2034</small></span>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <div class="signal-sources">
+    <span>Sources</span>
+    <a href="https://pulpit.noahairmet.com/">Pulpit live scope ↗</a>
+    <a href="https://www.bls.gov/ooh/computer-and-information-technology/information-security-analysts.htm">U.S. BLS projection ↗</a>
+  </div>
+</section>
+
+<script>
+  // A deliberately small, framework-free interpretation of dither-kit’s
+  // ordered-dither canvas technique. dither-kit is MIT-licensed:
+  // https://github.com/Boring-Software-Inc/dither-kit
+  const BAYER = [
+    [0, 8, 2, 10],
+    [12, 4, 14, 6],
+    [3, 11, 1, 9],
+    [15, 7, 13, 5],
+  ].map((row) => row.map((value) => (value + 0.5) / 16));
+
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const canvases = document.querySelectorAll<HTMLCanvasElement>("[data-dither-chart]");
+
+  const hexToRgb = (hex: string) => {
+    const value = Number.parseInt(hex.slice(1), 16);
+    return { r: value >> 16, g: (value >> 8) & 255, b: value & 255 };
+  };
+
+  const setupChart = (canvas: HTMLCanvasElement, chartIndex: number) => {
+    const context = canvas.getContext("2d");
+    if (!context) return;
+    const color = hexToRgb(canvas.dataset.color ?? "#ffffff");
+    const mode = canvas.dataset.ditherChart;
+    let progress = reduceMotion ? 1 : 0;
+    let hover = 0;
+    let hoverTarget = 0;
+    let frame = 0;
+    let previous = 0;
+
+    const fill = (alpha: number) => `rgba(${color.r}, ${color.g}, ${color.b}, ${alpha})`;
+
+    const paintMatrix = (width: number, height: number) => {
+      const total = Number(canvas.dataset.total ?? 0);
+      const active = Number(canvas.dataset.active ?? 0);
+      const columns = 27;
+      const rows = 13;
+      const gap = 1;
+      const cell = Math.max(1, Math.floor(Math.min(
+        (width - (columns - 1) * gap) / columns,
+        (height - (rows - 1) * gap) / rows,
+      )));
+      const matrixWidth = columns * cell + (columns - 1) * gap;
+      const matrixHeight = rows * cell + (rows - 1) * gap;
+      const offsetX = Math.max(0, Math.floor((width - matrixWidth) / 2));
+      const offsetY = Math.max(0, Math.floor((height - matrixHeight) / 2));
+      const visible = Math.round(total * progress);
+
+      for (let index = 0; index < visible; index += 1) {
+        const x = offsetX + (index % columns) * (cell + gap);
+        const y = offsetY + Math.floor(index / columns) * (cell + gap);
+        const loaded = index < active;
+        const threshold = BAYER[y & 3][x & 3];
+        const alpha = loaded
+          ? 0.56 + (1 - threshold) * (0.34 + hover * 0.1)
+          : 0.07 + (1 - threshold) * 0.08;
+        context.fillStyle = fill(alpha);
+        context.fillRect(x, y, cell, cell);
+      }
+    };
+
+    const paintBars = (width: number, height: number) => {
+      const values = (canvas.dataset.values ?? "").split(",").map(Number);
+      const maximum = Math.max(...values);
+      const barWidth = Math.max(8, Math.floor(width * 0.25));
+      const positions = [Math.floor(width * 0.2), Math.floor(width * 0.65)];
+
+      values.forEach((value, index) => {
+        const targetHeight = Math.max(3, Math.round((value / maximum) * (height - 3) * progress));
+        const top = height - targetHeight;
+        const left = positions[index];
+        for (let x = 0; x < barWidth; x += 1) {
+          for (let y = top; y < height; y += 1) {
+            const density = (y - top) / Math.max(1, targetHeight);
+            if (density <= BAYER[y & 3][x & 3] - hover * 0.12) continue;
+            context.fillStyle = fill(0.32 + density * (0.52 + hover * 0.12));
+            context.fillRect(left + x, y, 1, 1);
+          }
+          context.fillStyle = fill(0.78 + hover * 0.18);
+          context.fillRect(left + x, top, 1, 1);
+        }
+      });
+    };
+
+    const paint = () => {
+      const bounds = canvas.getBoundingClientRect();
+      const width = Math.max(80, Math.round(bounds.width / 2));
+      const height = Math.max(28, Math.round(bounds.height / 2));
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+      context.clearRect(0, 0, width, height);
+      if (mode === "matrix") paintMatrix(width, height);
+      if (mode === "bars") paintBars(width, height);
+    };
+
+    const tick = (time: number) => {
+      const elapsed = previous ? Math.min(32, time - previous) : 16;
+      previous = time;
+      if (progress < 1) progress = Math.min(1, progress + elapsed / (720 + chartIndex * 120));
+      hover += (hoverTarget - hover) * (reduceMotion ? 1 : 0.14);
+      paint();
+      if (progress < 1 || Math.abs(hoverTarget - hover) > 0.01) frame = requestAnimationFrame(tick);
+      else frame = 0;
+    };
+
+    const wake = () => { if (!frame) frame = requestAnimationFrame(tick); };
+    const region = canvas.closest(".evidence-item");
+    region?.addEventListener("pointerenter", () => { hoverTarget = 1; wake(); });
+    region?.addEventListener("pointerleave", () => { hoverTarget = 0; wake(); });
+
+    const observer = new ResizeObserver(paint);
+    observer.observe(canvas);
+    window.addEventListener("pagehide", () => observer.disconnect(), { once: true });
+    setTimeout(wake, chartIndex * 120);
+  };
+
+  canvases.forEach(setupChart);
+</script>

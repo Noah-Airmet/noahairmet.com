@@ -11,9 +11,12 @@
     "check": "astro check",
     "test": "node --test test/*.test.mjs",
     "preview": "wrangler dev --assets=./dist",
+    "deploy": "npm run build && wrangler deploy",
     "astro": "astro"
   },
   "dependencies": {
+    "@fontsource-variable/space-grotesk": "^5.2.10",
+    "@fontsource/space-mono": "^5.2.9",
     "astro": "^7.0.7"
   },
   "devDependencies": {
