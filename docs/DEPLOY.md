@@ -10,6 +10,11 @@
 - Production domains: `noahairmet.com` and `www.noahairmet.com`
 - Cloudflare configuration: `wrangler.jsonc`
 
+Production cutover was completed and verified on 2026-07-12. Both domains are
+Cloudflare Worker custom domains for `noahairmet-com`; the former GitHub Pages
+web DNS records have been removed. The GitHub Pages values below are retained
+only as an emergency rollback record.
+
 The primary site is hosted by Cloudflare Workers Static Assets. GitHub stores
 the source but is not the production origin. The site does not depend on the
 homelab or any Restoration Commons service.
