@@ -55,3 +55,13 @@ Production is the `noahairmet-com` Cloudflare Worker on `noahairmet.com` and
 `www.noahairmet.com`. Read `docs/DEPLOY.md` before release. A deploy requires
 explicit authorization, a clean validated commit on `main`, and live checks of
 the homepage, résumé, one legacy redirect, security headers, and 404 behavior.
+
+## Busy Bee app (`/bee`) — scoped exception
+
+`public/bee/` contains Katie's standalone workout PWA, served unlinked at
+`/bee`. It is the one sanctioned exception to this site's content ceiling.
+Before touching anything in `public/bee/`, read `docs/BEE-APP.md` — it holds
+the design decisions, data model, CSP constraints, and the service-worker
+cache-bump rule. The app must stay static, backend-free, unlinked from the
+homepage, and decoupled from the fitness repo. Site architecture boundaries
+above do not license expanding the app; app boundaries live in its own doc.
