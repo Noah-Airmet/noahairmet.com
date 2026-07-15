@@ -74,3 +74,37 @@ successful version. For a full hosting rollback, detach the Worker custom
 domains and restore the recorded GitHub Pages DNS values. Do not change mail,
 subdomain, Minecraft, tunnel, or Restoration Commons DNS records while working
 on this site.
+
+## Agent environment bootstrap (non-interactive shells)
+
+Agents working over `ssh imac '<command>'` get a non-interactive shell where
+the usual tooling is **not on PATH**. Bootstrap every session with:
+
+```bash
+export PATH="/usr/local/bin:$PATH"        # gh lives here
+export NVM_DIR="$HOME/.nvm"
+[ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"   # node/npm
+```
+
+For multi-step work, write a `zsh` script to `/tmp` and execute it rather
+than chaining quoted one-liners — nested quoting through ssh/osascript
+expands `$?` and similar on the wrong machine and produces false results.
+
+## Deploy authentication — current state (verified 2026-07-15)
+
+`~/.config/cloudflare/credentials` contains `CLOUDFLARE_API_KEY` (Global API
+Key), `CLOUDFLARE_EMAIL`, `CLOUDFLARE_ACCOUNT_ID`, and
+`CLOUDFLARE_ZONE_NOAHAIRMET` — it does **not** contain the scoped
+`CLOUDFLARE_API_TOKEN` that Wrangler 4 requires, and `wrangler whoami`
+reports not authenticated. Until that changes, `npm run deploy` cannot run
+unattended: an agent should complete validation and the merge to `main`,
+then hand the final step to Noah (`npx wrangler login` or exporting his
+scoped token, then `npm run deploy`). Agents must not mint new API tokens
+with the Global API Key, run `wrangler login`, or perform other credential
+creation on Noah's behalf.
+
+TODO (Noah): to enable unattended agent deploys, create a scoped token
+(Workers Scripts Write; Workers Routes Write + DNS Write on the
+noahairmet.com zone) and add it to `~/.config/cloudflare/credentials` as a
+`CLOUDFLARE_API_TOKEN=...` line. The release scripts can then
+`set -a; source` that file without printing values.
