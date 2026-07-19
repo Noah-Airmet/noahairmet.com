@@ -16,8 +16,8 @@
 # Legacy routes from the prior personal site.
 /blog.html / 301
 /commitments.html /#main 301
-/pulpit-progress.html https://pulpit.noahairmet.com/progress/ 301
-/pulpit.html https://pulpit.noahairmet.com 301
+/pulpit-progress.html https://noah-airmet.github.io/pulpit-site/work/ 301
+/pulpit.html https://noah-airmet.github.io/pulpit-site/ 301
 /corpus-access.html https://corpus.noahairmet.com 302
 /posts/template.html /404.html 301
 /assets/resume.pdf /resume/noah-airmet-resume.pdf 301
