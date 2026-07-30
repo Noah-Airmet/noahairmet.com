@@ -463,20 +463,15 @@ body {
   height: auto;
 }
 
-/* Each mountain is a ridge-corridor plate, fully on screen. Zoom knobs:
-   - element `width` = display size of the plate
-   - mask `#000 N%` = radius of the fully-visible core
-   - mask `transparent N%` = where the vignette finishes fading
-   Keep the two mask-image lines in each pair identical. */
+/* Each mountain is a ridge-corridor plate, fully on screen. The organic
+   boundary is baked into the geometry: scripts/generate-contours.mjs
+   trims every line to a noise-wobbled capsule around the ridge axis
+   (the `field: { r, wobble }` knobs per mountain). No CSS masks — the
+   lines simply end where a cartographer would have stopped drawing. */
 .contour-field--tr {
   top: 1.5rem;
   right: 1.5vw;
   width: min(44vw, 560px);
-}
-
-.contour-field--tr .contour-wash {
-  mask-image: radial-gradient(ellipse 76% 72% at 50% 48%, #000 66%, transparent 96%);
-  -webkit-mask-image: radial-gradient(ellipse 76% 72% at 50% 48%, #000 66%, transparent 96%);
 }
 
 .contour-field--bl {
@@ -485,20 +480,10 @@ body {
   width: min(38vw, 470px);
 }
 
-.contour-field--bl .contour-wash {
-  mask-image: radial-gradient(ellipse 76% 74% at 50% 50%, #000 66%, transparent 96%);
-  -webkit-mask-image: radial-gradient(ellipse 76% 74% at 50% 50%, #000 66%, transparent 96%);
-}
-
 .lost-art.contour-field--bl {
   width: min(50vw, 620px);
   left: 36vw;
   bottom: 1rem;
-}
-
-.lost-art .contour-wash {
-  mask-image: radial-gradient(ellipse 78% 74% at 50% 48%, #000 66%, transparent 96%);
-  -webkit-mask-image: radial-gradient(ellipse 78% 74% at 50% 48%, #000 66%, transparent 96%);
 }
 
 .contour-field--tr .contour-label {
@@ -661,6 +646,14 @@ body {
 .lost p {
   margin: 0 0 2rem;
   color: var(--ink-soft);
+}
+
+/* Plate name-labels need room to breathe; below this they collide with
+   flowing page content, so the plates go label-less texture. */
+@media (max-width: 64rem) {
+  .contour-label {
+    display: none;
+  }
 }
 
 /* ---- small screens --------------------------------------------------------- */

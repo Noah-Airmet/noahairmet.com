@@ -37,6 +37,7 @@ const MOUNTAINS = {
       [40.38437, -111.63648], // South Timpanogos
       [40.39134, -111.63736], // The Shoulder
     ],
+    field: { r: 300, wobble: 0.34 },
   },
   lonePeak: {
     // The ridge from his Mapbox screenshot: Rocky Mouth Canyon Peak (NNW)
@@ -49,6 +50,7 @@ const MOUNTAINS = {
       [40.5383, -111.76077], // Rocky Mouth Canyon Peak
       [40.52241, -111.74365], // Big Horn Peak
     ],
+    field: { r: 315, wobble: 0.38 },
   },
   kingsPeak: {
     // The Kings crest with the Henrys Fork approach.
@@ -57,6 +59,8 @@ const MOUNTAINS = {
     label: "KINGS PEAK · 13,528 FT",
     trailStart: [0.05, 0.42], // the real approach: in from the north
     namedMarks: [[40.76591, -110.37783]], // South Kings Peak
+    axisExtra: [[40.792, -110.373]], // capsule reaches up the Henrys Fork approach
+    field: { r: 330, wobble: 0.3 },
   },
 };
 
@@ -260,6 +264,29 @@ function ascentTrail(grid, startFrac) {
   return path; // [x, y] grid coords
 }
 
+// Deterministic PRNG for the boundary wobble.
+function mulberry32(seed) {
+  return function () {
+    let t = (seed += 0x6d2b79f5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// Distance from a point to a polyline (min over its segments).
+function distToPolyline(p, pts) {
+  let best = Infinity;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const [a, b] = [pts[i], pts[i + 1]];
+    const abx = b[0] - a[0], aby = b[1] - a[1];
+    const len2 = abx * abx + aby * aby || 1e-9;
+    const t = Math.max(0, Math.min(1, ((p[0] - a[0]) * abx + (p[1] - a[1]) * aby) / len2));
+    best = Math.min(best, Math.hypot(p[0] - (a[0] + t * abx), p[1] - (a[1] + t * aby)));
+  }
+  return best;
+}
+
 function toSet(grid, targetW, spec) {
   const { rows, cols, elev } = grid;
   const values = elev.filter((v) => v != null);
@@ -276,36 +303,16 @@ function toSet(grid, targetW, spec) {
   const H = Math.round(kmY * scale);
   const sx = (c) => (c / (cols - 1)) * targetW;
   const sy = (r) => (r / (rows - 1)) * H;
-
-  const paths = [];
-  levels.forEach((level) => {
-    for (const line of chain(segmentsForLevel(grid, level))) {
-      if (line.length < 12) continue; // drop gravel
-      const closed =
-        Math.hypot(line[0][0] - line[line.length - 1][0], line[0][1] - line[line.length - 1][1]) < 0.01;
-      const smooth = chaikin(rdp(line, 0.28));
-      const xs = smooth.map((p) => p[0]), ys = smooth.map((p) => p[1]);
-      const span =
-        (Math.max(...xs) - Math.min(...xs)) + (Math.max(...ys) - Math.min(...ys));
-      if (span < 5) continue; // drop pebble rings
-      let d = "";
-      smooth.forEach((p, i) => {
-        d += `${i === 0 ? "M" : "L"}${sx(p[0]).toFixed(1)} ${sy(p[1]).toFixed(1)}`;
-      });
-      if (closed) d += "Z";
-      paths.push(d);
-    }
-  });
+  const lonlatToVB = ([mlat, mlon]) => [
+    ((mlon - grid.lon[0]) / (grid.lon[1] - grid.lon[0])) * targetW,
+    ((grid.lat[1] - mlat) / (grid.lat[1] - grid.lat[0])) * H,
+  ];
 
   // summit = grid argmax
   let best = 0;
   for (let i = 1; i < elev.length; i++) if ((elev[i] ?? -1) > (elev[best] ?? -1)) best = i;
-  const peak = [sx(best % cols).toFixed(1), sy(Math.floor(best / cols)).toFixed(1)];
-
-  const trailPts = chaikin(rdp(ascentTrail(grid, spec.trailStart ?? [0.9, 0.1]), 0.9), 3);
-  const trail = trailPts
-    .map((p, i) => `${i === 0 ? "M" : "L"}${sx(p[0]).toFixed(1)} ${sy(p[1]).toFixed(1)}`)
-    .join("");
+  const peakVB = [sx(best % cols), sy(Math.floor(best / cols))];
+  const peak = [peakVB[0].toFixed(1), peakVB[1].toFixed(1)];
 
   // Secondary summits: the named peaks that make the ridge recognizable,
   // pinned by coordinate and snapped to the DEM's local max so the
@@ -322,11 +329,76 @@ function toSet(grid, targetW, spec) {
         if (at(rr, cc) > at(bestRC[0], bestRC[1])) bestRC = [rr, cc];
       }
     return {
+      vb: [sx(bestRC[1]), sy(bestRC[0])],
       x: sx(bestRC[1]).toFixed(1),
       y: sy(bestRC[0]).toFixed(1),
       ft: Math.round(at(bestRC[0], bestRC[1]) * 3.28084).toLocaleString("en-US") + " FT",
     };
   });
+
+  // The organic boundary: every contour is trimmed to a noise-wobbled
+  // capsule around the ridge axis (the named peaks through the summit),
+  // so lines end at varied natural positions instead of a box edge.
+  const axis = [
+    ...(marks.length ? [marks[0].vb] : []),
+    peakVB,
+    ...marks.slice(1).map((m) => m.vb),
+    ...(spec.axisExtra ?? []).map(lonlatToVB),
+  ];
+  const cx = axis.reduce((s, p) => s + p[0], 0) / axis.length;
+  const cy = axis.reduce((s, p) => s + p[1], 0) / axis.length;
+  const rand = mulberry32(Math.round(Math.abs(grid.lat[0]) * 1e4));
+  const [ph1, ph2, ph3] = [rand() * 6.28, rand() * 6.28, rand() * 6.28];
+  const fieldR = spec.field?.r ?? 280;
+  const wobble = spec.field?.wobble ?? 0.32;
+  const inField = (p) => {
+    const a = Math.atan2(p[1] - cy, p[0] - cx);
+    const n =
+      1 +
+      (wobble * (0.55 * Math.sin(2 * a + ph1) + 0.45 * Math.sin(3 * a + ph2) + 0.3 * Math.sin(5 * a + ph3))) / 1.3;
+    return distToPolyline(p, axis) < fieldR * n;
+  };
+
+  const paths = [];
+  levels.forEach((level) => {
+    for (const line of chain(segmentsForLevel(grid, level))) {
+      if (line.length < 12) continue; // drop gravel
+      const closed =
+        Math.hypot(line[0][0] - line[line.length - 1][0], line[0][1] - line[line.length - 1][1]) < 0.01;
+      const smooth = chaikin(rdp(line, 0.28));
+      const xs = smooth.map((p) => p[0]), ys = smooth.map((p) => p[1]);
+      const span =
+        (Math.max(...xs) - Math.min(...xs)) + (Math.max(...ys) - Math.min(...ys));
+      if (span < 5) continue; // drop pebble rings
+      const vb = smooth.map((p) => [sx(p[0]), sy(p[1])]);
+      // split into runs of in-field points; each run becomes its own line
+      const runs = [];
+      let run = [];
+      for (const p of vb) {
+        if (inField(p)) run.push(p);
+        else if (run.length) {
+          runs.push(run);
+          run = [];
+        }
+      }
+      if (run.length) runs.push(run);
+      const untouched = runs.length === 1 && runs[0].length === vb.length;
+      for (const piece of runs) {
+        if (piece.length < 6) continue;
+        let d = "";
+        piece.forEach((p, i) => {
+          d += `${i === 0 ? "M" : "L"}${p[0].toFixed(1)} ${p[1].toFixed(1)}`;
+        });
+        if (closed && untouched) d += "Z";
+        paths.push(d);
+      }
+    }
+  });
+
+  const trailPts = chaikin(rdp(ascentTrail(grid, spec.trailStart ?? [0.9, 0.1]), 0.9), 3);
+  const trail = trailPts
+    .map((p, i) => `${i === 0 ? "M" : "L"}${sx(p[0]).toFixed(1)} ${sy(p[1]).toFixed(1)}`)
+    .join("");
 
   return {
     paths,
