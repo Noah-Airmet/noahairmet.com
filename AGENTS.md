@@ -1,67 +1,91 @@
-# noahairmet.com Agent Guide
+# noahairmet.com — Agent Guide
 
-Read `/Users/nairmet/AGENTS.md` first, then this file.
+This is the whole operating manual. The only other docs are
+`docs/BEE-APP.md` (Katie's PWA — read before touching `public/bee/`) and
+`design-kit/` (context folder for design tools).
 
-This repository is the professional site for Noah Airmet: a small Astro site —
-home page, "field notes" (blog), résumé PDF — with the alpine survey-plate
-design documented in `docs/DESIGN.md`. Keep it separate from Pulpit,
-Restoration Commons, Telos, Roberts Academy, the homelab, and the old
-`website` repository.
+Noah Airmet's professional site: home, "field notes" blog, résumé PDF.
+Astro static → Cloudflare Worker `noahairmet-com` (noahairmet.com + www).
+Design: "alpine field notes" — real USGS contour art of Timpanogos, Lone
+Peak, and Kings Peak, a two-tone peak mark, mono chips, Besley/Literata/
+IBM Plex Mono. Tokens and rationale live as comments in
+`src/styles/site.css`.
 
-## Boundaries
+## Hard rules
 
-- Architecture: Astro static output, strict TypeScript, one hand-authored
-  stylesheet, a markdown content collection for field notes, self-hosted
-  fonts, zero client-side JavaScript, and Cloudflare Workers Static Assets.
-- Do not add React, Tailwind, component libraries, animation packages, CMS
-  tooling, analytics, auth, databases, forms, or Worker runtime functions
-  unless Noah explicitly changes the architecture.
-- Voice ceiling: the site must never overclaim. Noah is a student and junior
-  developer; copy states what is true today, in plain sentences. No
-  "thought leader" framing, no case studies for work that does not exist,
-  no filler. New capability claims require new shipped work.
-- **Zero corpus exposure.** No page, redirect, link, or comment in this repo
-  may reference `corpus.noahairmet.com` or any other private subdomain.
-  The professional site and the private services share a DNS zone and
-  nothing else.
-- Pulpit may be linked as independent work (`https://pulpit-archive.org/`);
-  it is not part of this site's architecture.
-- Do not deploy, change DNS, or touch Cloudflare settings without a task
-  that explicitly asks for it.
+- **No overclaiming.** Noah is a student and junior developer; copy states
+  what is true today, plainly. No case studies for unfinished work, no
+  filler, no "thought leader" voice. New claims require shipped, linkable
+  work.
+- **No new architecture.** No React/Tailwind/CMS/analytics/auth/forms/
+  Worker runtime code, and no client-side JavaScript at all, unless Noah
+  explicitly changes the architecture. All motion is CSS.
+- **CSP is strict** (`public/_headers`, `default-src 'self'`, no inline).
+  Everything self-hosted; `inlineStylesheets: "never"` stays in
+  `astro.config.mjs`.
+- **Zero private-subdomain exposure.** No page, link, comment, or redirect
+  may reference `corpus.noahairmet.com` or other private services. Smoke
+  tests fail the build on any `corpus` reference in `dist/`.
+- **Never add a `/resume/*` wildcard redirect** — it catches the PDF and
+  loops (tested). `/resume` + `/resume/` exact-match to the PDF.
+- **URLs are permanent**: note slugs, `/resume/noah-airmet-resume.pdf`,
+  `/bee`. Retired URLs get a redirect to the nearest equivalent in
+  `public/_redirects`, or a 404 — never silent breakage.
+- **`public/bee/` is untouchable** without reading `docs/BEE-APP.md`.
 
-## Checks
+## Add a field note
 
-Run before committing or deploying:
+Create `src/content/field-notes/<slug>.md`:
 
-```bash
-npm run verify   # astro check + build + smoke tests
-git diff --check
-git status --short
+```markdown
+---
+title: "Plain title, sentence case"
+date: 2026-09-14
+tag: agents          # optional, one word
+description: "One honest sentence — becomes the lede and RSS summary."
+---
 ```
 
-## Maintenance map
+Numbering (001, 002…) is computed from date order at build time; never put
+numbers in titles or slugs. Voice: first person, plain sentences, state
+what was learned and what is unknown; disclose substantive AI assistance
+in the note (see note 001). Drafts are proposals — Noah reads and owns
+every published word.
 
-- `src/content/field-notes/*.md`: the blog. See `docs/CONTENT-GUIDE.md`
-  before adding or editing a note.
-- `src/pages/index.astro`: home copy and links.
-- `src/lib/site.ts`: metadata, contact URLs, date/numbering helpers.
-- `src/styles/site.css`: the entire visual system (tokens documented in
-  `docs/DESIGN.md`).
-- `src/lib/contours.ts`: generated topographic artwork data — regenerate
-  with the script documented in `docs/DESIGN.md`, never hand-edit.
-- `public/_redirects` / `public/_headers`: edge behavior. Never add a
-  `/resume/*` wildcard redirect; it catches the PDF itself and loops.
-- `wrangler.jsonc`: production Worker and custom domains.
+## Map
 
-Production is the `noahairmet-com` Cloudflare Worker on `noahairmet.com`
-and `www.noahairmet.com`. Read `docs/DEPLOY.md` before release. A deploy
-requires explicit authorization from Noah, a clean validated commit on
-`main`, and the live checks listed there.
+- `src/pages/index.astro` — home copy and links (bio stays 3 sentences)
+- `src/content/field-notes/` — the blog
+- `src/lib/site.ts` — metadata, URLs, date/number helpers
+- `src/styles/site.css` — the entire visual system
+- `src/components/` — PeakMark (logo), ContourField (terrain art)
+- `src/lib/contours.ts` — generated terrain data; regenerate via
+  `node scripts/generate-contours.mjs` (cached grids in
+  `scripts/terrain-cache/`), never hand-edit
+- `public/_redirects`, `public/_headers` — edge behavior
+- `test/smoke.test.mjs` — the site's contract; update with any change
 
-## Busy Bee app (`/bee`) — scoped exception
+## Verify, deploy
 
-`public/bee/` contains Katie's standalone workout PWA, served unlinked at
-`/bee`. It is the one sanctioned exception to this site's content ceiling.
-Before touching anything in `public/bee/`, read `docs/BEE-APP.md`. The app
-must stay static, backend-free, unlinked from the homepage, and decoupled
-from the fitness repo.
+```bash
+npm run verify        # astro check + build + smoke tests — before every commit
+npm run deploy:production   # ONLY with Noah's explicit authorization
+```
+
+Deploy = Wrangler (local OAuth session; check `npx wrangler whoami`).
+GitHub (`Noah-Airmet/noahairmet.com`, branch `main`) stores source only —
+pushing does not deploy. After deploying, verify live:
+
+```bash
+curl -I https://noahairmet.com/                                    # 200
+curl -I https://noahairmet.com/resume/noah-airmet-resume.pdf       # 200
+curl -I https://noahairmet.com/bee/                                # 200
+curl -I https://noahairmet.com/commitments.html                    # 301 → note 001
+curl -I https://noahairmet.com/corpus-access.html                  # 404
+curl -I https://noahairmet.com/does-not-exist                      # 404
+```
+
+Security headers must be present on `/`. Rollback = redeploy the previous
+Worker version from the Cloudflare dashboard. Do not touch DNS: mail,
+tunnels, and the other subdomains live in the same zone and are not this
+repo's business.

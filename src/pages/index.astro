@@ -1,6 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import Benchmark from "../components/Benchmark.astro";
+import PeakMark from "../components/PeakMark.astro";
 import ContourField from "../components/ContourField.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { noteNumber, plateDate, site } from "../lib/site";
@@ -20,13 +20,13 @@ const links = [
 ---
 
 <BaseLayout>
-  <ContourField variant="ridge" />
-  <ContourField variant="knoll" />
+  <ContourField mountain="timpanogos" place="tr" />
+  <ContourField mountain="lonePeak" place="bl" class="home-knoll" />
 
   <div class="shell">
     <header class="masthead-block">
       <div class="masthead">
-        <Benchmark />
+        <PeakMark />
         <h1 class="masthead-name">Noah Airmet</h1>
       </div>
       <p class="plate-line">Provo, Utah · BYU cybersecurity · class of 2028</p>
@@ -98,7 +98,7 @@ const links = [
 
     <footer class="colophon">
       <p>Hand-built with Astro and plain CSS, with AI assistance. No analytics, no tracking.</p>
-      <p class="stamp"><Benchmark /> 4,551 ft · Provo, Utah</p>
+      <p class="stamp"><PeakMark /> 4,551 ft · Provo, Utah</p>
     </footer>
   </div>
 </BaseLayout>

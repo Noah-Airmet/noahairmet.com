@@ -1,27 +1,36 @@
 ---
 /**
- * Ghosted topographic contour artwork, cropped by the viewport edges.
- * Generated once (deterministic seeds; see docs/DESIGN.md), embedded as
- * static path data, and drawn exactly once on load by CSS — the one
- * ambient motion on the site. No JavaScript.
+ * Real-terrain contour artwork, ghosted at the viewport edges. Path data
+ * is generated from USGS 10m elevation grids by scripts/generate-contours.mjs.
+ * The lines draw once on load; after that, the only ongoing motion is the
+ * summit trail — a faint dashed route whose dashes crawl uphill. All CSS,
+ * no JavaScript.
  */
-import { knoll, ridge, type ContourSet } from "../lib/contours";
+import { kingsPeak, lonePeak, timpanogos, type ContourSet } from "../lib/contours";
 
 interface Props {
-  variant?: "ridge" | "knoll";
+  mountain?: "timpanogos" | "lonePeak" | "kingsPeak";
+  place?: "tr" | "bl";
+  labeled?: boolean;
   class?: string;
 }
 
-const { variant = "ridge", class: className } = Astro.props;
-const set: ContourSet = variant === "ridge" ? ridge : knoll;
-const viewBox = variant === "ridge" ? "0 0 1040 620" : "0 0 520 480";
+const sets: Record<string, ContourSet> = { timpanogos, lonePeak, kingsPeak };
+const {
+  mountain = "timpanogos",
+  place = mountain === "timpanogos" ? "tr" : "bl",
+  labeled = true,
+  class: className,
+} = Astro.props;
+const set = sets[mountain];
 const peakX = Number(set.peak[0]);
 const peakY = Number(set.peak[1]);
+const labelEnd = place === "tr";
 ---
 
 <svg
-  class:list={["contour-field", `contour-field--${variant}`, className]}
-  viewBox={viewBox}
+  class:list={["contour-field", `contour-field--${place}`, className]}
+  viewBox={set.viewBox}
   fill="none"
   aria-hidden="true"
 >
@@ -36,9 +45,27 @@ const peakY = Number(set.peak[1]);
       />
     ))
   }
+  {set.trail && (
+    <path
+      class="contour-trail"
+      d={set.trail}
+      pathLength="100"
+      vector-effect="non-scaling-stroke"
+    />
+  )}
   <path
     class="contour-peak"
     vector-effect="non-scaling-stroke"
     d={`M ${peakX - 5} ${peakY} h 10 M ${peakX} ${peakY - 5} v 10`}
   />
+  {labeled && (
+    <text
+      class="contour-label"
+      x={labelEnd ? peakX - 16 : peakX + 16}
+      y={peakY + 5}
+      text-anchor={labelEnd ? "end" : "start"}
+    >
+      {set.label}
+    </text>
+  )}
 </svg>

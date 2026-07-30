@@ -1,6 +1,6 @@
 ---
 import { getCollection, render } from "astro:content";
-import Benchmark from "../../components/Benchmark.astro";
+import PeakMark from "../../components/PeakMark.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { longDate, noteNumber } from "../../lib/site";
 
@@ -50,13 +50,13 @@ const { Content } = await render(note);
           <Content />
         </div>
 
-        <p class="note-end" aria-hidden="true"><Benchmark /></p>
+        <p class="note-end" aria-hidden="true"><PeakMark /></p>
       </article>
     </main>
 
     <footer class="colophon">
       <p>Hand-built with Astro and plain CSS, with AI assistance. No analytics, no tracking.</p>
-      <p class="stamp"><Benchmark /> 4,551 ft · Provo, Utah</p>
+      <p class="stamp"><PeakMark /> 4,551 ft · Provo, Utah</p>
     </footer>
   </div>
 </BaseLayout>

@@ -1,0 +1,31 @@
+---
+/**
+ * The site mark: a two-tone peak — outlined triangle with a solid
+ * snowcap above a jagged snowline. One currentColor, two treatments.
+ * Sized by font-size (1em).
+ */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<svg
+  class:list={["peak-mark", className]}
+  viewBox="0 0 24 24"
+  width="1em"
+  height="1em"
+  fill="none"
+  aria-hidden="true"
+>
+  <path
+    d="M12 4.6 L21 19.4 L3 19.4 Z"
+    stroke="currentColor"
+    stroke-width="1.6"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M12 4.6 L14.92 9.4 L13.7 8.6 L12.6 9.9 L11.5 8.6 L10.3 9.7 L9.08 9.4 Z"
+    fill="currentColor"
+  />
+</svg>

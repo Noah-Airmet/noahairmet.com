@@ -123,10 +123,10 @@ body {
   gap: 0.7rem;
 }
 
-.masthead .benchmark {
+.masthead .peak-mark {
   color: var(--paintbrush);
-  font-size: 1.7rem;
-  transform: translateY(0.18em);
+  font-size: 1.95rem;
+  transform: translateY(0.2em);
   flex: none;
 }
 
@@ -401,7 +401,7 @@ body {
   border-top: 1px solid var(--hairline);
 }
 
-.note-end .benchmark {
+.note-end .peak-mark {
   color: var(--paintbrush);
   font-size: 0.95rem;
   flex: none;
@@ -447,7 +447,7 @@ body {
   text-transform: uppercase;
 }
 
-.stamp .benchmark {
+.stamp .peak-mark {
   color: var(--paintbrush);
   font-size: 0.9rem;
   flex: none;
@@ -463,16 +463,25 @@ body {
   height: auto;
 }
 
-.contour-field--ridge {
-  top: clamp(-9rem, -10vw, -3rem);
-  right: clamp(-18rem, -16vw, -7rem);
-  width: min(78vw, 1000px);
+.contour-field--tr {
+  top: clamp(-16rem, -12vw, -6rem);
+  right: clamp(-12rem, -9vw, -4rem);
+  width: min(74vw, 950px);
+  mask-image: radial-gradient(ellipse 95% 85% at 60% 42%, #000 50%, transparent 90%);
+  -webkit-mask-image: radial-gradient(ellipse 95% 85% at 60% 42%, #000 50%, transparent 90%);
 }
 
-.contour-field--knoll {
-  bottom: -9rem;
-  left: -8rem;
-  width: min(42vw, 500px);
+.contour-field--bl {
+  bottom: clamp(-10rem, -8vw, -4rem);
+  left: clamp(-9rem, -7vw, -3rem);
+  width: min(44vw, 540px);
+  mask-image: radial-gradient(ellipse 95% 90% at 38% 62%, #000 48%, transparent 90%);
+  -webkit-mask-image: radial-gradient(ellipse 95% 90% at 38% 62%, #000 48%, transparent 90%);
+}
+
+.lost-art.contour-field--bl {
+  width: min(58vw, 700px);
+  bottom: -3rem;
 }
 
 .contour {
@@ -481,7 +490,7 @@ body {
   stroke-dasharray: 1 1;
   stroke-dashoffset: 1;
   animation: contour-draw 2.3s cubic-bezier(0.33, 0, 0.2, 1) forwards;
-  animation-delay: calc(80ms * var(--i, 0));
+  animation-delay: calc(70ms * min(var(--i, 0), 22));
 }
 
 .contour--index {
@@ -496,6 +505,31 @@ body {
   animation-delay: 1.9s;
 }
 
+/* The trail: real dashes crawling uphill, forever, slowly. */
+.contour-trail {
+  stroke: var(--ink-soft);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-dasharray: 1.2 2.2;
+  opacity: 0;
+  animation:
+    trail-in 1.2s ease 2.5s forwards,
+    trail-crawl 9s linear 2.5s infinite;
+}
+
+.contour-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  fill: var(--ink-soft);
+  stroke: var(--paper);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+  paint-order: stroke;
+  opacity: 0;
+  animation: label-in 1s ease 2.3s forwards;
+}
+
 @keyframes contour-draw {
   to {
     stroke-dashoffset: 0;
@@ -508,12 +542,40 @@ body {
   }
 }
 
+@keyframes trail-in {
+  to {
+    opacity: 0.5;
+  }
+}
+
+@keyframes trail-crawl {
+  to {
+    stroke-dashoffset: -3.4;
+  }
+}
+
+@keyframes label-in {
+  to {
+    opacity: 0.72;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .contour,
   .contour-peak {
     animation: none;
     stroke-dashoffset: 0;
     opacity: 1;
+  }
+
+  .contour-trail {
+    animation: none;
+    opacity: 0.5;
+  }
+
+  .contour-label {
+    animation: none;
+    opacity: 0.72;
   }
 }
 
@@ -544,13 +606,17 @@ body {
     padding-block: 2.5rem 2rem;
   }
 
-  .contour-field--ridge {
-    width: 130vw;
-    top: -14rem;
-    right: -40vw;
+  .contour-field--tr {
+    width: 135vw;
+    top: -16rem;
+    right: -45vw;
   }
 
-  .contour-field--knoll {
+  .home-knoll {
+    display: none;
+  }
+
+  .contour-label {
     display: none;
   }
 
