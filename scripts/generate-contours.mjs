@@ -28,8 +28,8 @@ const MOUNTAINS = {
     // The Timp horseshoe exactly as hiked: Bomber Peak (NW), the summit,
     // the west ridge down to South Timpanogos, and The Shoulder across
     // the basin. Peak coordinates from OpenStreetMap.
-    lat: [40.36, 40.43],
-    lon: [-111.688, -111.6],
+    lat: [40.372, 40.417],
+    lon: [-111.678, -111.614],
     label: "MT TIMPANOGOS · 11,749 FT",
     trailStart: [0.75, 0.97], // Aspen Grove side, up through the basin
     namedMarks: [
@@ -37,8 +37,8 @@ const MOUNTAINS = {
       [40.38437, -111.63648], // South Timpanogos
       [40.39134, -111.63736], // The Shoulder
     ],
-    axisExtra: [[40.44, -111.578]], // capsule flows off the top-right corner
-    field: { rKm: 1.65, wobble: 0.34 },
+    // No capsule trim: Timp shows as a complete corridor plate with a
+    // CSS vignette (Noah's call — reverted from the corner-flow version).
   },
   lonePeak: {
     // The ridge from his Mapbox screenshot: Rocky Mouth Canyon Peak (NNW)
@@ -368,10 +368,11 @@ function toSet(grid, targetW, spec) {
       if (span < 5) continue; // drop pebble rings
       const vb = smooth.map((p) => [sx(p[0]), sy(p[1])]);
       // split into runs of in-field points; each run becomes its own line
+      // (mountains without a `field` spec keep every line whole)
       const runs = [];
       let run = [];
       for (const p of vb) {
-        if (inField(p)) run.push(p);
+        if (!spec.field || inField(p)) run.push(p);
         else if (run.length) {
           runs.push(run);
           run = [];

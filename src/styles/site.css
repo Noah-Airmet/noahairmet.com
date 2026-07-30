@@ -463,15 +463,22 @@ body {
   height: auto;
 }
 
-/* Each mountain is a ridge-corridor plate, fully on screen. The organic
-   boundary is baked into the geometry: scripts/generate-contours.mjs
-   trims every line to a noise-wobbled capsule around the ridge axis
-   (the `field: { r, wobble }` knobs per mountain). No CSS masks — the
-   lines simply end where a cartographer would have stopped drawing. */
+/* Two boundary styles, chosen per mountain by Noah's eye:
+   - Timp (tr): complete corridor plate, fully on screen, faded by the
+     CSS vignette below.
+   - Lone Peak and Kings (bl): boundary baked into the geometry — lines
+     trimmed to a noise-wobbled capsule around the ridge axis (the
+     `field: { rKm, wobble }` knobs in scripts/generate-contours.mjs),
+     flowing off their screen corners. No masks. */
 .contour-field--tr {
-  top: -10rem;
-  right: -10vw;
-  width: min(58vw, 730px);
+  top: 1.5rem;
+  right: 1.5vw;
+  width: min(44vw, 560px);
+}
+
+.contour-field--tr .contour-wash {
+  mask-image: radial-gradient(ellipse 76% 72% at 50% 48%, #000 66%, transparent 96%);
+  -webkit-mask-image: radial-gradient(ellipse 76% 72% at 50% 48%, #000 66%, transparent 96%);
 }
 
 .contour-field--bl {
@@ -491,7 +498,9 @@ body {
 }
 
 .contour-field--bl .contour-label {
-  font-size: 24px;
+  /* small enough that the whole label sits left of the text column;
+     page copy can reflow without ever colliding with it */
+  font-size: 20px;
 }
 
 .lost-art .contour-label {
@@ -665,9 +674,9 @@ body {
   }
 
   .contour-field--tr {
-    width: 88vw;
-    top: -4rem;
-    right: -18vw;
+    width: 72vw;
+    top: 0.5rem;
+    right: -5vw;
   }
 
   .home-knoll {
