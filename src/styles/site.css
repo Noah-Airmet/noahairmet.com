@@ -469,21 +469,21 @@ body {
    (the `field: { r, wobble }` knobs per mountain). No CSS masks — the
    lines simply end where a cartographer would have stopped drawing. */
 .contour-field--tr {
-  top: 1.5rem;
-  right: 1.5vw;
-  width: min(44vw, 560px);
+  top: -10rem;
+  right: -10vw;
+  width: min(58vw, 730px);
 }
 
 .contour-field--bl {
-  bottom: 1rem;
-  left: 1vw;
-  width: min(38vw, 470px);
+  bottom: -8rem;
+  left: -7vw;
+  width: min(50vw, 620px);
 }
 
 .lost-art.contour-field--bl {
-  width: min(50vw, 620px);
-  left: 36vw;
-  bottom: 1rem;
+  width: min(58vw, 720px);
+  left: 28vw;
+  bottom: -8rem;
 }
 
 .contour-field--tr .contour-label {
@@ -665,9 +665,9 @@ body {
   }
 
   .contour-field--tr {
-    width: 72vw;
-    top: 0.5rem;
-    right: -5vw;
+    width: 88vw;
+    top: -4rem;
+    right: -18vw;
   }
 
   .home-knoll {

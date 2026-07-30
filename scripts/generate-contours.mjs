@@ -16,7 +16,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const cacheDir = join(here, "terrain-cache");
 mkdirSync(cacheDir, { recursive: true });
 
-const GRID = 80; // 80x80 samples per mountain
+const GRID = 100; // 100x100 samples per mountain (~75m cells; the ridges need it)
 const LEVELS = 9; // contour lines per mountain
 
 // Ridge-corridor boxes: framed tight on the ridgeline that makes each
@@ -28,8 +28,8 @@ const MOUNTAINS = {
     // The Timp horseshoe exactly as hiked: Bomber Peak (NW), the summit,
     // the west ridge down to South Timpanogos, and The Shoulder across
     // the basin. Peak coordinates from OpenStreetMap.
-    lat: [40.372, 40.417],
-    lon: [-111.678, -111.614],
+    lat: [40.36, 40.43],
+    lon: [-111.688, -111.6],
     label: "MT TIMPANOGOS · 11,749 FT",
     trailStart: [0.75, 0.97], // Aspen Grove side, up through the basin
     namedMarks: [
@@ -37,30 +37,33 @@ const MOUNTAINS = {
       [40.38437, -111.63648], // South Timpanogos
       [40.39134, -111.63736], // The Shoulder
     ],
-    field: { r: 300, wobble: 0.34 },
+    axisExtra: [[40.44, -111.578]], // capsule flows off the top-right corner
+    field: { rKm: 1.65, wobble: 0.34 },
   },
   lonePeak: {
     // The ridge from his Mapbox screenshot: Rocky Mouth Canyon Peak (NNW)
     // → Lone Peak cirque → Big Horn Peak (SE), west spurs to the valley.
-    lat: [40.505, 40.552],
-    lon: [-111.8, -111.712],
+    lat: [40.496, 40.564],
+    lon: [-111.792, -111.706],
     label: "LONE PEAK · 11,253 FT",
     trailStart: [0.65, 0.03], // out of the Draper foothills
     namedMarks: [
       [40.5383, -111.76077], // Rocky Mouth Canyon Peak
       [40.52241, -111.74365], // Big Horn Peak
     ],
-    field: { r: 315, wobble: 0.38 },
+    axisExtra: [[40.483, -111.832]], // capsule flows off the bottom-left corner
+    field: { rKm: 1.7, wobble: 0.38 },
   },
   kingsPeak: {
     // The Kings crest with the Henrys Fork approach.
-    lat: [40.745, 40.808],
-    lon: [-110.415, -110.33],
+    lat: [40.742, 40.815],
+    lon: [-110.425, -110.322],
     label: "KINGS PEAK · 13,528 FT",
     trailStart: [0.05, 0.42], // the real approach: in from the north
     namedMarks: [[40.76591, -110.37783]], // South Kings Peak
-    axisExtra: [[40.792, -110.373]], // capsule reaches up the Henrys Fork approach
-    field: { r: 330, wobble: 0.3 },
+    // capsule reaches up the Henrys Fork approach, then off the bottom corner
+    axisExtra: [[40.792, -110.373], [40.726, -110.443]],
+    field: { rKm: 1.9, wobble: 0.3 },
   },
 };
 
@@ -315,24 +318,16 @@ function toSet(grid, targetW, spec) {
   const peak = [peakVB[0].toFixed(1), peakVB[1].toFixed(1)];
 
   // Secondary summits: the named peaks that make the ridge recognizable,
-  // pinned by coordinate and snapped to the DEM's local max so the
-  // elevation tag is ground truth (reads slightly low at grid resolution).
-  const at = (r, c) => elev[r * cols + c] ?? -1e9;
-  const marks = (spec.namedMarks ?? []).map(([mlat, mlon]) => {
-    let r0 = Math.round(((grid.lat[1] - mlat) / (grid.lat[1] - grid.lat[0])) * (rows - 1));
-    let c0 = Math.round(((mlon - grid.lon[0]) / (grid.lon[1] - grid.lon[0])) * (cols - 1));
-    let bestRC = [r0, c0];
-    for (let dr = -3; dr <= 3; dr++)
-      for (let dc = -3; dc <= 3; dc++) {
-        const rr = r0 + dr, cc = c0 + dc;
-        if (rr < 1 || cc < 1 || rr >= rows - 1 || cc >= cols - 1) continue;
-        if (at(rr, cc) > at(bestRC[0], bestRC[1])) bestRC = [rr, cc];
-      }
+  // at their exact OSM coordinates, elevation-tagged from the DEM sampled
+  // at that precise point (see fetchMarkElevations).
+  const marks = (spec.namedMarks ?? []).map(([mlat, mlon], i) => {
+    const [x, y] = lonlatToVB([mlat, mlon]);
     return {
-      vb: [sx(bestRC[1]), sy(bestRC[0])],
-      x: sx(bestRC[1]).toFixed(1),
-      y: sy(bestRC[0]).toFixed(1),
-      ft: Math.round(at(bestRC[0], bestRC[1]) * 3.28084).toLocaleString("en-US") + " FT",
+      vb: [x, y],
+      x: x.toFixed(1),
+      y: y.toFixed(1),
+      ft:
+        Math.round((spec.markElevations?.[i] ?? 0) * 3.28084).toLocaleString("en-US") + " FT",
     };
   });
 
@@ -349,7 +344,7 @@ function toSet(grid, targetW, spec) {
   const cy = axis.reduce((s, p) => s + p[1], 0) / axis.length;
   const rand = mulberry32(Math.round(Math.abs(grid.lat[0]) * 1e4));
   const [ph1, ph2, ph3] = [rand() * 6.28, rand() * 6.28, rand() * 6.28];
-  const fieldR = spec.field?.r ?? 280;
+  const fieldR = (spec.field?.rKm ?? 1.6) * (targetW / kmX); // km → viewBox units
   const wobble = spec.field?.wobble ?? 0.32;
   const inField = (p) => {
     const a = Math.atan2(p[1] - cy, p[0] - cx);
@@ -359,10 +354,11 @@ function toSet(grid, targetW, spec) {
     return distToPolyline(p, axis) < fieldR * n;
   };
 
+  const cellKm = kmX / (cols - 1);
   const paths = [];
   levels.forEach((level) => {
     for (const line of chain(segmentsForLevel(grid, level))) {
-      if (line.length < 12) continue; // drop gravel
+      if (line.length * cellKm < 0.7) continue; // drop gravel (< ~700 m of line)
       const closed =
         Math.hypot(line[0][0] - line[line.length - 1][0], line[0][1] - line[line.length - 1][1]) < 0.01;
       const smooth = chaikin(rdp(line, 0.28));
@@ -409,9 +405,29 @@ function toSet(grid, targetW, spec) {
   };
 }
 
+// One batched query for every named mark's elevation at its exact point.
+async function fetchMarkElevations() {
+  const cache = join(cacheDir, "mark-elevations.json");
+  if (existsSync(cache)) return JSON.parse(readFileSync(cache, "utf8"));
+  const coords = Object.values(MOUNTAINS).flatMap((m) => m.namedMarks ?? []);
+  const res = await fetch(
+    `https://api.opentopodata.org/v1/ned10m?locations=${coords
+      .map(([la, lo]) => `${la},${lo}`)
+      .join("|")}`,
+  );
+  if (!res.ok) throw new Error(`mark elevations: HTTP ${res.status}`);
+  const data = await res.json();
+  const elevations = data.results.map((p) => p.elevation);
+  writeFileSync(cache, JSON.stringify(elevations));
+  return elevations;
+}
+
+const markElevs = await fetchMarkElevations();
+let markCursor = 0;
 const out = {};
 for (const [name, spec] of Object.entries(MOUNTAINS)) {
   const grid = await fetchGrid(name, spec);
+  spec.markElevations = (spec.namedMarks ?? []).map(() => markElevs[markCursor++]);
   out[name] = { ...toSet(grid, 1000, spec), label: spec.label };
   console.log(`${name}: ${out[name].paths.length} lines, ${JSON.stringify(out[name]).length} chars`);
 }
