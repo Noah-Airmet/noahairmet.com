@@ -1,0 +1,44 @@
+---
+/**
+ * Ghosted topographic contour artwork, cropped by the viewport edges.
+ * Generated once (deterministic seeds; see docs/DESIGN.md), embedded as
+ * static path data, and drawn exactly once on load by CSS — the one
+ * ambient motion on the site. No JavaScript.
+ */
+import { knoll, ridge, type ContourSet } from "../lib/contours";
+
+interface Props {
+  variant?: "ridge" | "knoll";
+  class?: string;
+}
+
+const { variant = "ridge", class: className } = Astro.props;
+const set: ContourSet = variant === "ridge" ? ridge : knoll;
+const viewBox = variant === "ridge" ? "0 0 1040 620" : "0 0 520 480";
+const peakX = Number(set.peak[0]);
+const peakY = Number(set.peak[1]);
+---
+
+<svg
+  class:list={["contour-field", `contour-field--${variant}`, className]}
+  viewBox={viewBox}
+  fill="none"
+  aria-hidden="true"
+>
+  {
+    set.paths.map((d, i) => (
+      <path
+        d={d}
+        pathLength="1"
+        vector-effect="non-scaling-stroke"
+        class:list={["contour", { "contour--index": i % 4 === 0 }]}
+        style={`--i: ${i}`}
+      />
+    ))
+  }
+  <path
+    class="contour-peak"
+    vector-effect="non-scaling-stroke"
+    d={`M ${peakX - 5} ${peakY} h 10 M ${peakX} ${peakY - 5} v 10`}
+  />
+</svg>

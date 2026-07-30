@@ -1,12 +1,21 @@
 ---
+import ContourField from "../components/ContourField.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
+
+const description = "Nothing is charted at this address.";
 ---
 
-<BaseLayout title="Page not found" path="/404.html" noindex>
-  <main id="main" class="not-found" tabindex="-1">
-    <p class="module-label">Wrong turn / 404</p>
-    <h1>404</h1>
-    <p>Nothing useful lives at this address.</p>
-    <a href="/">Return to the desk →</a>
-  </main>
+<BaseLayout title="Off the map" description={description} path="/404" noindex>
+  <ContourField variant="knoll" />
+
+  <div class="shell lost">
+    <main id="main">
+      <h1>Off the map</h1>
+      <p>Nothing is charted at this address.</p>
+      <nav class="cta-row" aria-label="Return">
+        <a href="/"><span class="bracket" aria-hidden="true">[&nbsp;</span>back
+        home<span class="bracket" aria-hidden="true">&nbsp;]</span></a>
+      </nav>
+    </main>
+  </div>
 </BaseLayout>

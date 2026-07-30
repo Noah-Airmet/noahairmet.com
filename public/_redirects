@@ -1,11 +1,11 @@
-# The professional site is intentionally one page. Preserve old bookmarks
-# without preserving the old multi-page architecture.
-/work/* /#work 301
-/work /#work 301
-/writing/* / 301
-/writing / 301
-/about/* /#main 301
-/about /#main 301
+# Old bookmarks land on their nearest live equivalent. Never add a
+# /resume/* wildcard: it catches the PDF itself and loops.
+/work/* / 301
+/work / 301
+/writing/* /field-notes/ 301
+/writing /field-notes/ 301
+/about/* / 301
+/about / 301
 /resume /resume/noah-airmet-resume.pdf 301
 /resume/ /resume/noah-airmet-resume.pdf 301
 /colophon/* / 301
@@ -13,11 +13,9 @@
 /privacy/* / 301
 /privacy / 301
 
-# Legacy routes from the prior personal site.
-/blog.html / 301
-/commitments.html /#main 301
-/pulpit-progress.html https://noah-airmet.github.io/pulpit-site/work/ 301
-/pulpit.html https://noah-airmet.github.io/pulpit-site/ 301
-/corpus-access.html https://corpus.noahairmet.com 302
-/posts/template.html /404.html 301
+# Legacy routes from the prior personal sites.
+/blog.html /field-notes/ 301
+/commitments.html /field-notes/professional-commitments/ 301
+/pulpit-progress.html https://pulpit-archive.org/ 301
+/pulpit.html https://pulpit-archive.org/ 301
 /assets/resume.pdf /resume/noah-airmet-resume.pdf 301

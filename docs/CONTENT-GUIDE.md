@@ -1,46 +1,54 @@
-# Content Guide
+# Content guide
 
-The site intentionally does not use content collections. All visible homepage
-copy and both project dialogs live in `src/pages/index.astro` so the entire
-public story can be reviewed in one place.
+## Adding a field note
 
-## Content ceiling
+Create `src/content/field-notes/<slug>.md`:
 
-The homepage contains:
+```markdown
+---
+title: "Plain title, sentence case"
+date: 2026-09-14
+tag: agents          # optional, one word, lowercase
+description: "One honest sentence. Appears as the lede, in RSS, and in search results."
+---
 
-- one short introduction;
-- two selected projects;
-- four primary links;
-- two sourced data points in one instrument panel;
-- one clearly separate reference to Pulpit.
+The note.
+```
 
-New material should replace or consolidate existing material before adding a
-route, section, card, or longer scroll. Do not recreate a blog, skills grid,
-principles section, services language, or institution-sized case-study system
-without an explicit change in strategy.
+That is the whole workflow. Numbering (001, 002, …) is computed from date
+order at build time — never write numbers into titles or slugs. Slug =
+filename; keep slugs short, lowercase, hyphenated, and permanent (they are
+URLs).
 
-## Updating work
+## Voice — the part that matters
 
-Edit the project row and its matching `<dialog>` together in
-`src/pages/index.astro`. Keep each dialog to a short explanation of the problem,
-method, current status, and one honest outbound link. Do not imply that a study
-project is a finished product or that early-career work has institutional
-authority it does not have.
+Noah is a cybersecurity student and junior developer studying toward
+technical AI governance. The site's credibility comes from never claiming
+otherwise. When writing or editing copy:
 
-Pulpit remains independent religious work. It may demonstrate archival method,
-OCR, provenance, and AI-assisted scale, but it should not become the career
-site's operational dependency or default professional identity.
+- State what happened, what was learned, what is still unknown. First
+  person, plain sentences.
+- Uncertainty is stated, not performed. "I don't know yet whether X" is
+  good writing here; "one can't help but wonder about the profound
+  implications of X" is banned.
+- No melodrama, no "journey", no "passionate", no "deep dive", no
+  "delve", no thought-leader cadence.
+- Claims about skills or work require the work to exist and be linkable.
+- AI assistance in producing a note gets disclosed in the note when it
+  was substantive (see note 001 for the pattern).
 
-## Updating data
+Drafts written by an agent are proposals: Noah edits and owns every
+published word. Do not publish a note Noah has not read.
 
-`src/components/DitherSignal.astro` contains a dated snapshot, visible values,
-canvas `data-*` values, explanatory labels, and source links. Update all five
-together. Never change a graph shape without changing the visible numbers, and
-never label broader information-security projections as AI GRC job growth.
+## Home page
 
-## Voice
+`src/pages/index.astro` holds the bio and links. The bio is three
+sentences and should stay three sentences. Update facts when they change
+(role, class year); do not add adjectives. The "recent" list shows the
+last five notes; the full log lives at `/field-notes/`.
 
-Be direct, specific, and comfortable with the fact that Noah is a college
-student. Prefer a short true sentence to abstract strategy language. Avoid
-seniority theater, consultancy jargon, fake metrics, and generic calls to
-"build the future."
+## What does not belong on this site
+
+Project pages for unfinished work, a /now page that will go stale,
+testimonials, analytics, newsletter capture, or anything that needs a
+backend. Pulpit is linked once, as independent work, and that is enough.

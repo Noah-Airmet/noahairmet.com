@@ -1,0 +1,62 @@
+---
+import { getCollection, render } from "astro:content";
+import Benchmark from "../../components/Benchmark.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { longDate, noteNumber } from "../../lib/site";
+
+export async function getStaticPaths() {
+  const notes = (await getCollection("fieldNotes")).sort(
+    (a, b) => a.data.date.valueOf() - b.data.date.valueOf(),
+  );
+  return notes.map((note, index) => ({
+    params: { slug: note.id },
+    props: { note, number: noteNumber(index) },
+  }));
+}
+
+const { note, number } = Astro.props;
+const { Content } = await render(note);
+---
+
+<BaseLayout
+  title={note.data.title}
+  description={note.data.description}
+  path={`/field-notes/${note.id}/`}
+>
+  <div class="shell">
+    <nav class="crumb cta-row" aria-label="Breadcrumb">
+      <a href="/field-notes/"><span class="bracket" aria-hidden="true">[&nbsp;</span>← field
+      notes<span class="bracket" aria-hidden="true">&nbsp;]</span></a>
+    </nav>
+
+    <main id="main">
+      <article>
+        <header class="note-head">
+          <p class="note-meta">
+            <span class="chip">{number}</span>
+            <time
+              class="note-date"
+              datetime={note.data.date.toISOString().slice(0, 10)}
+            >
+              {longDate(note.data.date)}
+            </time>
+            {note.data.tag && <span class="chip chip--granite">{note.data.tag}</span>}
+          </p>
+          <h1>{note.data.title}</h1>
+          <p class="note-lede">{note.data.description}</p>
+        </header>
+
+        <div class="prose">
+          <Content />
+        </div>
+
+        <p class="note-end" aria-hidden="true"><Benchmark /></p>
+      </article>
+    </main>
+
+    <footer class="colophon">
+      <p>Hand-built with Astro and plain CSS, with AI assistance. No analytics, no tracking.</p>
+      <p class="stamp"><Benchmark /> 4,551 ft · Provo, Utah</p>
+    </footer>
+  </div>
+</BaseLayout>

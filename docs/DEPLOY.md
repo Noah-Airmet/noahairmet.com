@@ -33,13 +33,16 @@ homelab or any Restoration Commons service.
    curl -I https://noahairmet.com/
    curl -I https://www.noahairmet.com/
    curl -I https://noahairmet.com/resume/noah-airmet-resume.pdf
-   curl -I https://noahairmet.com/pulpit-progress.html
+   curl -I https://noahairmet.com/field-notes/professional-commitments/
+   curl -I https://noahairmet.com/commitments.html
+   curl -I https://noahairmet.com/corpus-access.html
+   curl -I https://noahairmet.com/bee/
    curl -I https://noahairmet.com/does-not-exist
    ```
 
-The homepage and PDF should return `200`; the old Pulpit tracker path should
-redirect to the current Pulpit Workboard; the missing route should return
-`404`; and security headers should be present.
+The homepage, PDF, note 001, and `/bee/` should return `200`; the legacy
+commitments path should `301` to the note; the retired corpus path and the
+missing route should return `404`; and security headers should be present.
 
 ## Authentication
 

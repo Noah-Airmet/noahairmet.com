@@ -2,66 +2,66 @@
 
 Read `/Users/nairmet/AGENTS.md` first, then this file.
 
-This repository is the clean-room professional site for Noah Airmet. Keep it
-separate from Pulpit, Restoration Commons, Telos, Roberts Academy, the homelab,
-and the old `website` repository.
+This repository is the professional site for Noah Airmet: a small Astro site —
+home page, "field notes" (blog), résumé PDF — with the alpine survey-plate
+design documented in `docs/DESIGN.md`. Keep it separate from Pulpit,
+Restoration Commons, Telos, Roberts Academy, the homelab, and the old
+`website` repository.
 
 ## Boundaries
 
-- Architecture: a single-page Astro static output, strict TypeScript,
-  handcrafted CSS, one framework-free dither canvas component, native dialogs,
-  and Cloudflare Workers Static Assets.
-- Do not add React, Next.js, Tailwind, component libraries, animation packages,
-  CMS tooling, analytics, auth, databases, forms, or Worker runtime functions
+- Architecture: Astro static output, strict TypeScript, one hand-authored
+  stylesheet, a markdown content collection for field notes, self-hosted
+  fonts, zero client-side JavaScript, and Cloudflare Workers Static Assets.
+- Do not add React, Tailwind, component libraries, animation packages, CMS
+  tooling, analytics, auth, databases, forms, or Worker runtime functions
   unless Noah explicitly changes the architecture.
-- Do not copy HTML or CSS from `/Users/nairmet/development/website`.
-- Keep the homepage content ceiling small. New work should replace or
-  consolidate existing modules before adding routes or vertical sections.
-- Pulpit may be referenced as independent work, but it is not part of this
-  site's operational architecture.
-- Do not deploy, change DNS, create the remote GitHub repository, or touch
-  Cloudflare settings from this repo without a task that explicitly asks for it.
+- Voice ceiling: the site must never overclaim. Noah is a student and junior
+  developer; copy states what is true today, in plain sentences. No
+  "thought leader" framing, no case studies for work that does not exist,
+  no filler. New capability claims require new shipped work.
+- **Zero corpus exposure.** No page, redirect, link, or comment in this repo
+  may reference `corpus.noahairmet.com` or any other private subdomain.
+  The professional site and the private services share a DNS zone and
+  nothing else.
+- Pulpit may be linked as independent work (`https://pulpit-archive.org/`);
+  it is not part of this site's architecture.
+- Do not deploy, change DNS, or touch Cloudflare settings without a task
+  that explicitly asks for it.
 
 ## Checks
 
-Run these before committing or deploying:
+Run before committing or deploying:
 
 ```bash
-npm run build
-npm run check
-npm test
+npm run verify   # astro check + build + smoke tests
 git diff --check
 git status --short
 ```
 
-The `preview` script serves the already-built `dist` directory through Wrangler.
-Run `npm run build` first.
-
 ## Maintenance map
 
-- `src/pages/index.astro`: visible copy, links, project dialogs.
-- `src/components/DitherSignal.astro`: sourced figures and dither renderer.
-- `src/components/AmbientField.astro`: decorative motion only.
-- `src/styles/site.css`: the entire responsive visual system.
-- `src/lib/site.ts`: metadata and canonical contact URLs.
-- `public/_redirects` and `public/_headers`: edge behavior.
+- `src/content/field-notes/*.md`: the blog. See `docs/CONTENT-GUIDE.md`
+  before adding or editing a note.
+- `src/pages/index.astro`: home copy and links.
+- `src/lib/site.ts`: metadata, contact URLs, date/numbering helpers.
+- `src/styles/site.css`: the entire visual system (tokens documented in
+  `docs/DESIGN.md`).
+- `src/lib/contours.ts`: generated topographic artwork data — regenerate
+  with the script documented in `docs/DESIGN.md`, never hand-edit.
+- `public/_redirects` / `public/_headers`: edge behavior. Never add a
+  `/resume/*` wildcard redirect; it catches the PDF itself and loops.
 - `wrangler.jsonc`: production Worker and custom domains.
 
-Keep visible chart values, canvas `data-*` values, snapshot date, explanatory
-copy, and source links synchronized. Never use a `/resume/*` wildcard redirect;
-it catches the PDF itself and loops.
-
-Production is the `noahairmet-com` Cloudflare Worker on `noahairmet.com` and
-`www.noahairmet.com`. Read `docs/DEPLOY.md` before release. A deploy requires
-explicit authorization, a clean validated commit on `main`, and live checks of
-the homepage, résumé, one legacy redirect, security headers, and 404 behavior.
+Production is the `noahairmet-com` Cloudflare Worker on `noahairmet.com`
+and `www.noahairmet.com`. Read `docs/DEPLOY.md` before release. A deploy
+requires explicit authorization from Noah, a clean validated commit on
+`main`, and the live checks listed there.
 
 ## Busy Bee app (`/bee`) — scoped exception
 
 `public/bee/` contains Katie's standalone workout PWA, served unlinked at
 `/bee`. It is the one sanctioned exception to this site's content ceiling.
-Before touching anything in `public/bee/`, read `docs/BEE-APP.md` — it holds
-the design decisions, data model, CSP constraints, and the service-worker
-cache-bump rule. The app must stay static, backend-free, unlinked from the
-homepage, and decoupled from the fitness repo. Site architecture boundaries
-above do not license expanding the app; app boundaries live in its own doc.
+Before touching anything in `public/bee/`, read `docs/BEE-APP.md`. The app
+must stay static, backend-free, unlinked from the homepage, and decoupled
+from the fitness repo.

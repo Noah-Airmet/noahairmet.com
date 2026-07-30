@@ -1,20 +1,30 @@
 # Redirects
 
-`public/_redirects` is copied into `dist` and interpreted by Cloudflare Workers
-Static Assets. It preserves useful bookmarks without preserving the retired
-multi-page architecture.
+`public/_redirects` ships to `dist/` and is honored by Workers Static
+Assets at the edge. Current policy:
 
-Current behavior:
+## Live rules
 
-- `/work`, `/about`, and their children return to the relevant homepage area.
-- `/writing`, `/privacy`, and `/colophon` return home.
-- `/resume` and `/resume/` go to the one-page PDF.
-- old Pulpit and corpus URLs leave the career site for their separate products.
-- the old template post goes to the custom 404 page.
+- Old multi-page routes (`/work`, `/about`, `/colophon`, `/privacy`) → `/`.
+- `/writing` and `/blog.html` → `/field-notes/` (the section was renamed,
+  the idea survived).
+- `/commitments.html` → `/field-notes/professional-commitments/` — the
+  cyber-ethics code from the 2026 personal site lives on as note 001.
+- `/resume` and `/resume/` (exact) → the PDF. **Never add `/resume/*`**:
+  a wildcard catches the PDF itself and creates an infinite loop. The
+  smoke tests enforce this.
+- `/pulpit.html`, `/pulpit-progress.html` → `https://pulpit-archive.org/`.
+- `/assets/resume.pdf` → the current PDF path.
 
-Do not add `/resume/*` as a redirect source. It also matches the PDF destination
-and creates an infinite redirect loop. When changing these rules, rebuild and
-confirm that `dist/_redirects` matches the source file.
+## Deliberate removals
 
-Do not copy old source notes or generated Pulpit tracker files into this
-repository.
+- `/corpus-access.html` → **gone, 404.** It used to 302 to
+  `corpus.noahairmet.com`. Policy: the professional site exposes no path,
+  link, or redirect to private subdomains. Do not restore it. The smoke
+  tests fail on any `corpus` reference in `dist/`.
+- `/posts/template.html` → gone; it redirected to the 404 page anyway.
+
+## When retiring a URL
+
+Map it to the nearest live equivalent if one exists; otherwise let it
+404. Update the smoke test expectations and this file in the same commit.

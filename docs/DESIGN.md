@@ -1,55 +1,67 @@
-# Design Direction
+# Design — "alpine field notes"
 
-## Soft modularism
+The reference the direction answers to: Butterfly Interaction's Pond page
+(butterfly.so/pond) — huge whitespace, ghosted botanical engravings cropped
+by the viewport, words in letterpress color chips, one slow ambient motion.
+This site translates that grammar into the Wasatch: a **survey plate**
+rather than a pond specimen sheet. Nothing here copies Pond's assets or
+layout; it borrows the discipline.
 
-The site should feel like a small interactive desk, not a miniature consultancy.
-It uses a warm paper canvas, editorial rules, direct language, and one dark
-data-instrument panel. Desktop stays a two-column composition at every wide
-breakpoint; narrow, short, and zoomed viewports may scroll and reflow.
+## Palette (tokens in `src/styles/site.css`)
 
-## Core system
+Light — high-altitude morning:
 
-- Display/body: Space Grotesk Variable.
-- Metadata: Space Mono.
-- Paper: `#e9e1d2`.
-- Ink: `#171716`.
-- Instrument surface: `#151619`.
-- Signal accents: coral `#ff6b60`, blue `#4c9cff`, violet `#a77bff`.
-- Geometry: one-pixel rules, 4–6px corners, compact eight-pixel rhythm.
+- `--paper #f6f7f1` cool green-white (deliberately not warm cream)
+- `--ink #232b22` spruce black
+- `--ink-soft #596456`, `--hairline #dce1d3`
+- Chips: sage `#c9d4b8`, granite `#c3cdd3`, aspen gold `#ebd394`
+- `--paintbrush #bf4223` — reserved exclusively for the benchmark mark
+  and focus/hover accents. If paintbrush starts appearing in more places,
+  the design is drifting.
 
-Avoid neo-brutalist clichés and AI-template tells: oversized offset shadows,
-rainbow card systems, repeated rounded containers, pixel fonts, fake
-operating-system chrome, and arbitrary roughness. Only the dark instrument is a
-contained panel. The other regions are composed with spacing and rules.
+Dark — alpine night: same relationships on `#141913`, chips desaturated,
+paintbrush brightened to `#e06a48`. Both schemes ride
+`prefers-color-scheme`; there is no toggle.
 
-## Interaction rules
+## Type
 
-- All important content is visible or reachable without drag, hover, or motion.
-- Project details use native dialogs rather than new pages.
-- Links reveal useful secondary labels before activation.
-- The signal panel's sourced marks brighten on hover, but every value and label
-  remains visible without interaction.
-- Motion is short, local, and disabled under `prefers-reduced-motion`.
-- No custom cursor, scroll hijacking, sound, WebGL, or loading screen.
+- **Besley** (variable) — display. A Clarendon revival: survey plates,
+  national-park signage. Used small and confident; never poster-sized.
+- **Literata** (variable, + italic) — all reading text.
+- **IBM Plex Mono** 400/500 — dates, labels, chips, the plate line,
+  bracketed links.
 
-## Dither use
+All self-hosted via Fontsource imports in `BaseLayout.astro`. Do not add
+weights or families casually; every file ships to every visitor.
 
-The charts present two sourced facts: the public Pulpit archive snapshot and
-the U.S. Bureau of Labor Statistics information-security analyst projection.
-The latter is labeled as broader field context, not as an AI GRC forecast. The
-renderer borrows the ordered-dither approach demonstrated by the MIT-licensed
-dither-kit project while remaining plain TypeScript and canvas.
+## Signature elements
 
-Sparse Braille and point-cloud sprites may move in the outer page margins. They
-are ambient, non-interactive, hidden on constrained layouts, and stopped under
-reduced motion. They should never become a mascot system or another content box.
+1. **The benchmark** (`src/components/Benchmark.astro`) — a USGS
+   triangulation-station mark (triangle + dot in a circle). Favicon,
+   masthead, post end-mark, footer stamp ("△ 4,551 ft · Provo, Utah").
+2. **Topographic contours** (`src/components/ContourField.astro`) —
+   two generated contour sets (`ridge`, `knoll`) ghosted at viewport
+   edges, `position: fixed`, `z-index: -1`. They draw themselves once on
+   load (~2.3s, staggered) via CSS `stroke-dashoffset`; with
+   `prefers-reduced-motion: reduce` they render pre-drawn. This is the
+   site's **only** motion. Resist adding more.
+3. **Chips and brackets** — mono metadata chips (note number, tag) and
+   `[ bracketed ]` mono links, the letterpress nod to Pond.
 
-Do not add availability dots, pulsing status indicators, generic pill badges,
-gratuitous arrows in boxes, or repeated horizontal rules. These are common
-portfolio-template tells and compete with the page's actual hierarchy.
+## Artwork regeneration
 
-## Content ceiling
+`scripts/generate-contours.mjs` builds the contour paths from seeded
+randomness (ridge seed 11749 = Timpanogos ft; knoll seed 4551 = Provo ft).
+It writes `contours.json` + a preview HTML next to itself. To change the
+terrain: edit the parameters, run the script, and re-embed its JSON into
+`src/lib/contours.ts` (keep the header comment and `ContourSet` type; the
+file is otherwise a literal paste of the two path arrays).
 
-The homepage carries one introduction, two selected projects, four primary
-links, and one independent-project reference. Additions should replace or
-consolidate existing material before increasing the page's footprint.
+Keep `peakDrift` gentle (≤70 ridge / ≤45 knoll); large drift makes inner
+rings overshoot into scratch-like artifacts.
+
+## Voice
+
+Copy rules live in `CONTENT-GUIDE.md`, but they are design rules too: the
+page's honesty is the aesthetic. Plain sentences, true claims, no filler.
+The design frames modest content; it must never compensate for it.
