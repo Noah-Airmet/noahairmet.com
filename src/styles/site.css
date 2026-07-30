@@ -471,7 +471,7 @@ body {
      `field: { rKm, wobble }` knobs in scripts/generate-contours.mjs),
      flowing off their screen corners. No masks. */
 .contour-field--tr {
-  top: 1.5rem;
+  top: -2rem;
   right: 1.5vw;
   width: min(44vw, 560px);
 }
@@ -500,7 +500,7 @@ body {
 .contour-field--bl .contour-label {
   /* small enough that the whole label sits left of the text column;
      page copy can reflow without ever colliding with it */
-  font-size: 20px;
+  font-size: 17px;
 }
 
 .lost-art .contour-label {
@@ -675,7 +675,7 @@ body {
 
   .contour-field--tr {
     width: 72vw;
-    top: 0.5rem;
+    top: -1.5rem;
     right: -5vw;
   }
 
