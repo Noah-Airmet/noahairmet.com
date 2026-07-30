@@ -463,25 +463,54 @@ body {
   height: auto;
 }
 
+/* Each mountain is a compact floating figure. Zoom knobs:
+   - element `width` = display size of the whole 20km plate
+   - mask `#000 N%` = radius of the fully-visible core
+   - mask `transparent N%` = where the vignette finishes fading
+   Keep the two mask-image lines in each pair identical. */
 .contour-field--tr {
-  top: clamp(-16rem, -12vw, -6rem);
-  right: clamp(-12rem, -9vw, -4rem);
-  width: min(74vw, 950px);
-  mask-image: radial-gradient(ellipse 95% 85% at 60% 42%, #000 50%, transparent 90%);
-  -webkit-mask-image: radial-gradient(ellipse 95% 85% at 60% 42%, #000 50%, transparent 90%);
+  top: -3rem;
+  right: -3vw;
+  width: min(48vw, 620px);
+}
+
+.contour-field--tr .contour-wash {
+  mask-image: radial-gradient(ellipse 70% 66% at 50% 45%, #000 58%, transparent 88%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 66% at 50% 45%, #000 58%, transparent 88%);
 }
 
 .contour-field--bl {
-  bottom: clamp(-10rem, -8vw, -4rem);
-  left: clamp(-9rem, -7vw, -3rem);
-  width: min(44vw, 540px);
-  mask-image: radial-gradient(ellipse 95% 90% at 38% 62%, #000 48%, transparent 90%);
-  -webkit-mask-image: radial-gradient(ellipse 95% 90% at 38% 62%, #000 48%, transparent 90%);
+  bottom: -2rem;
+  left: -2vw;
+  width: min(34vw, 440px);
+}
+
+.contour-field--bl .contour-wash {
+  mask-image: radial-gradient(ellipse 68% 68% at 48% 55%, #000 58%, transparent 88%);
+  -webkit-mask-image: radial-gradient(ellipse 68% 68% at 48% 55%, #000 58%, transparent 88%);
 }
 
 .lost-art.contour-field--bl {
-  width: min(58vw, 700px);
-  bottom: -3rem;
+  width: min(60vw, 760px);
+  left: 4vw;
+  bottom: -4rem;
+}
+
+.lost-art .contour-wash {
+  mask-image: radial-gradient(ellipse 72% 68% at 49% 46%, #000 58%, transparent 88%);
+  -webkit-mask-image: radial-gradient(ellipse 72% 68% at 49% 46%, #000 58%, transparent 88%);
+}
+
+.contour-field--tr .contour-label {
+  font-size: 21px;
+}
+
+.contour-field--bl .contour-label {
+  font-size: 24px;
+}
+
+.lost-art .contour-label {
+  font-size: 20px;
 }
 
 .contour {
@@ -523,7 +552,7 @@ body {
   letter-spacing: 0.18em;
   fill: var(--ink-soft);
   stroke: var(--paper);
-  stroke-width: 4px;
+  stroke-width: 0.34em;
   stroke-linejoin: round;
   paint-order: stroke;
   opacity: 0;
@@ -607,9 +636,9 @@ body {
   }
 
   .contour-field--tr {
-    width: 135vw;
-    top: -16rem;
-    right: -45vw;
+    width: 78vw;
+    top: -2rem;
+    right: -8vw;
   }
 
   .home-knoll {

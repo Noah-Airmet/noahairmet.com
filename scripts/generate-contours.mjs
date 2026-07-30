@@ -16,30 +16,33 @@ const here = dirname(fileURLToPath(import.meta.url));
 const cacheDir = join(here, "terrain-cache");
 mkdirSync(cacheDir, { recursive: true });
 
-const GRID = 70; // 70x70 samples per mountain
-const LEVELS = 9; // contour lines per mountain
+const GRID = 88; // 88x88 samples per mountain
+const LEVELS = 10; // contour lines per mountain
 
+// ~20 km boxes: the whole massif floats as a compact figure inside its
+// frame with empty valley around it. Contours start well up the mountain
+// (see `lo` below) so each figure reads as a ring system, not texture.
 const MOUNTAINS = {
   timpanogos: {
-    // Mount Timpanogos, 11,749 ft — the Utah County icon
-    lat: [40.355, 40.435],
-    lon: [-111.695, -111.6],
+    // Mount Timpanogos, 11,749 ft — the whole massif, canyon to canyon
+    lat: [40.3, 40.5],
+    lon: [-111.76, -111.54],
     label: "MT TIMPANOGOS · 11,749 FT",
-    trailStart: [0.92, 0.18], // [rowFrac, colFrac] — trailhead-ish corner
+    trailStart: [0.9, 0.2], // [rowFrac, colFrac] — up from the Provo side
   },
   lonePeak: {
-    // Lone Peak, 11,253 ft
-    lat: [40.503, 40.552],
-    lon: [-111.776, -111.712],
+    // Lone Peak, 11,253 ft — with the ridgeline context around it
+    lat: [40.44, 40.62],
+    lon: [-111.85, -111.63],
     label: "LONE PEAK · 11,253 FT",
-    trailStart: [0.9, 0.12],
+    trailStart: [0.88, 0.12], // from the Draper foothills
   },
   kingsPeak: {
-    // Kings Peak, 13,528 ft — highest point in Utah
-    lat: [40.748, 40.806],
-    lon: [-110.412, -110.334],
+    // Kings Peak, 13,528 ft — Uinta crest with Henrys Fork basin
+    lat: [40.68, 40.86],
+    lon: [-110.48, -110.26],
     label: "KINGS PEAK · 13,528 FT",
-    trailStart: [0.12, 0.15],
+    trailStart: [0.06, 0.4], // the real approach: in from the north
   },
 };
 
@@ -188,46 +191,66 @@ function chaikin(points, iterations = 2) {
   return pts;
 }
 
-// A decorative ascent: greedy climb from a start corner toward the summit,
-// biased uphill and summit-ward. Not a real route — a plausible one.
+// A decorative ascent: continuous gradient climb with momentum, blending
+// "uphill" with "toward the summit". Momentum keeps it flowing — it
+// cannot switchback onto itself. Not a real route; a plausible one.
 function ascentTrail(grid, startFrac) {
   const { rows, cols, elev } = grid;
-  const at = (r, c) => elev[r * cols + c] ?? -1e9;
+  const at = (r, c) =>
+    elev[Math.min(rows - 1, Math.max(0, r)) * cols + Math.min(cols - 1, Math.max(0, c))] ?? 0;
+  const sample = (x, y) => {
+    const c0 = Math.floor(x), r0 = Math.floor(y);
+    const fx = x - c0, fy = y - r0;
+    return (
+      at(r0, c0) * (1 - fx) * (1 - fy) +
+      at(r0, c0 + 1) * fx * (1 - fy) +
+      at(r0 + 1, c0) * (1 - fx) * fy +
+      at(r0 + 1, c0 + 1) * fx * fy
+    );
+  };
   let best = 0;
   for (let i = 1; i < elev.length; i++) if ((elev[i] ?? -1e9) > (elev[best] ?? -1e9)) best = i;
-  const summit = [Math.floor(best / cols), best % cols];
-  let p = [Math.round(startFrac[0] * (rows - 1)), Math.round(startFrac[1] * (cols - 1))];
-  const path = [p];
-  const seen = new Set([p.join(",")]);
-  for (let step = 0; step < rows * cols; step++) {
-    if (Math.hypot(p[0] - summit[0], p[1] - summit[1]) < 1.2) break;
-    let bestScore = -Infinity;
-    let next = null;
-    for (const [dr, dc] of [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]]) {
-      const q = [p[0] + dr, p[1] + dc];
-      if (q[0] < 0 || q[1] < 0 || q[0] >= rows || q[1] >= cols || seen.has(q.join(","))) continue;
-      const toward =
-        ((summit[0] - p[0]) * dr + (summit[1] - p[1]) * dc) /
-        (Math.hypot(summit[0] - p[0], summit[1] - p[1]) * Math.hypot(dr, dc) || 1);
-      const score = (at(q[0], q[1]) - at(p[0], p[1])) + 26 * toward;
-      if (score > bestScore) {
-        bestScore = score;
-        next = q;
-      }
-    }
-    if (!next) break;
-    p = next;
-    seen.add(p.join(","));
-    path.push(p);
+  const summit = [best % cols, Math.floor(best / cols)]; // [x, y]
+
+  let p = [startFrac[1] * (cols - 1), startFrac[0] * (rows - 1)];
+  let v = [summit[0] - p[0], summit[1] - p[1]];
+  const norm = (u) => {
+    const m = Math.hypot(u[0], u[1]) || 1;
+    return [u[0] / m, u[1] / m];
+  };
+  v = norm(v);
+  const path = [[...p]];
+  const h = 0.75, step = 1.15;
+  for (let i = 0; i < 500; i++) {
+    const dSummit = Math.hypot(summit[0] - p[0], summit[1] - p[1]);
+    if (dSummit < 1.4) break;
+    const grad = norm([
+      sample(p[0] + h, p[1]) - sample(p[0] - h, p[1]),
+      sample(p[0], p[1] + h) - sample(p[0], p[1] - h),
+    ]);
+    const toward = norm([summit[0] - p[0], summit[1] - p[1]]);
+    // near the summit, "toward" dominates so the trail actually tops out
+    const pull = Math.min(1, 8 / dSummit);
+    const dir = norm([
+      0.5 * grad[0] + (0.55 + pull) * toward[0] + 0.85 * v[0],
+      0.5 * grad[1] + (0.55 + pull) * toward[1] + 0.85 * v[1],
+    ]);
+    p = [
+      Math.min(cols - 2, Math.max(1, p[0] + dir[0] * step)),
+      Math.min(rows - 2, Math.max(1, p[1] + dir[1] * step)),
+    ];
+    v = dir;
+    path.push([...p]);
   }
-  return path.map(([r, c]) => [c, r]); // → [x, y] grid coords
+  path.push(summit);
+  return path; // [x, y] grid coords
 }
 
 function toSet(grid, targetW, spec) {
   const { rows, cols, elev } = grid;
   const values = elev.filter((v) => v != null);
   const min = Math.min(...values), max = Math.max(...values);
-  const lo = min + 0.32 * (max - min);
+  const lo = min + 0.35 * (max - min);
   const hi = max - 0.05 * (max - min);
   const levels = Array.from({ length: LEVELS }, (_, i) => lo + (i / (LEVELS - 1)) * (hi - lo));
 
@@ -243,9 +266,14 @@ function toSet(grid, targetW, spec) {
   const paths = [];
   levels.forEach((level) => {
     for (const line of chain(segmentsForLevel(grid, level))) {
+      if (line.length < 12) continue; // drop gravel
       const closed =
         Math.hypot(line[0][0] - line[line.length - 1][0], line[0][1] - line[line.length - 1][1]) < 0.01;
       const smooth = chaikin(rdp(line, 0.28));
+      const xs = smooth.map((p) => p[0]), ys = smooth.map((p) => p[1]);
+      const span =
+        (Math.max(...xs) - Math.min(...xs)) + (Math.max(...ys) - Math.min(...ys));
+      if (span < 5) continue; // drop pebble rings
       let d = "";
       smooth.forEach((p, i) => {
         d += `${i === 0 ? "M" : "L"}${sx(p[0]).toFixed(1)} ${sy(p[1]).toFixed(1)}`;

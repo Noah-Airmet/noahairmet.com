@@ -1,10 +1,11 @@
 ---
 /**
- * Real-terrain contour artwork, ghosted at the viewport edges. Path data
- * is generated from USGS 10m elevation grids by scripts/generate-contours.mjs.
- * The lines draw once on load; after that, the only ongoing motion is the
- * summit trail — a faint dashed route whose dashes crawl uphill. All CSS,
- * no JavaScript.
+ * Real-terrain contour artwork: each mountain floats as a compact figure
+ * near a viewport corner. Path data comes from USGS 10m elevation grids
+ * via scripts/generate-contours.mjs. The contour wash (lines + trail) is
+ * CSS-masked so it dissolves in every direction; the summit cross and
+ * label sit outside the mask and stay crisp. Lines draw once on load;
+ * the dashed summit trail crawls slowly uphill forever. All CSS, no JS.
  */
 import { kingsPeak, lonePeak, timpanogos, type ContourSet } from "../lib/contours";
 
@@ -12,6 +13,8 @@ interface Props {
   mountain?: "timpanogos" | "lonePeak" | "kingsPeak";
   place?: "tr" | "bl";
   labeled?: boolean;
+  /** Label anchor as viewBox fractions; defaults to just right of the summit. */
+  labelPos?: [number, number];
   class?: string;
 }
 
@@ -20,12 +23,15 @@ const {
   mountain = "timpanogos",
   place = mountain === "timpanogos" ? "tr" : "bl",
   labeled = true,
+  labelPos,
   class: className,
 } = Astro.props;
 const set = sets[mountain];
 const peakX = Number(set.peak[0]);
 const peakY = Number(set.peak[1]);
-const labelEnd = place === "tr";
+const [, , vbW, vbH] = set.viewBox.split(" ").map(Number);
+const labelX = labelPos ? labelPos[0] * vbW : peakX + 16;
+const labelY = labelPos ? labelPos[1] * vbH : peakY + 5;
 ---
 
 <svg
@@ -34,37 +40,34 @@ const labelEnd = place === "tr";
   fill="none"
   aria-hidden="true"
 >
-  {
-    set.paths.map((d, i) => (
+  <g class="contour-wash">
+    {
+      set.paths.map((d, i) => (
+        <path
+          d={d}
+          pathLength="1"
+          vector-effect="non-scaling-stroke"
+          class:list={["contour", { "contour--index": i % 4 === 0 }]}
+          style={`--i: ${i}`}
+        />
+      ))
+    }
+    {set.trail && (
       <path
-        d={d}
-        pathLength="1"
+        class="contour-trail"
+        d={set.trail}
+        pathLength="100"
         vector-effect="non-scaling-stroke"
-        class:list={["contour", { "contour--index": i % 4 === 0 }]}
-        style={`--i: ${i}`}
       />
-    ))
-  }
-  {set.trail && (
-    <path
-      class="contour-trail"
-      d={set.trail}
-      pathLength="100"
-      vector-effect="non-scaling-stroke"
-    />
-  )}
+    )}
+  </g>
   <path
     class="contour-peak"
     vector-effect="non-scaling-stroke"
-    d={`M ${peakX - 5} ${peakY} h 10 M ${peakX} ${peakY - 5} v 10`}
+    d={`M ${peakX - 7} ${peakY} h 14 M ${peakX} ${peakY - 7} v 14`}
   />
   {labeled && (
-    <text
-      class="contour-label"
-      x={labelEnd ? peakX - 16 : peakX + 16}
-      y={peakY + 5}
-      text-anchor={labelEnd ? "end" : "start"}
-    >
+    <text class="contour-label" x={labelX} y={labelY}>
       {set.label}
     </text>
   )}
