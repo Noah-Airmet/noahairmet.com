@@ -66,6 +66,29 @@ const labelY = labelPos ? labelPos[1] * vbH : peakY + 5;
     vector-effect="non-scaling-stroke"
     d={`M ${peakX - 7} ${peakY} h 14 M ${peakX} ${peakY - 7} v 14`}
   />
+  {
+    set.marks.map((m) => {
+      const mx = Number(m.x);
+      const my = Number(m.y);
+      const flip = mx > 0.72 * vbW;
+      return (
+        <g class="contour-submark">
+          <path
+            vector-effect="non-scaling-stroke"
+            d={`M ${mx - 5} ${my} h 10 M ${mx} ${my - 5} v 10`}
+          />
+          <text
+            class="contour-sublabel"
+            x={flip ? mx - 12 : mx + 12}
+            y={my + 4}
+            text-anchor={flip ? "end" : "start"}
+          >
+            {m.ft}
+          </text>
+        </g>
+      );
+    })
+  }
   {labeled && (
     <text class="contour-label" x={labelX} y={labelY}>
       {set.label}

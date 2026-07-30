@@ -463,42 +463,42 @@ body {
   height: auto;
 }
 
-/* Each mountain is a compact floating figure. Zoom knobs:
-   - element `width` = display size of the whole 20km plate
+/* Each mountain is a ridge-corridor plate, fully on screen. Zoom knobs:
+   - element `width` = display size of the plate
    - mask `#000 N%` = radius of the fully-visible core
    - mask `transparent N%` = where the vignette finishes fading
    Keep the two mask-image lines in each pair identical. */
 .contour-field--tr {
-  top: -3rem;
-  right: -3vw;
-  width: min(48vw, 620px);
+  top: 1.5rem;
+  right: 1.5vw;
+  width: min(44vw, 560px);
 }
 
 .contour-field--tr .contour-wash {
-  mask-image: radial-gradient(ellipse 70% 66% at 50% 45%, #000 58%, transparent 88%);
-  -webkit-mask-image: radial-gradient(ellipse 70% 66% at 50% 45%, #000 58%, transparent 88%);
+  mask-image: radial-gradient(ellipse 76% 72% at 50% 48%, #000 66%, transparent 96%);
+  -webkit-mask-image: radial-gradient(ellipse 76% 72% at 50% 48%, #000 66%, transparent 96%);
 }
 
 .contour-field--bl {
-  bottom: -2rem;
-  left: -2vw;
-  width: min(34vw, 440px);
+  bottom: 1rem;
+  left: 1vw;
+  width: min(38vw, 470px);
 }
 
 .contour-field--bl .contour-wash {
-  mask-image: radial-gradient(ellipse 68% 68% at 48% 55%, #000 58%, transparent 88%);
-  -webkit-mask-image: radial-gradient(ellipse 68% 68% at 48% 55%, #000 58%, transparent 88%);
+  mask-image: radial-gradient(ellipse 76% 74% at 50% 50%, #000 66%, transparent 96%);
+  -webkit-mask-image: radial-gradient(ellipse 76% 74% at 50% 50%, #000 66%, transparent 96%);
 }
 
 .lost-art.contour-field--bl {
-  width: min(60vw, 760px);
-  left: 4vw;
-  bottom: -4rem;
+  width: min(50vw, 620px);
+  left: 36vw;
+  bottom: 1rem;
 }
 
 .lost-art .contour-wash {
-  mask-image: radial-gradient(ellipse 72% 68% at 49% 46%, #000 58%, transparent 88%);
-  -webkit-mask-image: radial-gradient(ellipse 72% 68% at 49% 46%, #000 58%, transparent 88%);
+  mask-image: radial-gradient(ellipse 78% 74% at 50% 48%, #000 66%, transparent 96%);
+  -webkit-mask-image: radial-gradient(ellipse 78% 74% at 50% 48%, #000 66%, transparent 96%);
 }
 
 .contour-field--tr .contour-label {
@@ -511,6 +511,26 @@ body {
 
 .lost-art .contour-label {
   font-size: 20px;
+}
+
+.contour-submark path {
+  stroke: currentColor;
+  stroke-width: 1.2;
+  opacity: 0;
+  animation: contour-appear 0.6s ease 2.1s forwards;
+}
+
+.contour-sublabel {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  letter-spacing: 0.14em;
+  fill: var(--ink-soft);
+  stroke: var(--paper);
+  stroke-width: 0.34em;
+  stroke-linejoin: round;
+  paint-order: stroke;
+  opacity: 0;
+  animation: sublabel-in 1s ease 2.4s forwards;
 }
 
 .contour {
@@ -589,6 +609,12 @@ body {
   }
 }
 
+@keyframes sublabel-in {
+  to {
+    opacity: 0.58;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .contour,
   .contour-peak {
@@ -605,6 +631,16 @@ body {
   .contour-label {
     animation: none;
     opacity: 0.72;
+  }
+
+  .contour-submark path {
+    animation: none;
+    opacity: 1;
+  }
+
+  .contour-sublabel {
+    animation: none;
+    opacity: 0.58;
   }
 }
 
@@ -636,16 +672,23 @@ body {
   }
 
   .contour-field--tr {
-    width: 78vw;
-    top: -2rem;
-    right: -8vw;
+    width: 72vw;
+    top: 0.5rem;
+    right: -5vw;
   }
 
   .home-knoll {
     display: none;
   }
 
-  .contour-label {
+  .lost-art.contour-field--bl {
+    width: 92vw;
+    left: 2vw;
+    bottom: 0;
+  }
+
+  .contour-label,
+  .contour-sublabel {
     display: none;
   }
 
