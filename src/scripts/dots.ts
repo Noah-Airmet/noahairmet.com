@@ -115,18 +115,43 @@ async function start(cv: HTMLCanvasElement) {
       : `${names.size} speakers, ${count.toLocaleString()} sermons`;
   });
 
-  // Lens: real pointer, or a short demo pass until the reader moves.
-  let px = -1e4, py = -1e4, demo = !reduce, hover = -1, pinned = false;
+  // Lens: the mouse, a finger, or a short demo pass until the reader moves.
+  // On touch the lens floats above the finger (which would hide it) and the
+  // details sit in a fixed box, so nothing jumps around under the thumb.
+  const touchUI = matchMedia("(hover: none)").matches;
+  const LIFT = 72;
+  let px = -1e4, py = -1e4, demo = !reduce, hover = -1, touching = false, pinned = false;
   const tip = document.querySelector<HTMLElement>("#tip")!;
+  const tipTitle = tip.querySelector<HTMLElement>(".tip-title")!, tipMeta = tip.querySelector<HTMLElement>(".tip-meta")!;
+  const tipGrade = tip.querySelector<HTMLElement>(".tip-grade")!, tipLink = tip.querySelector<HTMLAnchorElement>(".tip-link")!;
+  tip.classList.toggle("is-fixed", touchUI);
   const local = (e: PointerEvent) => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
-  cv.addEventListener("pointermove", (e) => { demo = false; pinned = false; [px, py] = local(e); dirty = true; });
-  cv.addEventListener("pointerleave", () => { if (!pinned) { px = py = -1e4; dirty = true; } });
+  const aim = (e: PointerEvent) => {
+    const [x, y] = local(e);
+    px = x; py = e.pointerType === "mouse" ? y : Math.max(8, y - LIFT);
+    dirty = true;
+  };
   cv.addEventListener("pointerdown", (e) => {
-    demo = false; [px, py] = local(e); dirty = true;
-    if (e.pointerType !== "mouse") pinned = true; // touch: tap shows it, the tip holds the link
+    demo = false;
+    if (e.pointerType === "mouse") return;
+    touching = true; pinned = false; aim(e);
+    try { cv.setPointerCapture(e.pointerId); } catch { /* pointer already gone */ }
   });
-  cv.addEventListener("click", () => {
-    if (hover >= 0 && titles && !pinned) window.open(TALK_URL + titles.id[hover] + "/", "_blank", "noopener");
+  cv.addEventListener("pointermove", (e) => {
+    demo = false;
+    if (e.pointerType === "mouse") { pinned = false; aim(e); }
+    else if (touching) aim(e);
+  });
+  const lift = (e: PointerEvent) => {
+    if (e.pointerType === "mouse") return;
+    touching = false; pinned = hover >= 0; dirty = true; // keep the last one up, with its link
+  };
+  cv.addEventListener("pointerup", lift);
+  cv.addEventListener("pointercancel", lift);
+  cv.addEventListener("pointerleave", (e) => { if (e.pointerType === "mouse") { px = py = -1e4; dirty = true; } });
+  cv.addEventListener("click", (e) => {
+    if ((e as PointerEvent).pointerType !== "mouse" && touchUI) return;
+    if (hover >= 0 && titles) window.open(TALK_URL + titles.id[hover] + "/", "_blank", "noopener");
   });
 
   const rootStyle = getComputedStyle(document.documentElement);
@@ -160,10 +185,32 @@ async function start(cv: HTMLCanvasElement) {
     requestAnimationFrame(frame);
   };
 
+  let shown = -2, shownTitles = false;
+  const showTip = (i: number) => {
+    if (i < 0) { tip.hidden = true; shown = -1; return; }
+    if (i !== shown || (titles !== null) !== shownTitles) {
+      shown = i; shownTitles = titles !== null;
+      tipTitle.textContent = titles ? titles.t[i] : "\u00a0";
+      tipMeta.textContent = `${D.speakers[D.s[i]]}, ${D.y[i]}`;
+      tipGrade.textContent = GRADES[D.f[i]];
+      if (titles) tipLink.href = TALK_URL + titles.id[i] + "/";
+    }
+    tip.hidden = false;
+    if (touchUI) {
+      // Fixed box: top of the chart, or the bottom when the lens is up high.
+      tip.classList.toggle("at-bottom", py < H * 0.45);
+    } else {
+      const tw = tip.offsetWidth, th = tip.offsetHeight;
+      const left = Math.min(W - tw, Math.max(0, px + 18)), topPos = py - th - 18 < 0 ? py + 22 : py - th - 18;
+      tip.style.transform = `translate(${Math.round(left)}px, ${Math.round(topPos)}px)`;
+    }
+  };
+
   const draw = (colors: string[]) => {
     ctx.clearRect(0, 0, W, H);
-    const R = Math.max(46, Math.min(80, W * 0.07));
-    let best = -1, bd = 16 * 16;
+    const R = touchUI ? Math.max(64, Math.min(96, W * 0.22)) : Math.max(46, Math.min(80, W * 0.07));
+    const zoom = touchUI ? 3.2 : 2.3, pick = touchUI ? 24 : 16;
+    let best = -1, bd = pick * pick;
     for (let g = 0; g < 5; g++) {
       for (let pass = 0; pass < 2; pass++) {
         ctx.fillStyle = colors[g];
@@ -176,7 +223,7 @@ async function start(cv: HTMLCanvasElement) {
           const d2 = dx * dx + dy * dy;
           if (d2 < R * R) {
             const f = 1 - Math.sqrt(d2) / R;
-            qx += dx * f * 0.9; qy += dy * f * 0.9; s = size * (1 + f * 2.3);
+            qx += dx * f * 0.9; qy += dy * f * 0.9; s = size * (1 + f * zoom);
             if (d2 < bd) { bd = d2; best = i; }
           }
           ctx.fillRect(qx - s / 2, qy - s / 2, s, s);
@@ -190,25 +237,8 @@ async function start(cv: HTMLCanvasElement) {
     for (const a of axis) a.lines.forEach((line, n) => ctx.fillText(line, a.x, axisY + n * 13));
 
     hover = best;
-    cv.style.cursor = best >= 0 ? "pointer" : "default";
-    if (best < 0) { tip.hidden = true; return; }
-    const title = titles ? titles.t[best] : "";
-    tip.replaceChildren();
-    if (title) { const b = document.createElement("strong"); b.textContent = title; tip.append(b); }
-    const meta = document.createElement("span");
-    meta.textContent = `${D.speakers[D.s[best]]}, ${D.y[best]}`;
-    const grade = document.createElement("span");
-    grade.className = "tip-grade"; grade.textContent = GRADES[D.f[best]];
-    tip.append(meta, grade);
-    if (pinned && titles) {
-      const a = document.createElement("a");
-      a.href = TALK_URL + titles.id[best] + "/"; a.textContent = "Read it on Pulpit"; a.target = "_blank"; a.rel = "noopener";
-      tip.append(a);
-    }
-    tip.hidden = false;
-    const tw = tip.offsetWidth, th = tip.offsetHeight;
-    const left = Math.min(W - tw, Math.max(0, px + 18)), topPos = py - th - 18 < 0 ? py + 22 : py - th - 18;
-    tip.style.transform = `translate(${Math.round(left)}px, ${Math.round(topPos)}px)`;
+    cv.style.cursor = best >= 0 && !touchUI ? "pointer" : "default";
+    showTip(best);
   };
 
   document.addEventListener("pointerdown", (e) => {

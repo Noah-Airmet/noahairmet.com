@@ -46,7 +46,12 @@ const fmt = (n: number) => n.toLocaleString("en-US");
       </div>
       <div class="dots-plot">
         <canvas id="dots" role="img" aria-label={`${fmt(total)} dots, one per sermon, grouped by decade and shaded by source fidelity`}></canvas>
-        <div class="dot-tip" id="tip" hidden></div>
+        <div class="dot-tip" id="tip" hidden>
+          <strong class="tip-title"></strong>
+          <span class="tip-meta"></span>
+          <span class="tip-grade"></span>
+          <a class="tip-link" target="_blank" rel="noopener">[ read it on pulpit ]</a>
+        </div>
       </div>
       <figcaption class="key" id="dots-key">
         <ul>

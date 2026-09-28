@@ -376,24 +376,67 @@ a:hover {
 }
 
 @media (max-width: 860px) {
+  /* Phones: one screen, no scroll. Text keeps its size; the mountain takes
+     whatever height is left (down to a floor on very short screens). */
+  :root {
+    --bar: 60px;
+  }
+
   .about {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding-top: 4px;
+    gap: 4px;
+    min-height: calc(100dvh - var(--bar));
+    padding-top: 2px;
+    padding-bottom: 14px;
   }
 
   .name {
-    font-size: clamp(52px, 15vw, 96px);
+    font-size: clamp(48px, 13.6vw, 96px);
+  }
+
+  .intro .lede {
+    margin-top: 14px;
+    font-size: 17px;
+  }
+
+  .actions {
+    gap: 6px 14px;
+    margin-top: 16px;
+  }
+
+  .actions .bl {
+    gap: 0.3em;
+    font-size: 14px;
+  }
+
+  .also {
+    margin-top: 12px;
+    font-size: 13px;
   }
 
   .timp {
-    flex: 1 0 250px;
+    flex: 1 1 0;
+    min-height: 170px;
     height: auto;
   }
 
   .caption {
-    padding-top: 10px;
+    gap: 2px 8px;
+    padding-top: 8px;
+  }
+
+  .caption-title {
+    font-size: 17px;
+  }
+
+  .caption-meta {
+    font-size: 14px;
+  }
+
+  .caption-time {
+    flex-basis: 100%;
+    justify-content: center;
   }
 }
 
@@ -567,9 +610,16 @@ a:hover {
   display: block;
   width: 100%;
   height: 100%;
-  touch-action: pan-y;
 }
 
+/* Touch screens explore the chart by dragging; the page scrolls elsewhere. */
+@media (hover: none) {
+  .dots-plot canvas {
+    touch-action: none;
+  }
+}
+
+/* One fixed size whatever the sermon, so the box never jitters. */
 .dot-tip {
   position: absolute;
   left: 0;
@@ -577,7 +627,7 @@ a:hover {
   z-index: 2;
   display: grid;
   gap: 3px;
-  max-width: 290px;
+  width: 290px;
   padding: 11px 13px;
   border-radius: 2px;
   background: var(--ink);
@@ -591,20 +641,46 @@ a:hover {
   display: none;
 }
 
-.dot-tip strong {
+.tip-title {
+  display: -webkit-box;
+  height: calc(2 * 1.3em);
+  overflow: hidden;
   font-size: 14px;
   font-weight: 650;
+  line-height: 1.3;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
-.dot-tip .tip-grade {
+.tip-grade {
   font-family: var(--mono);
   font-size: 11px;
   opacity: 0.75;
 }
 
-.dot-tip a {
-  margin-top: 4px;
-  font-weight: 650;
+.tip-link {
+  display: none;
+}
+
+/* Touch: pinned to the top of the chart (bottom when the lens is up high),
+   full width, never following the finger. */
+.dot-tip.is-fixed {
+  right: 0;
+  width: auto;
+  transform: none;
+}
+
+.dot-tip.is-fixed.at-bottom {
+  top: auto;
+  bottom: 30px;
+}
+
+.dot-tip.is-fixed .tip-link {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-size: 12px;
+  text-decoration: none;
   pointer-events: auto;
 }
 
