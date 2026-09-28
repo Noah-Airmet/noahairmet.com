@@ -2,48 +2,28 @@ export const site = {
   name: "Noah Airmet",
   url: "https://noahairmet.com",
   description:
-    "Cybersecurity student at BYU and junior developer at Simplicity Group, working toward technical AI governance.",
+    "Noah Airmet studies cybersecurity at BYU and builds software at Simplicity Group, working toward a career securing and governing AI systems.",
   email: "noah.airmet@icloud.com",
   github: "https://github.com/Noah-Airmet",
   linkedin: "https://www.linkedin.com/in/noah-airmet",
   resume: "/resume/noah-airmet-resume.pdf",
+  pulpit: "https://pulpit-archive.org/",
+  agentBus: "https://github.com/Noah-Airmet/agent-bus",
 };
 
-export type PageMeta = {
-  title?: string;
-  description?: string;
-  path?: string;
-  noindex?: boolean;
-};
+export const tabs = [
+  { id: "about", label: "About", href: "/" },
+  { id: "pulpit", label: "Pulpit", href: "/pulpit/" },
+  { id: "writing", label: "Writing", href: "/writing/" },
+] as const;
 
-export function absoluteUrl(path = "/") {
-  return new URL(path, site.url).toString();
-}
+export type TabId = (typeof tabs)[number]["id"];
 
-export function pageTitle(title?: string) {
-  return title ? `${title} · ${site.name}` : site.name;
-}
+export const absoluteUrl = (path = "/") => new URL(path, site.url).toString();
 
-/** "June 2026" */
-export function monthYear(date: Date) {
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    timeZone: "UTC",
-  });
-}
+export const pageTitle = (title?: string) => (title ? `${title} — ${site.name}` : site.name);
 
-/** "June 4, 2026" */
-export function longDate(date: Date) {
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    timeZone: "UTC",
-  });
-}
+export const longDate = (date: Date) =>
+  date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
 
-/** "2026-06-04", for <time datetime>. */
-export function isoDate(date: Date) {
-  return date.toISOString().slice(0, 10);
-}
+export const isoDate = (date: Date) => date.toISOString().slice(0, 10);

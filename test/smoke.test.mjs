@@ -5,133 +5,112 @@ import test from "node:test";
 
 const root = new URL("../", import.meta.url).pathname;
 const dist = join(root, "dist");
-
-const expectedFiles = [
-  "index.html",
-  "404.html",
-  "field-notes/index.html",
-  "field-notes/professional-commitments/index.html",
-  "rss.xml",
-  "sitemap-index.xml",
-  "resume/noah-airmet-resume.pdf",
-  "bee/index.html",
-  "bee/sw.js",
-  "favicon.svg",
-  "_headers",
-  "_redirects",
-  "robots.txt",
-];
-
+const read = (file) => readFileSync(join(dist, file), "utf8");
 const walk = (directory) => readdirSync(directory).flatMap((name) => {
   const path = join(directory, name);
   return statSync(path).isDirectory() ? walk(path) : [path];
 });
+const pages = () => walk(dist).filter((f) => f.endsWith(".html") && !f.includes("/bee/"));
 
-test("static build emits every route and control file", () => {
-  for (const file of expectedFiles) {
-    assert.ok(existsSync(join(dist, file)), `${file} should exist in dist`);
+test("static build emits every route, data file, and control file", () => {
+  for (const file of [
+    "index.html", "404.html", "pulpit/index.html", "writing/index.html",
+    "writing/professional-commitments/index.html", "rss.xml", "sitemap-index.xml",
+    "resume/noah-airmet-resume.pdf", "bee/index.html", "bee/sw.js", "favicon.svg",
+    "_headers", "_redirects", "robots.txt", "sky.js",
+    "data/timp.json", "data/pulpit-core.json", "data/pulpit-titles.json",
+  ]) assert.ok(existsSync(join(dist, file)), `${file} should exist in dist`);
+});
+
+test("every page works under the CSP: no inline scripts, styles, or style attributes", () => {
+  for (const file of pages()) {
+    const html = readFileSync(file, "utf8");
+    assert.doesNotMatch(html, /<style/, `${file}: inline <style>`);
+    assert.doesNotMatch(html, /\sstyle="/, `${file}: style attribute`);
+    for (const [tag] of html.matchAll(/<script\b[^>]*>/g)) {
+      assert.match(tag, /\ssrc="\//, `${file}: inline or third-party script ${tag}`);
+    }
+    assert.doesNotMatch(html, /fonts\.googleapis|fonts\.gstatic|cdn\.|unpkg|jsdelivr/, `${file}: external asset`);
   }
 });
 
-test("home includes accessibility and metadata markers", () => {
-  const home = readFileSync(join(dist, "index.html"), "utf8");
-  assert.match(home, /<a class="skip-link" href="#main">Skip to content<\/a>/);
-  assert.match(home, /<link rel="canonical" href="https:\/\/noahairmet\.com\//);
-  assert.match(home, /<meta name="description"/);
-  assert.match(home, /application\/rss\+xml/);
-});
-
-test("home tells the truth about who Noah is right now", () => {
-  const home = readFileSync(join(dist, "index.html"), "utf8");
-  assert.match(home, /Noah Airmet/);
-  assert.match(home, /graduate in 2028/);
-  assert.match(home, /Simplicity Group/);
-  assert.match(home, /pulpit-archive\.org/);
-  assert.match(home, /github\.com\/Noah-Airmet\/agent-bus/);
-  // Earlier sites' inflation and themed filler must stay gone.
-  assert.doesNotMatch(home, /dither|Selected work|field guide|Governing agent systems|learning in public|thought leader/i);
-});
-
-test("unlisted projects stay unlisted", () => {
-  // King Follett and Hymn Parts are for friends and family; never link them here.
-  const textFiles = walk(dist).filter((f) => /\.(html|xml|txt)$/.test(f) && !f.includes("/bee/"));
-  for (const file of textFiles) {
-    assert.doesNotMatch(readFileSync(file, "utf8"), /kingfollett\.|hymns\.noahairmet/i, `${file} must not link unlisted projects`);
+test("pages carry the accessibility and metadata basics", () => {
+  for (const file of pages()) {
+    const html = readFileSync(file, "utf8");
+    assert.match(html, /<a class="skip" href="#main">Skip to content<\/a>/, file);
+    assert.match(html, /id="main"/, file);
+    assert.match(html, /<meta name="description"/, file);
+    assert.match(html, /<link rel="canonical" href="https:\/\/noahairmet\.com\//, file);
   }
 });
 
-test("the Pulpit chart ships with a text alternative whose numbers add up", () => {
-  const home = readFileSync(join(dist, "index.html"), "utf8");
-  assert.match(home, /<caption>Pulpit sermons per decade by source fidelity<\/caption>/);
-  const totals = [...home.matchAll(/<td>([\d,]+)<\/td><\/tr>/g)].map(([, n]) => Number(n.replace(/,/g, "")));
-  assert.equal(totals.length, 20, "one row per decade, 1830s–2020s");
-  const sum = totals.reduce((a, b) => a + b, 0);
-  assert.match(home, new RegExp(`${sum.toLocaleString("en-US")} sermons by decade`));
+test("the home page leads with who Noah is and how to reach him", () => {
+  const home = read("index.html");
+  assert.match(home, /<h1 class="name" id="name">Noah<br>Airmet<\/h1>/);
+  assert.match(home, /href="\/resume\/noah-airmet-resume\.pdf"/);
+  assert.match(home, /href="mailto:noah\.airmet@icloud\.com"/);
+  assert.match(home, /Mount Timpanogos/);
 });
 
-test("styles stay external and honor reduced motion (CSP: style-src 'self')", () => {
-  const home = readFileSync(join(dist, "index.html"), "utf8");
-  assert.doesNotMatch(home, /<style/, "no inline <style> allowed under the CSP");
-  for (const file of walk(dist).filter((f) => f.endsWith(".html") && !f.includes("/bee/"))) {
-    assert.doesNotMatch(readFileSync(file, "utf8"), /\sstyle="/, `${file}: inline style attributes are blocked by the CSP`);
-  }
-  const cssFiles = walk(join(dist, "_astro")).filter((f) => f.endsWith(".css"));
-  assert.ok(cssFiles.length > 0, "bundled stylesheet should exist");
-  const css = cssFiles.map((f) => readFileSync(f, "utf8")).join("\n");
+test("styles are external and honor reduced motion", () => {
+  const css = walk(join(dist, "_astro")).filter((f) => f.endsWith(".css")).map((f) => readFileSync(f, "utf8")).join("\n");
+  assert.ok(css.length > 0, "bundled stylesheet should exist");
   assert.match(css, /prefers-reduced-motion/);
-  assert.match(css, /Source Serif 4/);
-  assert.match(css, /Public Sans/);
+  assert.match(css, /@view-transition/);
+  assert.ok(walk(join(dist, "_astro")).some((f) => f.endsWith(".woff2")), "fonts are self-hosted");
 });
 
-test("fonts are self-hosted", () => {
-  const fonts = walk(join(dist, "_astro")).filter((f) => f.endsWith(".woff2"));
-  assert.ok(fonts.length >= 3, "woff2 files should be bundled locally");
-  const html = walk(dist).filter((f) => f.endsWith(".html"));
-  for (const file of html) {
-    const body = readFileSync(file, "utf8");
-    assert.doesNotMatch(body, /fonts\.googleapis|fonts\.gstatic|cdn\./, `${file} must not reference external assets`);
+test("private and unlisted things stay unreachable", () => {
+  const files = walk(dist).filter((f) => /\.(html|css|js|xml|txt)$/.test(f) && !f.includes("/bee/"));
+  for (const file of files) {
+    const text = readFileSync(file, "utf8");
+    assert.doesNotMatch(text, /corpus\./i, `${file} must not reference corpus`);
+    // King Follett and Hymn Parts are for friends and family.
+    assert.doesNotMatch(text, /kingfollett\.|hymns\.noahairmet/i, `${file} must not link unlisted projects`);
   }
+  assert.doesNotMatch(read("_redirects"), /corpus/i);
 });
 
-test("corpus and other unrelated services are unreachable from this site", () => {
-  const textFiles = walk(dist).filter((f) => /\.(html|css|js|xml|txt)$/.test(f) && !f.includes("/bee/"));
-  for (const file of textFiles) {
-    assert.doesNotMatch(readFileSync(file, "utf8"), /corpus\./i, `${file} must not reference corpus`);
-  }
-  assert.doesNotMatch(readFileSync(join(dist, "_redirects"), "utf8"), /corpus/i);
-});
-
-test("redirect map cannot loop the resume PDF", () => {
-  const redirects = readFileSync(join(dist, "_redirects"), "utf8");
+test("redirects keep old URLs alive and cannot loop the résumé", () => {
+  const redirects = read("_redirects");
   assert.doesNotMatch(redirects, /^\/resume\/\*/m);
   assert.match(redirects, /^\/resume \/resume\/noah-airmet-resume\.pdf 301$/m);
-  assert.match(redirects, /^\/resume\/ \/resume\/noah-airmet-resume\.pdf 301$/m);
-  assert.match(redirects, /^\/commitments\.html \/field-notes\/professional-commitments\/ 301$/m);
+  assert.match(redirects, /^\/field-notes\/\* \/writing\/:splat 301$/m);
+  assert.match(redirects, /^\/commitments\.html \/writing\/professional-commitments\/ 301$/m);
 });
 
 test("security headers survive the rebuild", () => {
-  const headers = readFileSync(join(dist, "_headers"), "utf8");
+  const headers = read("_headers");
   assert.match(headers, /Content-Security-Policy: default-src 'self'/);
   assert.match(headers, /X-Content-Type-Options: nosniff/);
 });
 
-test("rss carries the field notes", () => {
-  const feed = readFileSync(join(dist, "rss.xml"), "utf8");
+test("the data files are whole", () => {
+  const core = JSON.parse(read("data/pulpit-core.json"));
+  const titles = JSON.parse(read("data/pulpit-titles.json"));
+  const n = core.y.length;
+  assert.ok(n > 12000, "every sermon is present");
+  for (const key of ["f", "s"]) assert.equal(core[key].length, n, `core.${key} length`);
+  assert.equal(titles.t.length, n); assert.equal(titles.id.length, n);
+  assert.ok(core.s.every((s) => s < core.speakers.length));
+  const timp = JSON.parse(read("data/timp.json"));
+  assert.equal(timp.elev.length, timp.rows * timp.cols);
+  assert.match(read("pulpit/index.html"), new RegExp(n.toLocaleString("en-US")));
+});
+
+test("rss carries the writing at its new address", () => {
+  const feed = read("rss.xml");
   assert.match(feed, /Professional commitments/);
-  assert.match(feed, /field-notes\/professional-commitments/);
+  assert.match(feed, /\/writing\/professional-commitments\//);
 });
 
 test("built pages do not contain broken internal links", () => {
-  const htmlFiles = walk(dist).filter((file) => file.endsWith(".html"));
-  for (const file of htmlFiles) {
+  for (const file of pages()) {
     const html = readFileSync(file, "utf8");
-    for (const [, href] of html.matchAll(/href="([^"]+)"/g)) {
+    for (const [, href] of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
       if (!href.startsWith("/") || href.startsWith("//")) continue;
       const pathname = href.split(/[?#]/)[0];
-      if (!pathname) continue;
-      const target = pathname.endsWith("/")
-        ? join(dist, pathname, "index.html")
-        : join(dist, pathname);
+      const target = pathname.endsWith("/") ? join(dist, pathname, "index.html") : join(dist, pathname);
       assert.ok(existsSync(target), `${file} links to missing ${pathname}`);
     }
   }

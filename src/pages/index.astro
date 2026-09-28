@@ -1,94 +1,55 @@
 ---
-import { getCollection } from "astro:content";
-import FidelityChart from "../components/FidelityChart.astro";
-import SiteFooter from "../components/SiteFooter.astro";
-import BaseLayout from "../layouts/BaseLayout.astro";
-import { isoDate, monthYear, site } from "../lib/site";
-
-const notes = (await getCollection("fieldNotes")).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
-);
-const featured = notes.find((note) => note.data.pullquote);
-const others = notes.filter((note) => note !== featured).slice(0, 4);
+import Site from "../layouts/Site.astro";
+import { site } from "../lib/site";
 ---
 
-<BaseLayout>
-  <main id="main">
-    <header class="hero wrap">
-      <h1 class="hero-name">Noah Airmet</h1>
-      <p class="hero-intro">
-        I study cybersecurity at BYU and graduate in 2028. I’m also a junior developer at{" "}
-        <a href="https://www.simplicitygroup.com/">Simplicity Group</a>, where I build features for
-        a regulated insurance platform. I’m working toward a career in technical AI governance.
+<Site tab="about" bareBar class="page-about">
+  <main id="main" class="about">
+    <section class="intro" aria-labelledby="name">
+      <h1 class="name" id="name">Noah<br />Airmet</h1>
+      <p class="lede">
+        I study cybersecurity at BYU and build software at{" "}
+        <a href="https://www.simplicitygroup.com/">Simplicity Group</a>. I’m working toward a career
+        securing and governing AI systems.
       </p>
-      <ul class="hero-actions" role="list">
-        <li>
-          <a class="button" href={site.resume}>Résumé <span class="button-note">PDF</span></a>
-        </li>
-        <li><a href={`mailto:${site.email}`}>Email</a></li>
-        <li><a href={site.github}>GitHub</a></li>
-        <li><a href={site.linkedin}>LinkedIn</a></li>
-      </ul>
-    </header>
-
-    <section class="work" aria-labelledby="work-heading">
-      <h2 class="visually-hidden" id="work-heading">Projects</h2>
-
-      <article class="project project--lead wrap">
-        <div class="project-text">
-          <h3 class="project-name"><a href="https://pulpit-archive.org/">Pulpit</a></h3>
-          <p>
-            A free archive of every Latter-day Saint general conference sermon since 1830. Each
-            text is traced to the best surviving source and graded for how faithfully that source
-            records what was said.
-          </p>
-          <p>Transcription is AI-assisted, linked to its sources, and reviewed by people.</p>
-          <p class="project-link"><a href="https://pulpit-archive.org/">pulpit-archive.org</a></p>
-        </div>
-        <FidelityChart />
-      </article>
-
-      <article class="project project--minor wrap">
-        <h3 class="project-name"><a href="https://github.com/Noah-Airmet/agent-bus">agent-bus</a></h3>
-        <p>
-          A small command-line tool that lets the AI coding assistants on one machine hand tasks to
-          each other and collect the results.
-        </p>
-        <p class="project-link">
-          <a href="https://github.com/Noah-Airmet/agent-bus">github.com/Noah-Airmet/agent-bus</a>
-        </p>
-      </article>
+      <div class="actions">
+        <a class="btn btn-solid" href={site.resume}>Résumé <span class="btn-note">PDF</span></a>
+        <a class="btn" href={`mailto:${site.email}`}>Email me</a>
+      </div>
+      <p class="more">
+        <a href={site.github}>GitHub</a>
+        <a href={site.linkedin}>LinkedIn</a>
+      </p>
+      <p class="also">
+        Also building <a href={site.agentBus}>agent-bus</a>, a small tool that lets AI coding
+        assistants hand work to each other.
+      </p>
     </section>
 
-    <section class="writing wrap" aria-labelledby="writing-heading">
-      <h2 class="visually-hidden" id="writing-heading">Writing</h2>
-      {
-        featured && (
-          <figure class="pullquote">
-            <blockquote>
-              <p>{featured.data.pullquote}</p>
-            </blockquote>
-            <figcaption>
-              From <a href={`/field-notes/${featured.id}/`}>{featured.data.title}</a>,{" "}
-              <time datetime={isoDate(featured.data.date)}>{monthYear(featured.data.date)}</time>
-            </figcaption>
-          </figure>
-        )
-      }
-      {
-        others.length > 0 && (
-          <ul class="note-list" role="list">
-            {others.map((note) => (
-              <li>
-                <a href={`/field-notes/${note.id}/`}>{note.data.title}</a>
-                <time datetime={isoDate(note.data.date)}>{monthYear(note.data.date)}</time>
-              </li>
-            ))}
-          </ul>
-        )
-      }
-    </section>
+    <figure class="timp">
+      <canvas id="timp" role="img" aria-label="Mount Timpanogos, drawn as ridgelines from USGS elevation data"></canvas>
+      <figcaption class="caption">
+        <span class="caption-title">Mount Timpanogos</span>
+        <span class="caption-meta">11,749 ft, above Provo, Utah</span>
+        <span class="caption-time">
+          <span id="clock">&nbsp;</span>
+          <span
+            class="daybar"
+            id="daybar"
+            role="slider"
+            tabindex="0"
+            aria-label="Time of day in Provo"
+            aria-valuemin="0"
+            aria-valuemax="1439"
+          >
+            <span class="sun"></span>
+          </span>
+        </span>
+      </figcaption>
+    </figure>
   </main>
+</Site>
 
-  <SiteFooter />
-</BaseLayout>
+<script>
+  import "../scripts/timp.ts";
+</script>

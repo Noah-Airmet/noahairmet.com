@@ -4,10 +4,7 @@ import { getCollection } from "astro:content";
 import { site } from "../lib/site";
 
 export async function GET(context: APIContext) {
-  const notes = (await getCollection("fieldNotes")).sort(
-    (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
-  );
-
+  const notes = (await getCollection("writing")).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
   return rss({
     title: `${site.name} — Writing`,
     description: site.description,
@@ -16,7 +13,7 @@ export async function GET(context: APIContext) {
       title: note.data.title,
       description: note.data.description,
       pubDate: note.data.date,
-      link: `/field-notes/${note.id}/`,
+      link: `/writing/${note.id}/`,
     })),
     customData: "<language>en-us</language>",
   });

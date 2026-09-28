@@ -1,96 +1,64 @@
 # noahairmet.com — Agent Guide
 
-This is the whole operating manual. The only other docs are
-`docs/BEE-APP.md` (Katie's PWA — read before touching `public/bee/`) and
-`design-kit/` (context folder for design tools).
+Noah Airmet's personal site, rebuilt from scratch on 2026-09-28. Three tabs,
+each one screen: **About** (`/`, Mount Timpanogos), **Pulpit** (`/pulpit/`,
+every sermon as a dot), **Writing** (`/writing/`). Astro static → Cloudflare
+Worker `noahairmet-com` (noahairmet.com + www). `docs/BEE-APP.md` covers
+Katie's workout PWA at `/bee` — read it before touching `public/bee/`.
 
-Noah Airmet's professional site: home, writing (served at `/field-notes/`
-for URL permanence), résumé PDF. Astro static → Cloudflare Worker
-`noahairmet-com` (noahairmet.com + www).
-Design: "one ink" — everything printed in a single blue-black on cool
-white, including the home page's one exhibit, a chart of Pulpit's catalog
-by decade and source fidelity. Source Serif 4 + Public Sans. Tokens and
-rationale live as comments in `src/styles/site.css`.
+## How it works
 
-## Hard rules
+- **The sky.** `public/sky.js` loads synchronously in `<head>` and sets
+  `--bg`, `--ink`, `--soft`, `--accent` from the sun's real elevation over
+  Provo. Light skies and dark skies never blend into each other (the
+  midpoint is unreadable); they crossfade. `?at=21:30` previews a time.
+- **Timp** (`src/scripts/timp.ts`): ridgelines from USGS elevation in
+  `public/data/timp.json`. Drag to turn; the day bar scrubs the sky.
+- **Dots** (`src/scripts/dots.ts`): `public/data/pulpit-core.json` draws
+  the dots; `pulpit-titles.json` loads after first paint. The dot ramp
+  (accent → sky) is validated in all four skies; if you change a sky's
+  colors, re-run the dataviz ordinal validator on it.
+- **Tabs** are real pages joined by cross-document view transitions: the
+  big name morphs into the wordmark, the tab pill slides.
+- **Attention order** is the design system (see the header of
+  `src/styles/site.css`): headline → lede → actions (the only filled
+  shapes) → the exhibit and its label → meta. Load animations run in that
+  same order. Label every exhibit where it sits, never in a far corner.
 
-- **No overclaiming.** Noah is a student and junior developer; copy states
-  what is true today, plainly. No case studies for unfinished work, no
-  filler, no "thought leader" voice. New claims require shipped, linkable
-  work.
-- **No new architecture.** No React/Tailwind/CMS/analytics/auth/forms/
-  Worker runtime code, and no client-side JavaScript at all, unless Noah
-  explicitly changes the architecture. All motion is CSS.
-- **CSP is strict** (`public/_headers`, `default-src 'self'`, no inline).
-  Everything self-hosted; `inlineStylesheets: "never"` stays in
-  `astro.config.mjs`.
-- **Zero private-subdomain exposure.** No page, link, comment, or redirect
-  may reference `corpus.noahairmet.com` or other private services. Smoke
-  tests fail the build on any `corpus` reference in `dist/`.
-- **Never add a `/resume/*` wildcard redirect** — it catches the PDF and
-  loops (tested). `/resume` + `/resume/` exact-match to the PDF.
-- **URLs are permanent**: note slugs, `/resume/noah-airmet-resume.pdf`,
-  `/bee`. Retired URLs get a redirect to the nearest equivalent in
-  `public/_redirects`, or a 404 — never silent breakage.
-- **`public/bee/` is untouchable** without reading `docs/BEE-APP.md`.
-- **Unlisted projects stay unlisted.** King Follett and Hymn Parts are for
-  friends and family; never link them (smoke-tested).
+## Rules that still apply
+
+- **Honest copy.** State what is true today; new claims need shipped,
+  linkable work.
+- **Unlisted stays unlisted.** Never link King Follett or Hymn Parts, or
+  any private subdomain (`corpus.` etc.). Smoke-tested.
+- **Strict CSP** (`public/_headers`): same-origin only, no inline scripts
+  or styles. Astro would inline small scripts, so `assetsInlineLimit: 0`
+  stays in `astro.config.mjs`. Setting styles from JS via `el.style` is
+  fine; `style="…"` in markup is not.
+- **URLs are permanent.** Old paths redirect in `public/_redirects`
+  (`/field-notes/*` → `/writing/*`). Never add a `/resume/*` wildcard — it
+  loops the PDF.
 
 ## Add a note
 
-Create `src/content/field-notes/<slug>.md`:
+Create `src/content/writing/<slug>.md` with `title`, `date`, optional
+`tag`, and a one-sentence `description`. Noah reads and owns every
+published word; disclose substantive AI assistance in the note.
 
-```markdown
----
-title: "Plain title, sentence case"
-date: 2026-09-14
-tag: agents          # optional, one word
-description: "One honest sentence — becomes the lede and RSS summary."
-pullquote: "Optional. One sentence quoted verbatim from the note."
----
+## Refresh data
+
+```bash
+python3 scripts/build-data.py   # re-tallies Pulpit from the live archive; rebuilds timp.json
 ```
-
-The newest note with a `pullquote` is featured on the home page; others
-list beneath it. Voice: first person, plain sentences, state
-what was learned and what is unknown; disclose substantive AI assistance
-in the note (see the commitments essay). Drafts are proposals — Noah reads and owns
-every published word.
-
-## Map
-
-- `src/pages/index.astro` — home copy and links (intro stays 3 sentences)
-- `src/content/field-notes/` — the writing
-- `src/lib/site.ts` — metadata, URLs, date helpers
-- `src/lib/pulpit.ts` — the chart's data: a dated snapshot of Pulpit's
-  live `archive-data.json`, tallied by decade and fidelity. Re-tally when
-  the archive grows; the test checks the chart total matches the rows.
-- `src/styles/site.css` — the entire visual system
-- `src/components/` — FidelityChart (SVG bars + HTML hover readouts +
-  hidden data table), SiteHeader, SiteFooter
-- `public/_redirects`, `public/_headers` — edge behavior
-- `test/smoke.test.mjs` — the site's contract; update with any change
 
 ## Verify, deploy
 
 ```bash
-npm run verify        # astro check + build + smoke tests — before every commit
+npm run verify              # astro check + build + smoke tests
 npm run deploy:production   # ONLY with Noah's explicit authorization
 ```
 
-Deploy = Wrangler (local OAuth session; check `npx wrangler whoami`).
-GitHub (`Noah-Airmet/noahairmet.com`, branch `main`) stores source only —
-pushing does not deploy. After deploying, verify live:
-
-```bash
-curl -I https://noahairmet.com/                                    # 200
-curl -I https://noahairmet.com/resume/noah-airmet-resume.pdf       # 200
-curl -I https://noahairmet.com/bee/                                # 200
-curl -I https://noahairmet.com/commitments.html                    # 301 → the commitments essay
-curl -I https://noahairmet.com/corpus-access.html                  # 404
-curl -I https://noahairmet.com/does-not-exist                      # 404
-```
-
-Security headers must be present on `/`. Rollback = redeploy the previous
-Worker version from the Cloudflare dashboard. Do not touch DNS: mail,
-tunnels, and the other subdomains live in the same zone and are not this
-repo's business.
+Deploy = Wrangler (`npx wrangler whoami`). Pushing to GitHub does not
+deploy. After deploying, check `/`, `/pulpit/`, `/writing/`,
+`/resume/noah-airmet-resume.pdf`, `/bee/` return 200 and
+`/field-notes/professional-commitments/` 301s. Don't touch DNS.

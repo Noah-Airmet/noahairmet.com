@@ -1,0 +1,26 @@
+---
+import { getCollection } from "astro:content";
+import Site from "../../layouts/Site.astro";
+import { isoDate, longDate } from "../../lib/site";
+
+const notes = (await getCollection("writing")).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<Site tab="writing" title="Writing" path="/writing/" description="Notes by Noah Airmet on security and AI governance.">
+  <main id="main" class="page page-in">
+    <h1 class="page-title">Writing</h1>
+    <ol class="entries" role="list">
+      {
+        notes.map((note) => (
+          <li>
+            <a class="entry" href={`/writing/${note.id}/`}>
+              <h2>{note.data.title}</h2>
+              <p>{note.data.description}</p>
+              <time datetime={isoDate(note.data.date)}>{longDate(note.data.date)}</time>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </main>
+</Site>

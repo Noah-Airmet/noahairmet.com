@@ -1,0 +1,28 @@
+---
+import { getCollection, render } from "astro:content";
+import Site from "../../layouts/Site.astro";
+import { isoDate, longDate } from "../../lib/site";
+
+export async function getStaticPaths() {
+  const notes = await getCollection("writing");
+  return notes.map((note) => ({ params: { slug: note.id }, props: { note } }));
+}
+
+const { note } = Astro.props;
+const { Content } = await render(note);
+---
+
+<Site tab="writing" title={note.data.title} description={note.data.description} path={`/writing/${note.id}/`}>
+  <main id="main" class="page">
+    <article>
+      <header class="article-head page-in">
+        <h1 class="page-title">{note.data.title}</h1>
+        <p class="lede">{note.data.description}</p>
+        <time class="article-date" datetime={isoDate(note.data.date)}>{longDate(note.data.date)}</time>
+      </header>
+      <div class="prose">
+        <Content />
+      </div>
+    </article>
+  </main>
+</Site>

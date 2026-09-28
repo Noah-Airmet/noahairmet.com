@@ -1,9 +1,9 @@
 # Old bookmarks land on their nearest live equivalent. Never add a
 # /resume/* wildcard: it catches the PDF itself and loops.
+/field-notes/* /writing/:splat 301
+/field-notes /writing/ 301
 /work/* / 301
 /work / 301
-/writing/* /field-notes/ 301
-/writing /field-notes/ 301
 /about/* / 301
 /about / 301
 /resume /resume/noah-airmet-resume.pdf 301
@@ -14,8 +14,8 @@
 /privacy / 301
 
 # Legacy routes from the prior personal sites.
-/blog.html /field-notes/ 301
-/commitments.html /field-notes/professional-commitments/ 301
+/blog.html /writing/ 301
+/commitments.html /writing/professional-commitments/ 301
 /pulpit-progress.html https://pulpit-archive.org/ 301
 /pulpit.html https://pulpit-archive.org/ 301
 /assets/resume.pdf /resume/noah-airmet-resume.pdf 301

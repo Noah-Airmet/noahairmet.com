@@ -1,0 +1,66 @@
+---
+import "@fontsource-variable/archivo/wdth.css";
+import "@fontsource-variable/jetbrains-mono";
+import "../styles/site.css";
+import { absoluteUrl, pageTitle, site, tabs, type TabId } from "../lib/site";
+
+interface Props {
+  tab?: TabId;
+  title?: string;
+  description?: string;
+  path?: string;
+  noindex?: boolean;
+  /** The About page's big name is the wordmark, so the bar leaves it out. */
+  bareBar?: boolean;
+  class?: string;
+}
+
+const {
+  tab,
+  title,
+  description = site.description,
+  path = "/",
+  noindex = false,
+  bareBar = false,
+  class: className,
+} = Astro.props;
+const fullTitle = pageTitle(title);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={absoluteUrl(path)} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="alternate" type="application/rss+xml" title={`${site.name} — Writing`} href={absoluteUrl("/rss.xml")} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={absoluteUrl(path)} />
+    <meta name="theme-color" content="#ecf0f4" />
+    <script is:inline src="/sky.js"></script>
+  </head>
+  <body class={className}>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="bar">
+      {bareBar ? <span /> : <a class="wordmark" href="/">Noah Airmet</a>}
+      <nav class="tabs" aria-label="Site">
+        {
+          tabs.map((t) => (
+            <a href={t.href} aria-current={t.id === tab ? "page" : undefined}>
+              {t.id === tab && <span class="pill" aria-hidden="true" />}
+              <span class="label">{t.label}</span>
+            </a>
+          ))
+        }
+      </nav>
+    </header>
+    <slot />
+  </body>
+</html>

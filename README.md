@@ -1,14 +1,14 @@
 # noahairmet.com
 
-Personal site: home, writing, résumé. Astro static, one hand-written
-stylesheet, zero client-side JavaScript, served as Cloudflare Workers
-static assets under a strict same-origin CSP.
+Noah Airmet's personal site: About (Mount Timpanogos as live ridgelines,
+colored by the real sky over Provo), Pulpit (all 12,162 sermons as
+interactive dots), and Writing. Astro static, a few small self-hosted
+scripts, strict same-origin CSP, served as Cloudflare Workers static assets.
 
-Everything you need to know is in [AGENTS.md](AGENTS.md) — rules, how to
-add a post, the file map, and the deploy procedure.
+Everything you need is in [AGENTS.md](AGENTS.md).
 
 ```bash
 npm install
 npm run dev
-npm run verify    # check + build + smoke tests
+npm run verify
 ```

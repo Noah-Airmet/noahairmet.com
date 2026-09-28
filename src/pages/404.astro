@@ -1,21 +1,10 @@
 ---
-import SiteFooter from "../components/SiteFooter.astro";
-import SiteHeader from "../components/SiteHeader.astro";
-import BaseLayout from "../layouts/BaseLayout.astro";
-
-const description = "There is no page at this address.";
+import Site from "../layouts/Site.astro";
 ---
 
-<BaseLayout title="Page not found" description={description} path="/404" noindex>
-  <SiteHeader />
-
-  <main id="main" class="wrap page lost">
-    <h1 class="page-title">Page not found</h1>
-    <p>
-      There is no page at this address. The <a href="/">home page</a> links to everything on this
-      site, and all writing is listed under <a href="/field-notes/">Writing</a>.
-    </p>
+<Site title="Not found" path="/404" noindex description="There is no page at this address.">
+  <main id="main" class="page lost page-in">
+    <h1 class="page-title">Nothing here</h1>
+    <p>There’s no page at this address. <a href="/">About</a>, <a href="/pulpit/">Pulpit</a>, and <a href="/writing/">Writing</a> have everything on this site.</p>
   </main>
-
-  <SiteFooter />
-</BaseLayout>
+</Site>

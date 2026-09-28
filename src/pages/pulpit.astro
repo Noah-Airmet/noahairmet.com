@@ -1,0 +1,69 @@
+---
+import core from "../../public/data/pulpit-core.json";
+import Site from "../layouts/Site.astro";
+import { site } from "../lib/site";
+
+const total: number = core.f.length;
+const labels = ["Verbatim", "Authoritative print", "Contemporaneous report", "Reconstructed", "Fragmentary"];
+const counts = labels.map((_, g) => core.f.filter((f: number) => f === g).length);
+const fmt = (n: number) => n.toLocaleString("en-US");
+---
+
+<Site
+  tab="pulpit"
+  title="Pulpit"
+  path="/pulpit/"
+  description={`Every Latter-day Saint general conference sermon since 1830 — ${fmt(total)} of them — as one dot each, from Pulpit, the archive Noah Airmet built.`}
+  class="page-pulpit"
+>
+  <main id="main" class="pulpit">
+    <section class="pulpit-text page-in">
+      <h1 class="headline">
+        Every general conference sermon since 1830, one dot each.
+      </h1>
+      <p class="lede">
+        Pulpit is my archive of Latter-day Saint general conference. Each of its {fmt(total)} sermons
+        is traced to the best surviving source and shaded by how faithfully that source records what
+        was said.
+      </p>
+      <div class="actions">
+        <a class="btn btn-solid" href={site.pulpit}>Open Pulpit</a>
+      </div>
+    </section>
+
+    <figure class="dots" aria-labelledby="dots-key">
+      <div class="dots-tools">
+        <div class="seg" role="group" aria-label="Arrange by">
+          <button type="button" data-layout="decade" aria-pressed="true">By decade</button>
+          <button type="button" data-layout="grade" aria-pressed="false">By source</button>
+        </div>
+        <label class="find">
+          <span class="visually-hidden">Find a speaker</span>
+          <input id="find" type="search" placeholder="Find a speaker" autocomplete="off" spellcheck="false" />
+        </label>
+        <output id="found" class="found" for="find" aria-live="polite"></output>
+      </div>
+      <div class="dots-plot">
+        <canvas id="dots" role="img" aria-label={`${fmt(total)} dots, one per sermon, grouped by decade and shaded by source fidelity`}></canvas>
+        <div class="dot-tip" id="tip" hidden></div>
+      </div>
+      <figcaption class="key" id="dots-key">
+        <ul>
+          {
+            labels.map((label, g) => (
+              <li>
+                <span class={`swatch g${g}`} aria-hidden="true" />
+                {label}
+                <span class="count">{fmt(counts[g])}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </figcaption>
+    </figure>
+  </main>
+</Site>
+
+<script>
+  import "../scripts/dots.ts";
+</script>

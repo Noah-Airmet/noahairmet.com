@@ -9,7 +9,11 @@ export default defineConfig({
   integrations: [sitemap()],
   devToolbar: { enabled: false },
   build: {
-    // The production CSP is style-src 'self'; never inline styles.
+    // The CSP allows only same-origin files: no inline styles or scripts.
     inlineStylesheets: "never",
+  },
+  vite: {
+    // Astro inlines small scripts under this limit; 0 keeps every script a file.
+    build: { assetsInlineLimit: 0 },
   },
 });
