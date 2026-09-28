@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Last out — frames</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=JetBrains+Mono:wght@400;500&display=swap">
+<script src="../../../public/sky.js"></script>
+<script src="data.js"></script>
+<style>
+  :root { --bg: rgb(236 240 244); --ink: rgb(18 28 44); --soft: rgb(78 89 110); --accent: rgb(35 66 197);
+          --sans: "Archivo", system-ui, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace;
+          --line: color-mix(in srgb, var(--ink) 16%, transparent); }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); color: var(--ink); }
+  body { margin: 0; font-family: var(--sans); padding: 28px clamp(16px, 3.4vw, 48px) 64px; }
+  header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 22px; margin-bottom: 18px; }
+  h1 { font-size: 22px; font-weight: 750; font-stretch: 88%; margin: 0; }
+  .ctl { font: 500 13px/1 var(--mono); color: var(--soft); display: flex; gap: 14px; flex-wrap: wrap; }
+  .ctl button { font: inherit; color: var(--ink); background: none; border: 0; padding: 4px 0; cursor: pointer; }
+  .ctl button[aria-pressed="false"] { color: var(--soft); opacity: .7; }
+  .ctl button::before { content: "[ "; } .ctl button::after { content: " ]"; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr)); gap: 34px 28px; }
+  figure { margin: 0; display: flex; flex-direction: column; }
+  .tag { font: 500 11px/1 var(--mono); color: var(--soft); text-transform: lowercase; letter-spacing: .02em;
+         border-top: 1px solid var(--line); padding-top: 10px; }
+  canvas { width: 100%; height: clamp(300px, 48vw, 460px); cursor: grab; touch-action: pan-y; display: block; }
+  canvas.is-dragging { cursor: grabbing; }
+  figcaption { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 4px 14px; padding-top: 10px; text-align: center; }
+  .t { font-size: 20px; font-weight: 750; font-stretch: 88%; }
+  .m { font: 400 13px/1.4 var(--mono); color: var(--soft); }
+  .m b { color: var(--ink); font-weight: 500; }
+  body.hero .grid { grid-template-columns: 1fr; }
+  body.hero canvas { height: min(70dvh, 700px); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Last out</h1>
+  <div class="ctl">
+    <button id="b-face" aria-pressed="true">face the peak</button>
+    <button id="b-route" aria-pressed="true">route</button>
+    <button id="b-hero" aria-pressed="false">full size</button>
+    <button id="b-replay">replay</button>
+  </div>
+</header>
+<main class="grid" id="grid"></main>
+
+<script>
+const D = window.LASTOUT;
+const ORDER = [
+  ["timp", "timp · hike · today's frame, unchanged"],
+  ["sundance", "sundance · A · ski · big frame, timp behind"],
+  ["sundance_b", "sundance · B · ski · fit to the day, timp as backdrop"],
+  ["alta", "alta · ski · sugarloaf behind"],
+  ["brighton", "brighton · ski · looking up from the base"],
+  ["cc_long", "corner canyon · A · one frame out to lone peak"],
+  ["cc_solo", "corner canyon · B · trails stretched, lone peak as backdrop"],
+];
+const FT = 3.28084, MI = 0.621371;
+const fmt = (n) => Math.round(n).toLocaleString("en-US");
+const dur = (h) => `${Math.floor(h)}h ${String(Math.round((h % 1) * 60)).padStart(2, "0")}m`;
+const DAYS = { timp: "Saturday", sundance: "Friday", sundance_b: "Friday", alta: "Saturday", brighton: "Sunday", cc_long: "Tuesday", cc_solo: "Tuesday" };
+function meta(key, r) {
+  const s = r.stats;
+  if (r.kind === "ski") return `skied ${DAYS[key]} · <b>${s.runs} runs</b> · <b>${fmt(s.down * FT)} ft</b> down · ${dur(s.hours)}`;
+  const verb = r.kind === "ride" ? "rode" : "hiked";
+  return `${verb} ${DAYS[key]} · <b>${(s.km * MI).toFixed(1)} mi</b> · <b>${fmt(s.up * FT)} ft</b> up · ${dur(s.hours)}`;
+}
+
+const Q = new URLSearchParams(location.search);
+const state = { face: true, route: true, epoch: performance.now() };
+const grid = document.getElementById("grid");
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches || Q.has("still");
+const only = Q.get("only");
+if (only || Q.has("hero")) document.body.classList.add("hero");
+for (const [key, tag] of ORDER) {
+  if (only && !only.split(",").includes(key)) continue;
+  const F = D[key];
+  const fig = document.createElement("figure");
+  fig.innerHTML = `<div class="tag">${tag}</div><canvas role="img" aria-label="${F.title}"></canvas>
+    <figcaption><span class="t">${F.title}</span><span class="m">${meta(key, F.route)}</span></figcaption>`;
+  grid.append(fig);
+  mount(fig.querySelector("canvas"), F);
+}
+const toggle = (id, k) => document.getElementById(id).addEventListener("click", (e) => {
+  state[k] = !state[k]; e.currentTarget.setAttribute("aria-pressed", state[k]);
+});
+toggle("b-face", "face"); toggle("b-route", "route");
+document.getElementById("b-hero").addEventListener("click", (e) => {
+  const on = document.body.classList.toggle("hero"); e.currentTarget.setAttribute("aria-pressed", on);
+});
+document.getElementById("b-replay").addEventListener("click", () => { state.epoch = performance.now(); });
+
+function mount(cv, F) {
+  const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+  const sampler = (G) => (x, y) => {
+    const C = G.cols, R = G.rows, E = G.elev;
+    x = Math.max(0, Math.min(C - 1.001, x)); y = Math.max(0, Math.min(R - 1.001, y));
+    const x0 = Math.floor(x), y0 = Math.floor(y), fx = x - x0, fy = y - y0, i = y0 * C + x0;
+    return E[i] * (1 - fx) * (1 - fy) + E[i + 1] * fx * (1 - fy) + E[i + C] * (1 - fx) * fy + E[i + C + 1] * fx * fy;
+  };
+  // Normalize on the visible core of the footprint, not the whole square grid.
+  const coreRange = (G, rMax) => {
+    let lo = Infinity, hi = -Infinity;
+    for (let r = 0; r < G.rows; r++) for (let c = 0; c < G.cols; c++) {
+      if (Math.hypot(c / (G.cols - 1) - 0.5, r / (G.rows - 1) - 0.5) > rMax) continue;
+      const v = G.elev[r * G.cols + c]; lo = Math.min(lo, v); hi = Math.max(hi, v);
+    }
+    return [lo, hi];
+  };
+  const fg = sampler(F), [lo, hi] = coreRange(F, 0.47);
+  const fgH = (u, v) => {
+    const r = Math.hypot(u, v);
+    if (r > 0.5) return -1;
+    const e = fg((u + 0.5) * (F.cols - 1), (v + 0.5) * (F.rows - 1));
+    return Math.max(0, (e - lo) / (hi - lo)) * (1 - smooth(F.fade, 0.5, r));
+  };
+
+  // Optional backdrop: a far, sparser, fainter layer behind the foreground.
+  const B = F.backdrop;
+  let bH = null, bNear = 0, bFar = 0;
+  if (B) {
+    const bs = sampler(B), [blo, bhi] = coreRange(B, 0.5);
+    bH = (u, v) => {
+      const lu = (u - B.center[0]) / B.scale, lv = (v - B.center[1]) / B.scale, r = Math.hypot(lu, lv);
+      if (r > 0.5) return -1;
+      const e = bs((lu + 0.5) * (B.cols - 1), (lv + 0.5) * (B.rows - 1));
+      return Math.max(0, (e - blo) / (bhi - blo)) * (1 - smooth(0.3, 0.5, r));
+    };
+    const dist = Math.hypot(B.center[0], B.center[1]);
+    bNear = Math.max(0.55, dist - B.scale * 0.5); bFar = dist + B.scale * 0.5;
+  }
+
+  const ctx = cv.getContext("2d");
+  let W = 0, H = 0;
+  const resize = () => {
+    const dpr = Math.min(devicePixelRatio || 1, 2), box = cv.getBoundingClientRect();
+    W = box.width; H = box.height; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
+  new ResizeObserver(resize).observe(cv); resize();
+  const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim() || "rgb(18 28 44)";
+  const withAlpha = (c, a) => c.replace(/^rgba?\(([^)]+)\)$/, (_m, b) => `rgb(${b.replace(/,/g, " ").replace(/\s*\/.*$/, "")} / ${a})`);
+
+  // Facing: the named peak sits at the back.
+  // Aim from the route toward the peak: route in front, peak behind.
+  let cu = 0, cv_ = 0, cn = 0;
+  for (const seg of F.route.segs) for (const [u, v] of seg.uv) if (Math.hypot(u, v) < 0.5) { cu += u; cv_ += v; cn++; }
+  const wu = F.peak[0] - (cn ? cu / cn : 0), wv = F.peak[1] - (cn ? cv_ / cn : 0);
+  const faceYaw = Math.atan2(wu, -wv);
+  const spinOnly = F.spin;
+  let off = 0, vel = 0, dragX = null, lastT = 0;
+  cv.addEventListener("pointerdown", (e) => { dragX = e.clientX; lastT = performance.now(); cv.setPointerCapture(e.pointerId); cv.classList.add("is-dragging"); });
+  cv.addEventListener("pointermove", (e) => {
+    if (dragX === null) return;
+    const now = performance.now(), dx = (e.clientX - dragX) * 0.006;
+    off += dx; vel = (dx / Math.max(1, now - lastT)) * 16; dragX = e.clientX; lastT = now;
+  });
+  const release = () => { dragX = null; cv.classList.remove("is-dragging"); };
+  cv.addEventListener("pointerup", release); cv.addEventListener("pointercancel", release);
+
+  // Route: subdivide so each piece falls between two slices; lifts are straight cables.
+  const pieces = []; // [u0,v0,h0|null,u1,v1,h1|null,lift,order]
+  let order = 0;
+  for (const seg of F.route.segs) {
+    const P = seg.uv;
+    if (seg.lift) {
+      const [a, b] = P, n = Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 0.004) + 1;
+      const ha = fgH(a[0], a[1]), hb = fgH(b[0], b[1]);
+      if (ha < 0 || hb < 0) continue;
+      const sag = (t) => 0.02 - 0.035 * t * (1 - t);
+      for (let i = 0; i < n; i++) {
+        const t0 = i / n, t1 = (i + 1) / n;
+        pieces.push([a[0] + (b[0] - a[0]) * t0, a[1] + (b[1] - a[1]) * t0, ha + (hb - ha) * t0 + sag(t0),
+                     a[0] + (b[0] - a[0]) * t1, a[1] + (b[1] - a[1]) * t1, ha + (hb - ha) * t1 + sag(t1), 1, order++]);
+      }
+    } else {
+      for (let i = 0; i + 1 < P.length; i++) {
+        const a = P[i], b = P[i + 1], n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 0.004));
+        for (let j = 0; j < n; j++) {
+          const t0 = j / n, t1 = (j + 1) / n;
+          pieces.push([a[0] + (b[0] - a[0]) * t0, a[1] + (b[1] - a[1]) * t0, null,
+                       a[0] + (b[0] - a[0]) * t1, a[1] + (b[1] - a[1]) * t1, null, 0, order++]);
+        }
+      }
+    }
+  }
+  const total = order;
+
+  const SLICES = 60, SAMPLES = 150, BSLICES = 26;
+  const frame = (now) => {
+    const face = state.face && !spinOnly;
+    if (dragX === null) {
+      vel *= 0.95; off += vel;
+      if (face) { off += (Math.max(-0.6, Math.min(0.6, off)) - off) * 0.2; off *= 0.985; if (!reduce) off += Math.sin(now / 4200) * 0.0006; }
+      else if (!reduce && Math.abs(vel) < 5e-4) off += 8e-4;
+    } else if (face) off = Math.max(-0.75, Math.min(0.75, off));
+    const Y = faceYaw + off;
+    const t0 = state.epoch + (reduce ? -1e4 : 450), grow = Math.min(1, Math.max(0, (now - t0) / 1500));
+    const reveal = reduce ? 1 : Math.min(1, Math.max(0, (now - t0 - 1500) / 2600));
+    const bg = css("--bg"), ink = css("--ink"), accent = css("--accent");
+    ctx.clearRect(0, 0, W, H);
+
+    const span = Math.min(W * 0.92, H * 1.45) * (B ? 0.86 : 1);
+    const depth = span * 0.34, lift = span * 0.36;
+    const ox = W / 2, oy = H - depth * 0.62 - 4;
+    const cs = Math.cos(Y), sn = Math.sin(Y);
+    const persp = (d) => 1 / (1 - d * 0.28);
+    const proj = (u, v, h) => {
+      const s = u * cs + v * sn, d = -u * sn + v * cs, p = persp(d);
+      return [ox + s * span * p, oy + d * depth * p - h * lift * p];
+    };
+
+    // one ridgeline: fill below it with the sky, then stroke it
+    const slice = (heightFn, d, baseY, p, sMax, yLift, alpha, width) => {
+      const runs = []; let run = [];
+      for (let j = 0; j <= SAMPLES; j++) {
+        const s = -sMax + (j / SAMPLES) * 2 * sMax;
+        const h = heightFn(s * cs - d * sn, s * sn + d * cs);
+        if (h < 0) { if (run.length) runs.push(run); run = []; continue; }
+        run.push([ox + s * span * p, baseY - h * yLift]);
+      }
+      if (run.length) runs.push(run);
+      ctx.fillStyle = bg;
+      for (const r of runs) {
+        ctx.beginPath(); ctx.moveTo(r[0][0], baseY + 2);
+        for (const [x, y] of r) ctx.lineTo(x, y);
+        ctx.lineTo(r[r.length - 1][0], baseY + 2); ctx.closePath(); ctx.fill();
+      }
+      ctx.beginPath();
+      for (const r of runs) { ctx.moveTo(r[0][0], r[0][1]); for (const [x, y] of r) ctx.lineTo(x, y); }
+      ctx.strokeStyle = withAlpha(ink, alpha); ctx.lineWidth = width; ctx.stroke();
+    };
+
+    // backdrop: its own compressed depth so it sits just above the foreground's far edge
+    if (B) {
+      const horizon = oy - 0.52 * depth * persp(-0.52);
+      const wave = Math.min(1, Math.max(0, grow * 1.4 - 0.2)), ease = 1 - Math.pow(1 - wave, 3);
+      for (let k = 0; k < BSLICES; k++) {
+        const d = -bFar + (k / (BSLICES - 1)) * (bFar - bNear);
+        const t = (d + bFar) / (bFar - bNear); // 0 far .. 1 near
+        const baseY = horizon - (1 - t) * depth * 0.22;
+        const p = 0.62 + 0.16 * t;
+        const sMax = Math.min(0.5 * B.scale + 0.2, (W * 0.47) / (span * p));
+        slice((u, v) => (fgH(u, v) >= 0 ? -1 : bH(u, v)), d, baseY, p, sMax, ease * lift * 1.7 * p, 0.14 + 0.24 * t, 0.7);
+      }
+    }
+
+    // bucket route pieces by the slice just in front of them
+    const buckets = new Map();
+    if (state.route) for (const p of pieces) {
+      if (p[7] > reveal * total) continue;
+      const d0 = -p[0] * sn + p[1] * cs, d1 = -p[3] * sn + p[4] * cs;
+      const k = Math.min(SLICES - 1, Math.max(0, Math.ceil(((Math.max(d0, d1) + 0.52) / 1.04) * (SLICES - 1))));
+      (buckets.get(k) || buckets.set(k, []).get(k)).push(p);
+    }
+
+    for (let k = 0; k < SLICES; k++) {
+      const d = -0.52 + (k / (SLICES - 1)) * 1.04;
+      const wave = Math.min(1, Math.max(0, grow * 1.7 - (1 - k / SLICES) * 0.7));
+      const ease = 1 - Math.pow(1 - wave, 3);
+      const p = persp(d), kk = k / SLICES;
+      slice(fgH, d, oy + d * depth * p, p, 0.55, ease * lift * p, 0.22 + 0.78 * kk, 0.6 + 0.9 * kk);
+
+      const bucket = buckets.get(k);
+      if (bucket && grow >= 1) {
+        ctx.lineCap = "round";
+        for (const isLift of [1, 0]) {
+          ctx.beginPath();
+          for (const q of bucket) {
+            if (q[6] !== isLift) continue;
+            const h0 = q[2] ?? fgH(q[0], q[1]), h1 = q[5] ?? fgH(q[3], q[4]);
+            if (h0 < 0 || h1 < 0) continue;
+            const a = proj(q[0], q[1], h0 + 0.006), b = proj(q[3], q[4], h1 + 0.006);
+            ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]);
+          }
+          ctx.strokeStyle = isLift ? withAlpha(accent, 0.5) : accent;
+          ctx.lineWidth = isLift ? 0.9 : 1.9 + 0.8 * kk;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+}
+</script>
+</body>
+</html>
