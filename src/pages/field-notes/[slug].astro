@@ -1,20 +1,16 @@
 ---
 import { getCollection, render } from "astro:content";
-import PeakMark from "../../components/PeakMark.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import SiteHeader from "../../components/SiteHeader.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { longDate, noteNumber } from "../../lib/site";
+import { isoDate, longDate } from "../../lib/site";
 
 export async function getStaticPaths() {
-  const notes = (await getCollection("fieldNotes")).sort(
-    (a, b) => a.data.date.valueOf() - b.data.date.valueOf(),
-  );
-  return notes.map((note, index) => ({
-    params: { slug: note.id },
-    props: { note, number: noteNumber(index) },
-  }));
+  const notes = await getCollection("fieldNotes");
+  return notes.map((note) => ({ params: { slug: note.id }, props: { note } }));
 }
 
-const { note, number } = Astro.props;
+const { note } = Astro.props;
 const { Content } = await render(note);
 ---
 
@@ -23,40 +19,23 @@ const { Content } = await render(note);
   description={note.data.description}
   path={`/field-notes/${note.id}/`}
 >
-  <div class="shell">
-    <nav class="crumb cta-row" aria-label="Breadcrumb">
-      <a href="/field-notes/"><span class="bracket" aria-hidden="true">[&nbsp;</span>← field
-      notes<span class="bracket" aria-hidden="true">&nbsp;]</span></a>
-    </nav>
+  <SiteHeader current="writing" />
 
-    <main id="main">
-      <article>
-        <header class="note-head">
-          <p class="note-meta">
-            <span class="chip">{number}</span>
-            <time
-              class="note-date"
-              datetime={note.data.date.toISOString().slice(0, 10)}
-            >
-              {longDate(note.data.date)}
-            </time>
-            {note.data.tag && <span class="chip chip--granite">{note.data.tag}</span>}
-          </p>
-          <h1>{note.data.title}</h1>
-          <p class="note-lede">{note.data.description}</p>
-        </header>
+  <main id="main" class="wrap page">
+    <article class="article">
+      <header class="article-head">
+        <h1 class="page-title">{note.data.title}</h1>
+        <p class="article-lede">{note.data.description}</p>
+        <time class="article-date" datetime={isoDate(note.data.date)}>
+          {longDate(note.data.date)}
+        </time>
+      </header>
 
-        <div class="prose">
-          <Content />
-        </div>
+      <div class="prose">
+        <Content />
+      </div>
+    </article>
+  </main>
 
-        <p class="note-end" aria-hidden="true"><PeakMark /></p>
-      </article>
-    </main>
-
-    <footer class="colophon">
-      <p>Hand-built with Astro and plain CSS, with AI assistance. No analytics, no tracking.</p>
-      <p class="stamp"><PeakMark /> 4,551 ft · Provo, Utah</p>
-    </footer>
-  </div>
+  <SiteFooter />
 </BaseLayout>

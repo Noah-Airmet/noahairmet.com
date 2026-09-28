@@ -1,0 +1,16 @@
+---
+interface Props {
+  current?: "writing";
+}
+
+const { current } = Astro.props;
+---
+
+<header class="site-header">
+  <div class="wrap site-header-row">
+    <a class="wordmark" href="/">Noah Airmet</a>
+    <nav aria-label="Site">
+      <a href="/field-notes/" aria-current={current === "writing" ? "page" : undefined}>Writing</a>
+    </nav>
+  </div>
+</header>

@@ -8,6 +8,9 @@ const fieldNotes = defineCollection({
     date: z.coerce.date(),
     tag: z.string().optional(),
     description: z.string(),
+    // A sentence quoted verbatim from the note; the newest note that has
+    // one is featured on the home page.
+    pullquote: z.string().optional(),
   }),
 });
 

@@ -1,9 +1,7 @@
 ---
-import "@fontsource-variable/besley";
-import "@fontsource-variable/literata";
-import "@fontsource-variable/literata/wght-italic.css";
-import "@fontsource/ibm-plex-mono/400.css";
-import "@fontsource/ibm-plex-mono/500.css";
+import "@fontsource-variable/source-serif-4/opsz.css";
+import "@fontsource-variable/source-serif-4/opsz-italic.css";
+import "@fontsource-variable/public-sans";
 import "../styles/site.css";
 import { absoluteUrl, pageTitle, site, type PageMeta } from "../lib/site";
 
@@ -28,7 +26,7 @@ const canonical = absoluteUrl(path);
     <link
       rel="alternate"
       type="application/rss+xml"
-      title={`${site.name} — Field notes`}
+      title={`${site.name} — Writing`}
       href={absoluteUrl("/rss.xml")}
     />
     {noindex && <meta name="robots" content="noindex" />}
@@ -36,8 +34,8 @@ const canonical = absoluteUrl(path);
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f6f7f1" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#151a15" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f9fafc" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b1120" />
     <meta name="generator" content={Astro.generator} />
   </head>
   <body>

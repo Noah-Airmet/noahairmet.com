@@ -1,0 +1,129 @@
+---
+import { decades, decadeTotal, gradeTotal, grades, total } from "../lib/pulpit";
+
+// Plot space: one 10-unit slot per decade, 100 units = 1,000 sermons.
+// The SVG stretches to its box (preserveAspectRatio="none"); strokes use
+// non-scaling-stroke so segment gaps and gridlines stay crisp at any size.
+const slot = 10;
+const barWidth = 7.4;
+const yMax = 1000;
+const width = decades.length * slot;
+const height = 100;
+const scale = height / yMax;
+
+// Stack most faithful at the base, least faithful on top.
+const columns = decades.map((d, i) => {
+  let y = height;
+  const segments = grades
+    .filter((g) => d.counts[g.id] > 0)
+    .map((g) => {
+      const h = d.counts[g.id] * scale;
+      y -= h;
+      return { grade: g, count: d.counts[g.id], y, h };
+    });
+  return { decade: d.decade, x: i * slot + (slot - barWidth) / 2, total: decadeTotal(d), segments };
+});
+
+const fmt = (n: number) => n.toLocaleString("en-US");
+
+const ticks = [1830, 1880, 1930, 1980, 2020];
+---
+
+<figure class="fchart" aria-labelledby="fchart-title">
+  <figcaption class="fchart-title" id="fchart-title">
+    {fmt(total)} sermons by decade, shaded by how faithfully each text survives
+  </figcaption>
+
+  <div class="fchart-plot">
+    <span class="fchart-grid-label fchart-grid-label--top" aria-hidden="true">1,000</span>
+    <span class="fchart-grid-label fchart-grid-label--mid" aria-hidden="true">500</span>
+    <svg
+      class="fchart-svg"
+      viewBox={`0 0 ${width} ${height}`}
+      preserveAspectRatio="none"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <line class="fchart-gridline" x1="0" x2={width} y1="0" y2="0" vector-effect="non-scaling-stroke" />
+      <line class="fchart-gridline" x1="0" x2={width} y1={height / 2} y2={height / 2} vector-effect="non-scaling-stroke" />
+      <g class="fchart-bars">
+        {
+          columns.map((c) => (
+            <g class="col">
+              {c.segments.map((s) => (
+                <rect
+                  class={`seg g-${s.grade.id}`}
+                  x={c.x}
+                  y={s.y}
+                  width={barWidth}
+                  height={s.h}
+                  vector-effect="non-scaling-stroke"
+                />
+              ))}
+            </g>
+          ))
+        }
+      </g>
+      <line class="fchart-baseline" x1="0" x2={width} y1={height} y2={height} vector-effect="non-scaling-stroke" />
+    </svg>
+    <ol class="fchart-hits" aria-hidden="true">
+      {
+        columns.map((c) => (
+          <li class="hit">
+            <span class="tip">
+              <span class="tip-head">
+                <strong>{c.decade}s</strong> {fmt(c.total)} sermons
+              </span>
+              {[...c.segments].reverse().map((s) => (
+                <span class="tip-row">
+                  <span class={`swatch g-${s.grade.id}`} />
+                  {fmt(s.count)} {s.grade.label.toLowerCase()}
+                </span>
+              ))}
+            </span>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+
+  <ol class="fchart-axis" aria-hidden="true">
+    {ticks.map((t) => <li class={`tick tick-${t}`}>{t}s</li>)}
+  </ol>
+
+  <ul class="fchart-legend">
+    {
+      grades.map((g) => (
+        <li>
+          <span class={`swatch g-${g.id}`} aria-hidden="true" />
+          <span class="legend-label">{g.label}</span>
+          <span class="legend-count">{fmt(gradeTotal(g.id))}</span>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="visually-hidden">
+    <table>
+      <caption>Pulpit sermons per decade by source fidelity</caption>
+      <thead>
+        <tr>
+          <th scope="col">Decade</th>
+          {grades.map((g) => <th scope="col">{g.label}</th>)}
+          <th scope="col">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          decades.map((d) => (
+            <tr>
+              <th scope="row">{d.decade}s</th>
+              {grades.map((g) => <td>{fmt(d.counts[g.id])}</td>)}
+              <td>{fmt(decadeTotal(d))}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</figure>

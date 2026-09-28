@@ -2,81 +2,70 @@
 
 ## Subject and job
 
-Noah Airmet: cybersecurity undergrad at BYU (class of 2028), junior
-developer at Simplicity Group (insurance tech), building toward technical
-AI governance. Skis, hikes, and mountain-bikes the Wasatch. The site must
-read as honest notes from someone early in their career — never a
-thought-leader brand. Audience: security/GRC hiring managers, professors,
-future colleagues, spending under a minute. Job: "real, careful, writes
-clearly" → route to a note, the résumé, or GitHub.
+Noah Airmet: cybersecurity undergrad at BYU (graduating 2028), junior
+developer at Simplicity Group (insurance distribution tech), working
+toward technical AI governance. Audience: security/GRC hiring managers,
+professors, future colleagues, spending under a minute. Job, in order:
+who he is → proof he builds careful systems → what he believes → how to
+reach him. Every link routes to the résumé, a project, the writing, or
+email.
 
-## Direction: "alpine field notes"
+## Direction: "one ink"
 
-Reference grammar (not assets): butterfly.so/pond — huge whitespace,
-ghosted engravings cropped by the viewport, letterpress color chips, slow
-tasteful motion. Translated to Utah as a survey plate.
+Everything is printed in a single blue-black on cool white — text, rules,
+links, and the chart. The chart steps that same hue from pale (least
+certain source) to full strength (verbatim), so the page's one exhibit is
+drawn in the page's own ink. No second hue anywhere.
 
-**Tokens** (all in `src/styles/site.css`): light "high-altitude morning" —
-paper `#f6f7f1` (cool, not cream), spruce ink `#232b22`, soft ink
-`#596456`, hairline `#dce1d3`, chips sage `#c9d4b8` / granite `#c3cdd3` /
-aspen `#ebd394`, paintbrush red `#bf4223` reserved for the peak mark and
-accents. Dark "alpine night" mirrors it on `#141913`. Both via
+**Tokens** (all in `src/styles/site.css`): paper `#f9fafc`, ink
+`#0f1e47`, soft ink `#4e5a77`, rule `#d8deec`, link `#2347c5`. Chart
+ramp (OKLCH hue 266, validated monotone, light end >= 2:1): `#16295f`
+`#1f40b6` `#4b6ecc` `#7290d6` `#93aade`. Dark mode is its own set on
+`#0b1120`, ramp flipped so full strength is lightest. Both via
 `prefers-color-scheme`, no toggle.
 
-**Type**: Besley (Clarendon revival — display, modest sizes), Literata
-(reading), IBM Plex Mono (labels/chips/brackets). Self-hosted Fontsource.
+**Type**: Source Serif 4 (optical sizes: display cuts for the name and the
+quote, text cuts for reading); Public Sans (the U.S. Web Design System's
+face) for small structural text — actions, dates, chart labels. Sentence
+case everywhere; no all-caps labels, no monospace.
 
-**Signature elements**:
-1. Two-tone peak mark: outlined triangle, solid snowcap over a jagged
-   snowline, one currentColor (favicon, masthead, end-marks, footer stamp
-   "△ 4,551 ft · Provo, Utah").
-2. Real-terrain contour art from USGS 10m data: Mount Timpanogos (home
-   top-right), Lone Peak (home bottom-left), Kings Peak (404). Ghosted,
-   edge-masked, draw once on load. Each carries a halo'd mono label
-   ("MT TIMPANOGOS · 11,749 FT") and a summit cross.
-3. The trail: a faint dashed ascent line to each summit whose dashes crawl
-   slowly uphill, forever — the only ongoing motion, echoing the bio line
-   "I'm early on that trail."
+**Signature element**: the Pulpit chart — 12,162 sermons by decade, stacked
+by fidelity grade, real data from the live archive. It shows three eras of
+record-keeping at a glance (shorthand reports, printed Conference Reports,
+verbatim transcripts). HTML hover readouts per column; a hidden table for
+screen readers. On wide screens the columns rise once on load; that is
+the site's only motion.
 
-## Copy — final, verbatim, complete
+## Copy
 
-Home: masthead "Noah Airmet"; plate line "Provo, Utah · BYU cybersecurity
-· class of 2028"; bio: "I'm a cybersecurity student at BYU and a junior
-developer at Simplicity Group. I'm working toward technical AI governance
-— threat-modeling AI systems, running evals, and writing documentation a
-regulator or auditor can actually use. I'm early on that trail; these
-notes are me learning in public." Sections: **Field notes** (rows:
-number chip · Mon YYYY · title), links `[ résumé ] [ github ]
-[ linkedin ] [ email ] [ rss ]`, **Elsewhere**: "I also build Pulpit, an
-AI-assisted archive of Latter-day Saint general conference sermons with
-source-linked transcription and human review. It's independent from my
-professional work, but it's where I learned to run systems carefully."
-Colophon: "Hand-built with Astro and plain CSS, with AI assistance. No
-analytics, no tracking." + stamp.
+Home intro (three sentences): "I study cybersecurity at BYU and graduate
+in 2028. I'm also a junior developer at Simplicity Group, where I build
+features for a regulated insurance platform. I'm working toward a career
+in technical AI governance." Actions: Résumé (PDF), Email, GitHub,
+LinkedIn.
 
-Field-notes index lede: "Numbered in the order they happened."
+Projects: **Pulpit** (links pulpit-archive.org) and **agent-bus** (links
+the public GitHub repo). No other projects: King Follett and Hymn Parts
+are deliberately unlisted.
 
-Note 001 (June 4, 2026, tag `ethics`): "Professional commitments" —
-"A personal code of ethics for work in cybersecurity and AI governance —
-written for a class, kept because I mean it." Body in
-`src/content/field-notes/professional-commitments.md`; Noah's own words,
-never edited by a variant.
+Writing: the newest note with a `pullquote` is featured as a large quote
+(currently "When a system isn't ready or oversight is weak, I will say so
+clearly." from "Professional commitments"). Note bodies are Noah's own
+words; never edited by a design variant.
 
-404: "Off the map" / "Nothing is charted at this address." / `[ back home ]`.
+404: "Page not found" plus directions to the home page and Writing.
 
 ## Hard constraints — violating any disqualifies a variant
 
-1. Strict same-origin CSP, no inline styles/scripts; everything
-   self-hosted (fonts via Fontsource npm packages only).
-2. Zero client-side JavaScript; all motion is CSS; at most ONE ongoing
-   ambient motion sitewide.
+1. Strict same-origin CSP: no inline styles (including `style=`
+   attributes) or scripts; everything self-hosted via Fontsource.
+2. Zero client-side JavaScript; all motion is CSS; nothing loops.
 3. Astro static; changes land in `src/styles/site.css` and existing
    components — no new frameworks or build tools.
 4. Untouchable: `public/bee/`, the résumé PDF URL, `public/_headers`,
    `public/_redirects` semantics, all slugs.
 5. No reference to `corpus.noahairmet.com` or any private subdomain.
-6. Responsive to 375px; ~60–70ch prose measure; visible keyboard focus;
-   WCAG AA contrast in both schemes; complete and beautiful under
-   `prefers-reduced-motion: reduce`.
-7. The copy above is final: no new sections, no invented projects or
-   metrics, no filler. If a layout needs lorem ipsum, it fails.
+6. Responsive to 375px with no horizontal scroll; ~60–70ch prose measure;
+   visible keyboard focus; WCAG AA contrast in both schemes; complete
+   under `prefers-reduced-motion: reduce`.
+7. No invented projects, metrics, or claims; no filler.

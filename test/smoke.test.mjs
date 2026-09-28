@@ -39,30 +39,48 @@ test("home includes accessibility and metadata markers", () => {
   assert.match(home, /<link rel="canonical" href="https:\/\/noahairmet\.com\//);
   assert.match(home, /<meta name="description"/);
   assert.match(home, /application\/rss\+xml/);
-  assert.match(home, /contour-field/);
 });
 
 test("home tells the truth about who Noah is right now", () => {
   const home = readFileSync(join(dist, "index.html"), "utf8");
   assert.match(home, /Noah Airmet/);
-  assert.match(home, /class of 2028/);
-  assert.match(home, /Field notes/);
-  assert.match(home, /learning in public/);
+  assert.match(home, /graduate in 2028/);
+  assert.match(home, /Simplicity Group/);
   assert.match(home, /pulpit-archive\.org/);
-  // The old site's inflation and chrome must stay gone.
-  assert.doesNotMatch(home, /dither|Selected work|field guide|Governing agent systems/i);
+  assert.match(home, /github\.com\/Noah-Airmet\/agent-bus/);
+  // Earlier sites' inflation and themed filler must stay gone.
+  assert.doesNotMatch(home, /dither|Selected work|field guide|Governing agent systems|learning in public|thought leader/i);
+});
+
+test("unlisted projects stay unlisted", () => {
+  // King Follett and Hymn Parts are for friends and family; never link them here.
+  const textFiles = walk(dist).filter((f) => /\.(html|xml|txt)$/.test(f) && !f.includes("/bee/"));
+  for (const file of textFiles) {
+    assert.doesNotMatch(readFileSync(file, "utf8"), /kingfollett\.|hymns\.noahairmet/i, `${file} must not link unlisted projects`);
+  }
+});
+
+test("the Pulpit chart ships with a text alternative whose numbers add up", () => {
+  const home = readFileSync(join(dist, "index.html"), "utf8");
+  assert.match(home, /<caption>Pulpit sermons per decade by source fidelity<\/caption>/);
+  const totals = [...home.matchAll(/<td>([\d,]+)<\/td><\/tr>/g)].map(([, n]) => Number(n.replace(/,/g, "")));
+  assert.equal(totals.length, 20, "one row per decade, 1830s–2020s");
+  const sum = totals.reduce((a, b) => a + b, 0);
+  assert.match(home, new RegExp(`${sum.toLocaleString("en-US")} sermons by decade`));
 });
 
 test("styles stay external and honor reduced motion (CSP: style-src 'self')", () => {
   const home = readFileSync(join(dist, "index.html"), "utf8");
   assert.doesNotMatch(home, /<style/, "no inline <style> allowed under the CSP");
+  for (const file of walk(dist).filter((f) => f.endsWith(".html") && !f.includes("/bee/"))) {
+    assert.doesNotMatch(readFileSync(file, "utf8"), /\sstyle="/, `${file}: inline style attributes are blocked by the CSP`);
+  }
   const cssFiles = walk(join(dist, "_astro")).filter((f) => f.endsWith(".css"));
   assert.ok(cssFiles.length > 0, "bundled stylesheet should exist");
   const css = cssFiles.map((f) => readFileSync(f, "utf8")).join("\n");
   assert.match(css, /prefers-reduced-motion/);
-  assert.match(css, /Besley/);
-  assert.match(css, /Literata/);
-  assert.match(css, /IBM Plex Mono/);
+  assert.match(css, /Source Serif 4/);
+  assert.match(css, /Public Sans/);
 });
 
 test("fonts are self-hosted", () => {

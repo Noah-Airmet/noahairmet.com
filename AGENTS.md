@@ -4,12 +4,13 @@ This is the whole operating manual. The only other docs are
 `docs/BEE-APP.md` (Katie's PWA — read before touching `public/bee/`) and
 `design-kit/` (context folder for design tools).
 
-Noah Airmet's professional site: home, "field notes" blog, résumé PDF.
-Astro static → Cloudflare Worker `noahairmet-com` (noahairmet.com + www).
-Design: "alpine field notes" — real USGS contour art of Timpanogos, Lone
-Peak, and Kings Peak, a two-tone peak mark, mono chips, Besley/Literata/
-IBM Plex Mono. Tokens and rationale live as comments in
-`src/styles/site.css`.
+Noah Airmet's professional site: home, writing (served at `/field-notes/`
+for URL permanence), résumé PDF. Astro static → Cloudflare Worker
+`noahairmet-com` (noahairmet.com + www).
+Design: "one ink" — everything printed in a single blue-black on cool
+white, including the home page's one exhibit, a chart of Pulpit's catalog
+by decade and source fidelity. Source Serif 4 + Public Sans. Tokens and
+rationale live as comments in `src/styles/site.css`.
 
 ## Hard rules
 
@@ -32,8 +33,10 @@ IBM Plex Mono. Tokens and rationale live as comments in
   `/bee`. Retired URLs get a redirect to the nearest equivalent in
   `public/_redirects`, or a 404 — never silent breakage.
 - **`public/bee/` is untouchable** without reading `docs/BEE-APP.md`.
+- **Unlisted projects stay unlisted.** King Follett and Hymn Parts are for
+  friends and family; never link them (smoke-tested).
 
-## Add a field note
+## Add a note
 
 Create `src/content/field-notes/<slug>.md`:
 
@@ -43,25 +46,27 @@ title: "Plain title, sentence case"
 date: 2026-09-14
 tag: agents          # optional, one word
 description: "One honest sentence — becomes the lede and RSS summary."
+pullquote: "Optional. One sentence quoted verbatim from the note."
 ---
 ```
 
-Numbering (001, 002…) is computed from date order at build time; never put
-numbers in titles or slugs. Voice: first person, plain sentences, state
+The newest note with a `pullquote` is featured on the home page; others
+list beneath it. Voice: first person, plain sentences, state
 what was learned and what is unknown; disclose substantive AI assistance
-in the note (see note 001). Drafts are proposals — Noah reads and owns
+in the note (see the commitments essay). Drafts are proposals — Noah reads and owns
 every published word.
 
 ## Map
 
-- `src/pages/index.astro` — home copy and links (bio stays 3 sentences)
-- `src/content/field-notes/` — the blog
-- `src/lib/site.ts` — metadata, URLs, date/number helpers
+- `src/pages/index.astro` — home copy and links (intro stays 3 sentences)
+- `src/content/field-notes/` — the writing
+- `src/lib/site.ts` — metadata, URLs, date helpers
+- `src/lib/pulpit.ts` — the chart's data: a dated snapshot of Pulpit's
+  live `archive-data.json`, tallied by decade and fidelity. Re-tally when
+  the archive grows; the test checks the chart total matches the rows.
 - `src/styles/site.css` — the entire visual system
-- `src/components/` — PeakMark (logo), ContourField (terrain art)
-- `src/lib/contours.ts` — generated terrain data; regenerate via
-  `node scripts/generate-contours.mjs` (cached grids in
-  `scripts/terrain-cache/`), never hand-edit
+- `src/components/` — FidelityChart (SVG bars + HTML hover readouts +
+  hidden data table), SiteHeader, SiteFooter
 - `public/_redirects`, `public/_headers` — edge behavior
 - `test/smoke.test.mjs` — the site's contract; update with any change
 
@@ -80,7 +85,7 @@ pushing does not deploy. After deploying, verify live:
 curl -I https://noahairmet.com/                                    # 200
 curl -I https://noahairmet.com/resume/noah-airmet-resume.pdf       # 200
 curl -I https://noahairmet.com/bee/                                # 200
-curl -I https://noahairmet.com/commitments.html                    # 301 → note 001
+curl -I https://noahairmet.com/commitments.html                    # 301 → the commitments essay
 curl -I https://noahairmet.com/corpus-access.html                  # 404
 curl -I https://noahairmet.com/does-not-exist                      # 404
 ```

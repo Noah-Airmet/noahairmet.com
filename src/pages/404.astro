@@ -1,21 +1,21 @@
 ---
-import ContourField from "../components/ContourField.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import SiteHeader from "../components/SiteHeader.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const description = "Nothing is charted at this address.";
+const description = "There is no page at this address.";
 ---
 
-<BaseLayout title="Off the map" description={description} path="/404" noindex>
-  <ContourField mountain="kingsPeak" place="bl" labelPos={[0.55, 0.1]} class="lost-art" />
+<BaseLayout title="Page not found" description={description} path="/404" noindex>
+  <SiteHeader />
 
-  <div class="shell lost">
-    <main id="main">
-      <h1>Off the map</h1>
-      <p>Nothing is charted at this address.</p>
-      <nav class="cta-row" aria-label="Return">
-        <a href="/"><span class="bracket" aria-hidden="true">[&nbsp;</span>back
-        home<span class="bracket" aria-hidden="true">&nbsp;]</span></a>
-      </nav>
-    </main>
-  </div>
+  <main id="main" class="wrap page lost">
+    <h1 class="page-title">Page not found</h1>
+    <p>
+      There is no page at this address. The <a href="/">home page</a> links to everything on this
+      site, and all writing is listed under <a href="/field-notes/">Writing</a>.
+    </p>
+  </main>
+
+  <SiteFooter />
 </BaseLayout>

@@ -2,7 +2,7 @@ export const site = {
   name: "Noah Airmet",
   url: "https://noahairmet.com",
   description:
-    "Cybersecurity student at BYU and junior developer at Simplicity Group, working toward technical AI governance. Field notes, written while learning.",
+    "Cybersecurity student at BYU and junior developer at Simplicity Group, working toward technical AI governance.",
   email: "noah.airmet@icloud.com",
   github: "https://github.com/Noah-Airmet",
   linkedin: "https://www.linkedin.com/in/noah-airmet",
@@ -24,17 +24,16 @@ export function pageTitle(title?: string) {
   return title ? `${title} · ${site.name}` : site.name;
 }
 
-const monthNames = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-] as const;
-
-/** "Jun 2026" — the compact plate-label date used in note lists. */
-export function plateDate(date: Date) {
-  return `${monthNames[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
+/** "June 2026" */
+export function monthYear(date: Date) {
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    timeZone: "UTC",
+  });
 }
 
-/** "June 4, 2026" — the long form used on note pages. */
+/** "June 4, 2026" */
 export function longDate(date: Date) {
   return date.toLocaleDateString("en-US", {
     year: "numeric",
@@ -44,7 +43,7 @@ export function longDate(date: Date) {
   });
 }
 
-/** "001", "002", … — notes are a chronological log; the number is real. */
-export function noteNumber(indexFromOldest: number) {
-  return String(indexFromOldest + 1).padStart(3, "0");
+/** "2026-06-04", for <time datetime>. */
+export function isoDate(date: Date) {
+  return date.toISOString().slice(0, 10);
 }

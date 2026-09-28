@@ -1,48 +1,58 @@
 /* ---------------------------------------------------------------------------
    noahairmet.com — the entire visual system.
-   Direction: "alpine field notes" — a survey-plate page. Cool high-altitude
-   paper, spruce ink, ghosted topographic contours cropped by the viewport,
-   letterpress-style metadata chips, and exactly one motion: the contours
-   draw themselves once on load.
-   Faces: Besley (Clarendon revival — survey plates, park signage) for
-   display; Literata for reading; IBM Plex Mono for labels and dates.
+
+   One ink. Everything is printed in a single blue-black on cool white:
+   text, rules, links, and the Pulpit chart, which steps the same hue from
+   pale (least certain source) to full strength (verbatim). No second hue.
+
+   Faces: Source Serif 4 (optical sizes — display cuts for the name and
+   the quote, text cuts for reading) and Public Sans (the U.S. Web Design
+   System's face) for small structural text: actions, dates, chart labels.
+
+   Motion: exactly one moment. On wide screens the chart's columns rise
+   once on load. Nothing loops.
 --------------------------------------------------------------------------- */
 
 /* ---- tokens ------------------------------------------------------------ */
 
 :root {
-  --paper: #f6f7f1;
-  --ink: #232b22;
-  --ink-soft: #596456;
-  --hairline: #dce1d3;
+  --paper: #f9fafc;
+  --ink: #0f1e47;
+  --ink-soft: #4e5a77;
+  --rule: #d8deec;
+  --link: #2347c5;
+  --select: #cdd8f5;
 
-  --chip-sage: #c9d4b8;
-  --chip-granite: #c3cdd3;
-  --chip-aspen: #ebd394;
-  --chip-text: #232b22;
-  --paintbrush: #bf4223;
+  /* Ordinal ramp, one hue (OKLCH h 266), most to least faithful.
+     Validated: monotone lightness, light end >= 2:1 on --paper. */
+  --g1: #16295f;
+  --g2: #1f40b6;
+  --g3: #4b6ecc;
+  --g4: #7290d6;
+  --g5: #93aade;
 
-  --contour-ink: rgba(35, 43, 34, 0.17);
+  --serif: "Source Serif 4 Variable", "Source Serif 4", Georgia, serif;
+  --sans: "Public Sans Variable", "Public Sans", system-ui, sans-serif;
 
-  --font-display: "Besley Variable", Besley, Georgia, serif;
-  --font-text: "Literata Variable", Literata, Georgia, serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --gutter: clamp(1rem, 4vw, 3rem);
+  --measure: 36rem;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #141913;
-    --ink: #e7ebde;
-    --ink-soft: #9fab96;
-    --hairline: #2a3227;
+    --paper: #0b1120;
+    --ink: #e2e8f6;
+    --ink-soft: #9fabc5;
+    --rule: #242d42;
+    --link: #8aacfa;
+    --select: #283a6b;
 
-    --chip-sage: #39432f;
-    --chip-granite: #333f46;
-    --chip-aspen: #574722;
-    --chip-text: #e7ebde;
-    --paintbrush: #e06a48;
-
-    --contour-ink: rgba(231, 235, 222, 0.12);
+    /* Flipped: in the dark, full strength is the lightest step. */
+    --g1: #d5e1fd;
+    --g2: #9cb9fc;
+    --g3: #6f92e5;
+    --g4: #5371bb;
+    --g5: #3b528d;
   }
 }
 
@@ -56,650 +66,790 @@
 
 html {
   color-scheme: light dark;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-text);
-  font-size: 1.0625rem;
-  line-height: 1.7;
+  font-family: var(--serif);
+  font-size: 1.125rem;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background: var(--chip-aspen);
-  color: var(--chip-text);
+  background: var(--select);
+  color: var(--ink);
+}
+
+h1,
+h2,
+h3,
+p,
+figure,
+blockquote {
+  margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 600;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+a {
+  color: var(--link);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, var(--link) 45%, transparent);
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 2px;
 }
 
 :focus-visible {
-  outline: 2px solid var(--paintbrush);
-  outline-offset: 2px;
-  border-radius: 1px;
+  outline: 2px solid var(--link);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.wrap {
+  width: min(100% - 2 * var(--gutter), 72rem);
+  margin-inline: auto;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+main {
+  flex: 1 0 auto;
 }
 
 .skip-link {
   position: absolute;
-  left: -100vw;
-  top: 0;
-  padding: 0.6rem 1rem;
+  left: var(--gutter);
+  top: -4rem;
+  z-index: 10;
+  padding: 0.6rem 0.9rem;
   background: var(--ink);
   color: var(--paper);
-  font-family: var(--font-mono);
-  font-size: 0.8125rem;
-  text-decoration: none;
-  z-index: 10;
-}
-
-.skip-link:focus-visible {
-  left: 0.75rem;
-  top: 0.75rem;
-}
-
-/* ---- shell: a left-set survey-plate column ------------------------------ */
-
-.shell {
-  display: grid;
-  grid-template-columns:
-    minmax(1.25rem, 1fr)
-    minmax(auto, 40rem)
-    minmax(1.25rem, 2.1fr);
-  padding-block: clamp(3rem, 9vh, 5.5rem) 2.75rem;
-  min-height: 100svh;
-}
-
-.shell > * {
-  grid-column: 2;
-  min-width: 0;
-}
-
-/* ---- masthead ----------------------------------------------------------- */
-
-.masthead {
-  display: flex;
-  align-items: baseline;
-  gap: 0.7rem;
-}
-
-.masthead .peak-mark {
-  color: var(--paintbrush);
-  font-size: 1.95rem;
-  transform: translateY(0.2em);
-  flex: none;
-}
-
-.masthead-name {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 640;
-  font-size: clamp(2rem, 4.6vw, 2.75rem);
-  line-height: 1.08;
-  letter-spacing: 0.005em;
-}
-
-.masthead-name a {
-  color: inherit;
+  font-family: var(--sans);
+  font-size: 0.875rem;
   text-decoration: none;
 }
 
-.plate-line {
-  margin: 1rem 0 0;
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  font-weight: 400;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
+.skip-link:focus {
+  top: 1rem;
 }
 
-/* ---- shared section furniture ------------------------------------------ */
+/* ---- home: introduction ------------------------------------------------ */
 
-.section {
-  margin-top: clamp(2.6rem, 6vh, 3.4rem);
+.hero {
+  padding-block: clamp(4.5rem, 12vh, 9rem) clamp(4rem, 9vh, 6.5rem);
 }
 
-.section-label {
-  display: flex;
-  align-items: center;
-  margin: 0 0 1.1rem;
-  font-family: var(--font-display);
+.hero-name {
+  font-size: clamp(3.25rem, 1.6rem + 6.6vw, 7.5rem);
   font-weight: 600;
-  font-size: 0.95rem;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
+  line-height: 0.95;
+  letter-spacing: -0.022em;
 }
 
-.section-label::after {
-  content: "";
-  flex: 1;
-  margin-left: 1.1rem;
-  border-top: 1px solid var(--hairline);
+.hero-intro {
+  max-width: 29em;
+  margin-top: clamp(1.5rem, 3vw, 2.25rem);
+  font-size: clamp(1.25rem, 1.08rem + 0.75vw, 1.625rem);
+  line-height: 1.45;
 }
 
-.bio {
-  margin: 1.9rem 0 0;
-  max-width: 36rem;
-}
-
-/* ---- chips -------------------------------------------------------------- */
-
-.chip {
-  display: inline-block;
-  padding: 0.3em 0.5em;
-  border-radius: 2px;
-  background: var(--chip-sage);
-  color: var(--chip-text);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 500;
-  line-height: 1;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.chip--granite {
-  background: var(--chip-granite);
-}
-
-.chip--aspen {
-  background: var(--chip-aspen);
-}
-
-/* ---- field-note lists ---------------------------------------------------- */
-
-.note-list {
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem clamp(1rem, 0.6rem + 1.5vw, 1.75rem);
+  margin: clamp(2rem, 4vw, 2.75rem) 0 0;
+  padding: 0;
   list-style: none;
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.button {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5em;
+  padding: 0.7em 1em 0.72em;
+  border-radius: 3px;
+  background: var(--ink);
+  color: var(--paper);
+  text-decoration: none;
+}
+
+.button:hover {
+  background: var(--link);
+  color: var(--paper);
+}
+
+@media (prefers-color-scheme: dark) {
+  .button:hover {
+    background: var(--g1);
+    color: var(--paper);
+  }
+}
+
+.button-note {
+  font-size: 0.75em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+}
+
+/* ---- home: projects ---------------------------------------------------- */
+
+.project {
+  border-top: 1px solid var(--rule);
+}
+
+.project--lead {
+  display: grid;
+  gap: 2.5rem;
+  padding-block: clamp(2.5rem, 6vw, 4.5rem);
+}
+
+.project--minor {
+  padding-block: 2rem clamp(3.5rem, 8vw, 6rem);
+}
+
+.project-name {
+  font-size: clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.project--minor .project-name {
+  font-size: 1.5rem;
+}
+
+.project-name a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.project-name a:hover {
+  color: var(--link);
+}
+
+.project-text {
+  max-width: var(--measure);
+}
+
+.project p {
+  max-width: var(--measure);
+  margin-top: 0.85rem;
+}
+
+.project .project-link {
+  margin-top: 1.1rem;
+  font-family: var(--sans);
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+@media (min-width: 62rem) {
+  .project--lead {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    column-gap: clamp(3rem, 6vw, 6rem);
+    align-items: start;
+  }
+
+  .project--minor {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    column-gap: clamp(3rem, 6vw, 6rem);
+    align-items: baseline;
+  }
+
+  .project--minor .project-name {
+    grid-row: 1 / span 2;
+  }
+
+  .project--minor p {
+    grid-column: 2;
+  }
+
+  .project--minor p:first-of-type {
+    margin-top: 0;
+  }
+}
+
+/* ---- the Pulpit chart -------------------------------------------------- */
+
+.fchart {
+  font-family: var(--sans);
+}
+
+.fchart-title {
+  margin-bottom: 1.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-wrap: balance;
+}
+
+.fchart-plot {
+  position: relative;
+  height: clamp(11rem, 8rem + 12vw, 16rem);
+}
+
+.fchart-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.fchart-gridline {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+.fchart-baseline {
+  stroke: var(--ink-soft);
+  stroke-width: 1;
+}
+
+.fchart-grid-label {
+  position: absolute;
+  left: 0;
+  font-size: 0.75rem;
+  line-height: 1;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+  transform: translateY(calc(-100% - 0.3rem));
+}
+
+.fchart-grid-label--top {
+  top: 0;
+}
+
+.fchart-grid-label--mid {
+  top: 50%;
+}
+
+.g-verbatim {
+  --c: var(--g1);
+}
+
+.g-authoritative_print {
+  --c: var(--g2);
+}
+
+.g-contemporaneous_report {
+  --c: var(--g3);
+}
+
+.g-reconstructed {
+  --c: var(--g4);
+}
+
+.g-fragmentary {
+  --c: var(--g5);
+}
+
+.seg {
+  fill: var(--c);
+  stroke: var(--paper);
+  stroke-width: 2px;
+}
+
+/* Hover readout: an HTML column over each bar, so labels never stretch
+   with the SVG. Mouse only; the hidden table serves screen readers. */
+
+.fchart-hits {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(20, minmax(0, 1fr));
   margin: 0;
   padding: 0;
+  list-style: none;
 }
 
-.note-row {
-  display: grid;
-  grid-template-columns: auto auto 1fr;
-  gap: 0.9rem;
-  align-items: baseline;
-  padding-block: 0.85rem;
+.hit {
+  position: relative;
+  border-radius: 2px;
 }
 
-.note-row + .note-row {
-  border-top: 1px solid var(--hairline);
+
+.tip {
+  position: absolute;
+  top: 0;
+  left: calc(100% + 0.4rem);
+  z-index: 2;
+  display: none;
+  gap: 0.2rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  background: var(--paper);
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
-.note-date {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+.hit:nth-child(n + 11) .tip {
+  right: calc(100% + 0.4rem);
+  left: auto;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hit:hover {
+    background: color-mix(in srgb, var(--link) 9%, transparent);
+  }
+
+  .hit:hover .tip {
+    display: grid;
+  }
+}
+
+.tip-head {
   color: var(--ink-soft);
+}
+
+.tip-head strong {
+  margin-right: 0.3em;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.tip-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.fchart-axis {
+  display: grid;
+  grid-template-columns: repeat(20, minmax(0, 1fr));
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.tick {
+  grid-row: 1;
+  justify-self: center;
   white-space: nowrap;
 }
 
-.note-title {
-  font-style: italic;
-  font-weight: 520;
-  color: var(--ink);
-  text-decoration: none;
+.tick-1830 {
+  grid-column: 1;
+  justify-self: start;
 }
 
-.note-title:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-color: var(--paintbrush);
+.tick-1880 {
+  grid-column: 6;
 }
 
-.note-aside {
-  margin: 1.2rem 0 0;
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  letter-spacing: 0.06em;
+.tick-1930 {
+  grid-column: 11;
+}
+
+.tick-1980 {
+  grid-column: 16;
+}
+
+.tick-2020 {
+  grid-column: 20;
+  justify-self: end;
+}
+
+.fchart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.5rem;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8125rem;
+  line-height: 1.3;
+}
+
+.fchart-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.swatch {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 2px;
+  background: var(--c);
+}
+
+.legend-count {
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes rise {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@media (min-width: 62rem) and (prefers-reduced-motion: no-preference) {
+  .col {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: rise 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  .col:nth-child(1) { animation-delay: 150ms; }
+  .col:nth-child(2) { animation-delay: 180ms; }
+  .col:nth-child(3) { animation-delay: 210ms; }
+  .col:nth-child(4) { animation-delay: 240ms; }
+  .col:nth-child(5) { animation-delay: 270ms; }
+  .col:nth-child(6) { animation-delay: 300ms; }
+  .col:nth-child(7) { animation-delay: 330ms; }
+  .col:nth-child(8) { animation-delay: 360ms; }
+  .col:nth-child(9) { animation-delay: 390ms; }
+  .col:nth-child(10) { animation-delay: 420ms; }
+  .col:nth-child(11) { animation-delay: 450ms; }
+  .col:nth-child(12) { animation-delay: 480ms; }
+  .col:nth-child(13) { animation-delay: 510ms; }
+  .col:nth-child(14) { animation-delay: 540ms; }
+  .col:nth-child(15) { animation-delay: 570ms; }
+  .col:nth-child(16) { animation-delay: 600ms; }
+  .col:nth-child(17) { animation-delay: 630ms; }
+  .col:nth-child(18) { animation-delay: 660ms; }
+  .col:nth-child(19) { animation-delay: 690ms; }
+  .col:nth-child(20) { animation-delay: 720ms; }
+}
+
+/* ---- home: writing ----------------------------------------------------- */
+
+.writing {
+  padding-block: clamp(1.5rem, 4vw, 3rem) clamp(4.5rem, 10vw, 8rem);
+}
+
+.pullquote blockquote {
+  margin: 0;
+}
+
+.pullquote p {
+  max-width: 20em;
+  font-size: clamp(1.75rem, 1.15rem + 2.6vw, 3.25rem);
+  font-weight: 450;
+  line-height: 1.18;
+  letter-spacing: -0.012em;
+  text-wrap: balance;
+}
+
+/* Hang the opening quote into the margin where there is a margin to use. */
+@media (min-width: 48rem) {
+  .pullquote p {
+    text-indent: -0.42em;
+  }
+
+  @supports (hanging-punctuation: first) {
+    .pullquote p {
+      text-indent: 0;
+      hanging-punctuation: first;
+    }
+  }
+}
+
+.pullquote p::before {
+  content: "\201C";
+}
+
+.pullquote p::after {
+  content: "\201D";
+}
+
+.pullquote figcaption {
+  margin-top: 1.5rem;
+  font-family: var(--sans);
+  font-size: 0.9375rem;
   color: var(--ink-soft);
 }
 
-/* ---- bracketed mono links ------------------------------------------------ */
+.note-list {
+  margin: 2.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
 
-.cta-row {
+.note-list li {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem 1.6rem;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1.5rem;
+  max-width: 44rem;
+  padding-block: 0.75rem;
+  border-top: 1px solid var(--rule);
+}
+
+.note-list time {
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}
+
+/* ---- footer ------------------------------------------------------------ */
+
+.site-footer {
+  padding-block: clamp(2.5rem, 6vw, 4rem) clamp(3rem, 7vw, 5rem);
+  background: color-mix(in srgb, var(--ink) 4%, var(--paper));
+  border-top: 1px solid var(--rule);
+}
+
+.site-footer .wrap {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.footer-email {
+  justify-self: start;
+  font-size: clamp(1.375rem, 1.1rem + 1.4vw, 2.25rem);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
   margin: 0;
   padding: 0;
   list-style: none;
-  font-family: var(--font-mono);
+  font-family: var(--sans);
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.footer-place {
+  font-family: var(--sans);
   font-size: 0.875rem;
-}
-
-.cta-row li {
-  display: contents;
-}
-
-.cta-row a {
-  color: var(--ink);
-  text-decoration: none;
-  padding: 0.2em 0;
-}
-
-.cta-row .bracket {
   color: var(--ink-soft);
 }
 
-.cta-row a:hover {
-  background: var(--chip-sage);
+@media (min-width: 62rem) {
+  .site-footer .wrap {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    column-gap: clamp(3rem, 6vw, 6rem);
+    align-items: baseline;
+  }
+
+  .footer-email {
+    grid-row: 1 / span 2;
+  }
+
+  .footer-links,
+  .footer-place {
+    grid-column: 2;
+  }
 }
 
-.cta-row a:hover .bracket {
+/* ---- inner pages ------------------------------------------------------- */
+
+.site-header-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 1.5rem;
+}
+
+.wordmark {
   color: var(--ink);
+  font-size: 1.1875rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  text-decoration: none;
 }
 
-/* ---- prose (note pages) -------------------------------------------------- */
+.wordmark:hover {
+  color: var(--link);
+}
 
-.prose > * {
-  margin-block: 0 1.05em;
+.site-header nav {
+  font-family: var(--sans);
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.site-header nav a[aria-current="page"] {
+  color: var(--ink);
+  text-decoration-color: currentColor;
+}
+
+.page {
+  padding-block: clamp(3rem, 9vw, 6rem) clamp(4rem, 10vw, 7rem);
+}
+
+.page-title {
+  max-width: 18em;
+  font-size: clamp(2.25rem, 1.5rem + 3.4vw, 4rem);
+  line-height: 1.05;
+  letter-spacing: -0.018em;
+}
+
+/* Writing index */
+
+.entries {
+  margin: clamp(2.5rem, 6vw, 4rem) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.entry {
+  display: grid;
+  gap: 0.5rem;
+  max-width: var(--measure);
+  padding-block: 1.75rem;
+  border-top: 1px solid var(--rule);
+}
+
+.entry-title {
+  font-size: 1.625rem;
+  line-height: 1.2;
+}
+
+.entry-title a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.entry-title a:hover {
+  color: var(--link);
+  text-decoration-line: underline;
+}
+
+.entry-summary {
+  color: var(--ink-soft);
+}
+
+.entry-date,
+.article-date {
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}
+
+/* Article */
+
+.article-head {
+  display: grid;
+  gap: 1.25rem;
+  padding-bottom: clamp(2rem, 5vw, 3rem);
+  border-bottom: 1px solid var(--rule);
+}
+
+.article-lede {
+  max-width: 30em;
+  font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.prose {
+  max-width: var(--measure);
+  padding-top: clamp(2rem, 5vw, 3rem);
+  font-size: 1.1875rem;
+  line-height: 1.65;
+}
+
+.prose > * + * {
+  margin-top: 1.1em;
 }
 
 .prose h2 {
-  margin: 2.1em 0 0.55em;
-  font-family: var(--font-display);
-  font-weight: 620;
-  font-size: 1.3rem;
+  margin-top: 2.4em;
+  font-size: 1.5rem;
   line-height: 1.25;
+  letter-spacing: -0.005em;
 }
 
-.prose a,
-.bio a {
-  color: inherit;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-color: var(--ink-soft);
-}
-
-.prose a:hover,
-.bio a:hover {
-  text-decoration-color: var(--paintbrush);
-}
-
-.prose blockquote {
-  margin: 1.4em 0;
-  padding-left: 1.1rem;
-  border-left: 2px solid var(--hairline);
-  color: var(--ink-soft);
-  font-style: italic;
+.prose h2 + * {
+  margin-top: 0.6em;
 }
 
 .prose hr {
-  width: 5rem;
-  margin: 2.4em auto;
+  width: 4rem;
+  margin-block: 3em;
+  margin-inline: 0;
   border: 0;
-  border-top: 1px solid var(--hairline);
+  border-top: 1px solid var(--rule);
+}
+
+.prose em {
+  font-style: italic;
+}
+
+.prose > p:first-child em:only-child,
+.prose > hr + p em:only-child {
+  color: var(--ink-soft);
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.25em;
+}
+
+.prose blockquote {
+  margin-inline: 0;
+  padding-left: 1.25em;
+  border-left: 2px solid var(--rule);
+  color: var(--ink-soft);
 }
 
 .prose code {
-  font-family: var(--font-mono);
-  font-size: 0.88em;
-  background: color-mix(in srgb, var(--ink) 7%, transparent);
-  padding: 0.1em 0.35em;
-  border-radius: 2px;
+  font-size: 0.9em;
 }
 
-.prose pre {
-  overflow-x: auto;
-  padding: 1rem 1.1rem;
-  border: 1px solid var(--hairline);
-  border-radius: 2px;
-  background: color-mix(in srgb, var(--ink) 4%, transparent);
-  font-size: 0.85rem;
-  line-height: 1.6;
-}
-
-.prose pre code {
-  background: none;
-  padding: 0;
-}
-
-/* ---- note page header / footer ------------------------------------------ */
-
-.note-head {
-  margin-bottom: 2.4rem;
-}
-
-.note-meta {
-  display: flex;
-  align-items: baseline;
-  gap: 0.9rem;
-  margin-bottom: 1.5rem;
-}
-
-.note-head h1 {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 640;
-  font-size: clamp(1.75rem, 4vw, 2.35rem);
-  line-height: 1.14;
-}
-
-.note-lede {
-  margin: 0.9rem 0 0;
-  font-style: italic;
-  font-size: 1.08rem;
-  color: var(--ink-soft);
-  max-width: 34rem;
-}
-
-.note-end {
-  display: flex;
-  align-items: center;
-  gap: 0.9rem;
-  margin-top: 3.2rem;
-  color: var(--ink-soft);
-}
-
-.note-end::before,
-.note-end::after {
-  content: "";
-  flex: 1;
-  border-top: 1px solid var(--hairline);
-}
-
-.note-end .peak-mark {
-  color: var(--paintbrush);
-  font-size: 0.95rem;
-  flex: none;
-}
-
-.crumb {
-  margin: 0 0 2.2rem;
-}
-
-/* ---- colophon ------------------------------------------------------------ */
-
-.colophon {
-  margin-top: clamp(3.4rem, 9vh, 5rem);
-  padding-top: 1.4rem;
-  border-top: 1px solid var(--hairline);
-  display: grid;
-  gap: 0.6rem;
-  font-family: var(--font-mono);
-  font-size: 0.8125rem;
-  line-height: 1.6;
-  color: var(--ink-soft);
-}
-
-.colophon p {
-  margin: 0;
-}
-
-.colophon a {
-  color: inherit;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.colophon a:hover {
-  color: var(--ink);
-}
-
-.stamp {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.stamp .peak-mark {
-  color: var(--paintbrush);
-  font-size: 0.9rem;
-  flex: none;
-}
-
-/* ---- contour artwork ------------------------------------------------------ */
-
-.contour-field {
-  position: fixed;
-  z-index: -1;
-  pointer-events: none;
-  color: var(--contour-ink);
-  height: auto;
-}
-
-/* Two boundary styles, chosen per mountain by Noah's eye:
-   - Timp (tr): complete corridor plate, fully on screen, faded by the
-     CSS vignette below.
-   - Lone Peak and Kings (bl): boundary baked into the geometry — lines
-     trimmed to a noise-wobbled capsule around the ridge axis (the
-     `field: { rKm, wobble }` knobs in scripts/generate-contours.mjs),
-     flowing off their screen corners. No masks. */
-.contour-field--tr {
-  top: -2rem;
-  right: 1.5vw;
-  width: min(44vw, 560px);
-}
-
-.contour-field--tr .contour-wash {
-  mask-image: radial-gradient(ellipse 76% 72% at 50% 48%, #000 66%, transparent 96%);
-  -webkit-mask-image: radial-gradient(ellipse 76% 72% at 50% 48%, #000 66%, transparent 96%);
-}
-
-.contour-field--bl {
-  bottom: -8rem;
-  left: -7vw;
-  width: min(50vw, 620px);
-}
-
-.lost-art.contour-field--bl {
-  width: min(58vw, 720px);
-  left: 28vw;
-  bottom: -8rem;
-}
-
-.contour-field--tr .contour-label {
-  font-size: 21px;
-}
-
-.contour-field--bl .contour-label {
-  /* small enough that the whole label sits left of the text column;
-     page copy can reflow without ever colliding with it */
-  font-size: 17px;
-}
-
-.lost-art .contour-label {
-  font-size: 20px;
-}
-
-.contour-submark path {
-  stroke: currentColor;
-  stroke-width: 1.2;
-  opacity: 0;
-  animation: contour-appear 0.6s ease 2.1s forwards;
-}
-
-.contour-sublabel {
-  font-family: var(--font-mono);
-  font-size: 16px;
-  letter-spacing: 0.14em;
-  fill: var(--ink-soft);
-  stroke: var(--paper);
-  stroke-width: 0.34em;
-  stroke-linejoin: round;
-  paint-order: stroke;
-  opacity: 0;
-  animation: sublabel-in 1s ease 2.4s forwards;
-}
-
-.contour {
-  stroke: currentColor;
-  stroke-width: 1;
-  stroke-dasharray: 1 1;
-  stroke-dashoffset: 1;
-  animation: contour-draw 2.3s cubic-bezier(0.33, 0, 0.2, 1) forwards;
-  animation-delay: calc(70ms * min(var(--i, 0), 22));
-}
-
-.contour--index {
-  stroke-width: 1.6;
-}
-
-.contour-peak {
-  stroke: currentColor;
-  stroke-width: 1.4;
-  opacity: 0;
-  animation: contour-appear 0.6s ease forwards;
-  animation-delay: 1.9s;
-}
-
-/* The trail: real dashes crawling uphill, forever, slowly. */
-.contour-trail {
-  stroke: var(--ink-soft);
-  stroke-width: 1.2;
-  stroke-linecap: round;
-  stroke-dasharray: 1.2 2.2;
-  opacity: 0;
-  animation:
-    trail-in 1.2s ease 2.5s forwards,
-    trail-crawl 9s linear 2.5s infinite;
-}
-
-.contour-label {
-  font-family: var(--font-mono);
-  font-size: 13px;
-  letter-spacing: 0.18em;
-  fill: var(--ink-soft);
-  stroke: var(--paper);
-  stroke-width: 0.34em;
-  stroke-linejoin: round;
-  paint-order: stroke;
-  opacity: 0;
-  animation: label-in 1s ease 2.3s forwards;
-}
-
-@keyframes contour-draw {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-@keyframes contour-appear {
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes trail-in {
-  to {
-    opacity: 0.5;
-  }
-}
-
-@keyframes trail-crawl {
-  to {
-    stroke-dashoffset: -3.4;
-  }
-}
-
-@keyframes label-in {
-  to {
-    opacity: 0.72;
-  }
-}
-
-@keyframes sublabel-in {
-  to {
-    opacity: 0.58;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .contour,
-  .contour-peak {
-    animation: none;
-    stroke-dashoffset: 0;
-    opacity: 1;
-  }
-
-  .contour-trail {
-    animation: none;
-    opacity: 0.5;
-  }
-
-  .contour-label {
-    animation: none;
-    opacity: 0.72;
-  }
-
-  .contour-submark path {
-    animation: none;
-    opacity: 1;
-  }
-
-  .contour-sublabel {
-    animation: none;
-    opacity: 0.58;
-  }
-}
-
-/* ---- 404 ------------------------------------------------------------------ */
-
-.lost {
-  align-content: center;
-}
-
-.lost h1 {
-  margin: 0 0 0.7rem;
-  font-family: var(--font-display);
-  font-weight: 640;
-  font-size: clamp(2.2rem, 6vw, 3.1rem);
-  line-height: 1.05;
-}
+/* 404 */
 
 .lost p {
-  margin: 0 0 2rem;
-  color: var(--ink-soft);
-}
-
-/* Plate name-labels need room to breathe; below this they collide with
-   flowing page content, so the plates go label-less texture. */
-@media (max-width: 64rem) {
-  .contour-label {
-    display: none;
-  }
-}
-
-/* ---- small screens --------------------------------------------------------- */
-
-@media (max-width: 47rem) {
-  .shell {
-    grid-template-columns: minmax(1.25rem, 1fr) minmax(auto, 40rem) minmax(1.25rem, 1fr);
-    padding-block: 2.5rem 2rem;
-  }
-
-  .contour-field--tr {
-    width: 72vw;
-    top: -1.5rem;
-    right: -5vw;
-  }
-
-  .home-knoll {
-    display: none;
-  }
-
-  .lost-art.contour-field--bl {
-    width: 92vw;
-    left: 2vw;
-    bottom: 0;
-  }
-
-  .contour-label,
-  .contour-sublabel {
-    display: none;
-  }
-
-  .note-row {
-    grid-template-columns: auto 1fr;
-    row-gap: 0.15rem;
-  }
-
-  .note-row .note-title {
-    grid-column: 1 / -1;
-  }
+  max-width: var(--measure);
+  margin-top: 1.5rem;
+  font-size: 1.25rem;
+  line-height: 1.5;
 }

@@ -7,6 +7,7 @@ export default defineConfig({
   output: "static",
   site: "https://noahairmet.com",
   integrations: [sitemap()],
+  devToolbar: { enabled: false },
   build: {
     // The production CSP is style-src 'self'; never inline styles.
     inlineStylesheets: "never",

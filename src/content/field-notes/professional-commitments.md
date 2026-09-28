@@ -3,6 +3,7 @@ title: "Professional commitments"
 date: 2026-06-04
 tag: ethics
 description: "A personal code of ethics for work in cybersecurity and AI governance — written for a class, kept because I mean it."
+pullquote: "When a system isn’t ready or oversight is weak, I will say so clearly."
 ---
 
 *Written for a cybersecurity ethics class at BYU, 2026. Lightly reformatted for
