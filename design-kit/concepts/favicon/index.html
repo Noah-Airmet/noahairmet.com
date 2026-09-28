@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Favicon options</title>
+<style>
+  body { margin: 0; padding: 24px; font: 13px/1.4 ui-monospace, monospace; background: #f4f5f7; color: #111; }
+  h2 { font: 700 15px system-ui; margin: 26px 0 8px; }
+  .row { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start; }
+  .sky { display: flex; flex-direction: column; gap: 6px; }
+  .tab { display: flex; align-items: center; gap: 10px; width: 210px; height: 40px; padding: 0 12px; border-radius: 10px; font: 500 15px system-ui; }
+  .tab.dark { background: #3a3a3c; color: #eee; }
+  .tab.light { background: #e7e7ea; color: #222; }
+  .tab img { width: 16px; height: 16px; }
+  .big { display: flex; gap: 8px; align-items: end; }
+  .big img { image-rendering: auto; border-radius: 0; }
+  .label { color: #666; font-size: 11px; }
+</style>
+</head>
+<body>
+<div id="out"></div>
+<script>
+// Timp from Utah Valley, north (left) to south: highest point per row of the USGS grid.
+const P = [0.718,0.732,0.756,0.676,0.618,0.55,0.476,0.412,0.344,0.285,0.271,0.238,0.203,0.25,0.35,0.412,0.453,0.521,0.591,0.618,0.653,0.635,0.641,0.594,0.612,0.612,0.638,0.618,0.656,0.612,0.579,0.603,0.597,0.579,0.553,0.491,0.529,0.559,0.603,0.518,0.521,0.456,0.468,0.55,0.553,0.462,0.409,0.421,0.397,0.459,0.406,0.521,0.685,0.7,0.812,0.953,0.997,0.974,1.0,0.944,0.944,0.859,0.912,0.935,0.891,0.903,0.926,0.888,0.956,0.935,0.947,0.941,0.994,0.909,0.885,0.809,0.812,0.762,0.838,0.8,0.853,0.871,0.815,0.729,0.638,0.524,0.432,0.371,0.303,0.218,0.197,0.182,0.129,0.132,0.071,0.018,0.0,0.053,0.05,0.035];
+const SKY = {
+  day:    { bg: [236,240,244], ink: [18,28,44],    accent: [35,66,197] },
+  golden: { bg: [245,224,204], ink: [82,38,22],    accent: [152,60,28] },
+  blue:   { bg: [36,37,66],    ink: [250,206,186], accent: [240,140,112] },
+  night:  { bg: [11,16,29],    ink: [216,224,240], accent: [138,168,250] },
+};
+const rgb = (c) => `rgb(${c.join(",")})`;
+// Gaussian-smoothed profile, so only the big shapes survive at 16 px.
+function smoothP(sigma) {
+  return P.map((_, i) => {
+    let s = 0, w = 0;
+    for (let j = 0; j < P.length; j++) { const k = Math.exp(-((j - i) ** 2) / (2 * sigma * sigma)); s += P[j] * k; w += k; }
+    return s / w;
+  });
+}
+// Profile across x0..x1: its lowest point sits on `base`, its highest at `top`.
+function ridge(x0, x1, base, top, sigma = 3.5, n = 24) {
+  const Q = smoothP(sigma), lo = Math.min(...Q), hi = Math.max(...Q), pts = [];
+  for (let k = 0; k <= n; k++) {
+    const i = Math.round((k / n) * (Q.length - 1));
+    pts.push([x0 + (k / n) * (x1 - x0), base - ((Q[i] - lo) / (hi - lo)) * (base - top)]);
+  }
+  return pts.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
+}
+const OPTIONS = {
+  "A · silhouette": (p) => `<rect width="32" height="32" fill="${rgb(p.bg)}"/>
+    <polygon points="0,32 ${ridge(-1, 33, 27, 7)} 32,32" fill="${rgb(p.ink)}"/>`,
+  "C · silhouette + sun (sun over the north ridge)": (p) => `<rect width="32" height="32" fill="${rgb(p.bg)}"/>
+    <circle cx="9" cy="9.5" r="4.4" fill="${rgb(p.accent)}"/>
+    <polygon points="0,32 ${ridge(-1, 33, 28, 8)} 32,32" fill="${rgb(p.ink)}"/>`,
+  "C2 · smaller sun, higher": (p) => `<rect width="32" height="32" fill="${rgb(p.bg)}"/>
+    <circle cx="9.5" cy="8" r="3.6" fill="${rgb(p.accent)}"/>
+    <polygon points="0,32 ${ridge(-1, 33, 28, 9)} 32,32" fill="${rgb(p.ink)}"/>`,
+};
+const svg = (body) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><clipPath id="c"><rect width="32" height="32" rx="7"/></clipPath><g clip-path="url(#c)">${body}</g></svg>`;
+const url = (s) => "data:image/svg+xml," + encodeURIComponent(s);
+let html = "";
+for (const [name, make] of Object.entries(OPTIONS)) {
+  html += `<h2>${name}</h2><div class="row">`;
+  for (const [sky, p] of Object.entries(SKY)) {
+    const u = url(svg(make(p)));
+    html += `<div class="sky"><span class="label">${sky}</span>
+      <div class="tab dark"><img src="${u}">Noah Airmet</div>
+      <div class="tab light"><img src="${u}">Noah Airmet</div>
+      <div class="big"><img src="${u}" width="32" height="32"><img src="${u}" width="64" height="64"></div></div>`;
+  }
+  html += "</div>";
+}
+document.getElementById("out").innerHTML = html;
+window.ICONS = { OPTIONS, SKY, svg, ridge };
+</script>
+</body>
+</html>

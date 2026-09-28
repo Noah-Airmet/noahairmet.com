@@ -44,6 +44,17 @@
 
   function css(c) { return "rgb(" + c[0] + " " + c[1] + " " + c[2] + ")"; }
 
+  // The tab icon is Timp's silhouette in the current sky's colors.
+  var TIMP = "0,32 -1.0,12.9 0.4,15.3 1.8,19.0 3.3,20.3 4.7,16.9 6.1,14.5 7.5,14.0 8.9,14.3 10.3,15.1 11.8,15.8 13.2,16.5 14.6,17.1 16.0,15.2 17.4,10.5 18.8,7.3 20.3,7.0 21.7,7.1 23.1,7.1 24.5,8.1 25.9,9.5 27.3,13.2 28.8,18.8 30.2,23.5 31.6,26.1 33.0,27.0 32,32";
+  function icon(p) {
+    var link = document.querySelector('link[rel="icon"][type="image/svg+xml"]');
+    if (!link) return;
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><clipPath id="c"><rect width="32" height="32" rx="7"/></clipPath>' +
+      '<g clip-path="url(#c)"><rect width="32" height="32" fill="' + css(p.bg) + '"/><polygon points="' + TIMP + '" fill="' + css(p.ink) + '"/></g></svg>';
+    var href = "data:image/svg+xml," + encodeURIComponent(svg);
+    if (link.getAttribute("href") !== href) link.setAttribute("href", href);
+  }
+
   var sky = {
     offsetMinutes: 0,
     sunElevation: sunElevation,
@@ -59,6 +70,7 @@
       root.style.colorScheme = p.dark ? "dark" : "light";
       var meta = document.querySelector('meta[name="theme-color"]');
       if (meta) meta.setAttribute("content", css(p.bg));
+      icon(p);
       sky.current = p;
       document.dispatchEvent(new CustomEvent("skychange", { detail: p }));
       return p;
@@ -73,5 +85,7 @@
     sky.offsetMinutes = (+at[1] % 24) * 60 + +at[2] - ((+now[0] % 24) * 60 + +now[1]);
   }
   sky.apply();
+  // Again once the DOM is ready, in case the icon link comes after this script.
+  document.addEventListener("DOMContentLoaded", function () { icon(sky.current); });
   setInterval(function () { if (!sky.offsetMinutes) sky.apply(); }, 60000);
 })();
