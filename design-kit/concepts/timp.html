@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Noah Airmet — concept A: Timp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #eef1f4; --ink: #1b2433; --soft: #5a6477; --line: #1b2433; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--ink); transition: background-color .6s; }
+  body { font-family: "Archivo", system-ui, sans-serif; font-variation-settings: "wdth" 100; -webkit-font-smoothing: antialiased; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+  canvas.dragging { cursor: grabbing; }
+  .ui { position: fixed; inset: 0; pointer-events: none; padding: clamp(20px, 4vw, 48px); display: grid; grid-template-rows: auto 1fr auto; }
+  .ui a, .ui button, .ui .daybar { pointer-events: auto; }
+  h1 { margin: 0; font-size: clamp(44px, 7.5vw, 104px); line-height: .88; font-weight: 750; font-variation-settings: "wdth" 72; letter-spacing: -.01em; text-transform: uppercase; }
+  .intro { max-width: 30ch; margin: 18px 0 0; font-size: clamp(15px, 1.25vw, 18px); line-height: 1.4; color: var(--soft); transition: color .6s; }
+  .links { display: flex; gap: 18px; margin-top: 18px; font: 500 13px/1 "JetBrains Mono", monospace; }
+  a { color: var(--ink); text-decoration: none; border-bottom: 1px solid currentColor; padding-bottom: 2px; transition: color .6s; }
+  a:hover { opacity: .65; }
+  .bottom { display: flex; justify-content: space-between; align-items: end; gap: 24px; }
+  @media (max-width: 760px) { .bottom { flex-direction: column; align-items: start; } .clock { text-align: left; } .work span { display: block; margin: 2px 0 0; } }
+  .work { display: grid; gap: 10px; font-size: 15px; }
+  .work span { color: var(--soft); font-size: 13px; margin-left: 8px; transition: color .6s; }
+  .work a { border: 0; font-weight: 650; }
+  .clock { text-align: right; font: 400 12px/1.5 "JetBrains Mono", monospace; color: var(--soft); transition: color .6s; }
+  .daybar { position: relative; width: 220px; height: 22px; margin-top: 6px; cursor: ew-resize; touch-action: none; }
+  .daybar::before { content: ""; position: absolute; left: 0; right: 0; top: 10px; height: 1px; background: currentColor; opacity: .35; }
+  .sun { position: absolute; top: 5px; width: 11px; height: 11px; margin-left: -5.5px; border-radius: 50%; background: var(--ink); transition: background .6s; }
+  .tick { position: absolute; top: 7px; width: 1px; height: 7px; background: currentColor; opacity: .35; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="ui">
+  <header>
+    <h1>Noah<br>Airmet</h1>
+    <p class="intro">Cybersecurity student at BYU and junior developer at Simplicity Group, working toward AI security and governance.</p>
+    <nav class="links"><a href="#">Résumé</a><a href="#">GitHub</a><a href="#">LinkedIn</a><a href="#">Email</a></nav>
+  </header>
+  <div></div>
+  <div class="bottom">
+    <div class="work">
+      <div><a href="https://pulpit-archive.org/">Pulpit ↗</a><span>every general conference sermon since 1830, source-graded</span></div>
+      <div><a href="https://github.com/Noah-Airmet/agent-bus">agent-bus ↗</a><span>lets AI coding assistants hand work to each other</span></div>
+      <div><a href="#">Writing</a><span>notes on security and AI governance</span></div>
+    </div>
+    <div class="clock">
+      <div id="clock">Provo, UT</div>
+      <div class="daybar" id="daybar"><div class="tick" style="left:25%"></div><div class="tick" style="left:50%"></div><div class="tick" style="left:75%"></div><div class="sun" id="sun"></div></div>
+    </div>
+  </div>
+</div>
+<script>
+(async () => {
+  const T = await (await fetch('timp.json')).json();
+  const R = T.rows, C = T.cols, E = T.elev;
+  let lo = Infinity, hi = -Infinity; for (const v of E) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
+  let sIdx = 0; for (let i = 0; i < E.length; i++) if (E[i] > E[sIdx]) sIdx = i;
+  const summit = { u: (sIdx % C) / (C - 1) - .5, v: Math.floor(sIdx / C) / (R - 1) - .5 };
+
+  const cv = document.getElementById('c'), cx = cv.getContext('2d');
+  let W, H, dpr;
+  const resize = () => { dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; cx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+  resize(); addEventListener('resize', resize);
+
+  const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+  const height = (u, v) => {
+    const r = Math.hypot(u, v); if (r > .5) return -1; const m = 1 - smooth(.3, .5, r);
+    const x = (u + .5) * (C - 1), y = (v + .5) * (R - 1);
+    const x0 = Math.max(0, Math.min(C - 2, Math.floor(x))), y0 = Math.max(0, Math.min(R - 2, Math.floor(y)));
+    const fx = x - x0, fy = y - y0, i = y0 * C + x0;
+    const e = E[i] * (1 - fx) * (1 - fy) + E[i + 1] * fx * (1 - fy) + E[i + C] * (1 - fx) * fy + E[i + C + 1] * fx * fy;
+    return ((e - lo) / (hi - lo)) * m;
+  };
+
+  // Sun over Provo (NOAA approximation), degrees above horizon.
+  const LAT = 40.2338, LON = -111.6585;
+  const sunElev = (d) => {
+    const rad = Math.PI / 180, jd = d / 864e5 + 2440587.5, n = jd - 2451545;
+    const L = (280.46 + .9856474 * n) % 360, g = ((357.528 + .9856003 * n) % 360) * rad;
+    const lam = (L + 1.915 * Math.sin(g) + .02 * Math.sin(2 * g)) * rad, eps = (23.439 - 4e-7 * n) * rad;
+    const dec = Math.asin(Math.sin(eps) * Math.sin(lam));
+    const ra = Math.atan2(Math.cos(eps) * Math.sin(lam), Math.cos(lam));
+    const gmst = (18.697374558 + 24.06570982441908 * n) % 24;
+    const ha = ((gmst * 15 + LON) * rad - ra);
+    return Math.asin(Math.sin(LAT * rad) * Math.sin(dec) + Math.cos(LAT * rad) * Math.cos(dec) * Math.cos(ha)) / rad;
+  };
+  const P = [
+    { at: -18, bg: [12, 17, 30], ink: [201, 211, 230], soft: [128, 142, 170] },
+    { at: -8,  bg: [38, 40, 72], ink: [246, 190, 168], soft: [176, 160, 190] },
+    { at: -1,  bg: [244, 214, 200], ink: [110, 38, 44], soft: [150, 88, 90] },
+    { at: 6,   bg: [246, 229, 206], ink: [96, 52, 30], soft: [140, 104, 80] },
+    { at: 18,  bg: [238, 241, 244], ink: [27, 36, 51], soft: [90, 100, 119] },
+  ];
+  const mix = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+  const palette = (el) => {
+    if (el <= P[0].at) return P[0]; if (el >= P[P.length - 1].at) return P[P.length - 1];
+    for (let i = 0; i < P.length - 1; i++) if (el < P[i + 1].at) { const t = (el - P[i].at) / (P[i + 1].at - P[i].at); return { bg: mix(P[i].bg, P[i + 1].bg, t), ink: mix(P[i].ink, P[i + 1].ink, t), soft: mix(P[i].soft, P[i + 1].soft, t) }; }
+  };
+  const rgb = (a, al = 1) => `rgba(${a[0]},${a[1]},${a[2]},${al})`;
+
+  let offsetMin = 0; // scrubbed minutes from now
+  const clockEl = document.getElementById('clock'), sunEl = document.getElementById('sun'), bar = document.getElementById('daybar');
+  let pal = palette(sunElev(new Date()));
+  const applyTime = () => {
+    const d = new Date(Date.now() + offsetMin * 6e4);
+    pal = palette(sunElev(d));
+    const root = document.documentElement.style;
+    root.setProperty('--bg', rgb(pal.bg)); root.setProperty('--ink', rgb(pal.ink)); root.setProperty('--soft', rgb(pal.soft));
+    const local = new Date(d.toLocaleString('en-US', { timeZone: 'America/Denver' }));
+    const mins = local.getHours() * 60 + local.getMinutes();
+    sunEl.style.left = (mins / 1440 * 100) + '%';
+    clockEl.textContent = 'Provo, UT  ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Denver' });
+  };
+  applyTime(); setInterval(() => { if (!scrubbing) applyTime(); }, 30000);
+  let scrubbing = false;
+  const scrub = (e) => {
+    const r = bar.getBoundingClientRect(); const x = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Denver' }));
+    offsetMin = x * 1440 - (now.getHours() * 60 + now.getMinutes()); applyTime();
+  };
+  bar.addEventListener('pointerdown', e => { scrubbing = true; bar.setPointerCapture(e.pointerId); scrub(e); });
+  bar.addEventListener('pointermove', e => scrubbing && scrub(e));
+  bar.addEventListener('pointerup', () => scrubbing = false);
+  bar.addEventListener('dblclick', () => { offsetMin = 0; applyTime(); });
+
+  // Rotation: drag with inertia, slow drift when idle.
+  let yaw = -0.5, vel = 0, drag = null, pitch = 0, pitchT = 0;
+  cv.addEventListener('pointerdown', e => { drag = { x: e.clientX, t: performance.now() }; cv.setPointerCapture(e.pointerId); cv.classList.add('dragging'); });
+  cv.addEventListener('pointermove', e => {
+    pitchT = (e.clientY / H - .5) * .5;
+    if (!drag) return; const now = performance.now(); const dx = e.clientX - drag.x;
+    yaw += dx * .006; vel = dx * .006 / Math.max(1, now - drag.t) * 16; drag = { x: e.clientX, t: now };
+  });
+  const end = () => { drag = null; cv.classList.remove('dragging'); };
+  cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+
+  const t0 = performance.now();
+  const SLICES = 64, SAMPLES = 140;
+  const frame = (now) => {
+    if (!drag) { vel *= .95; yaw += vel + (Math.abs(vel) < .0005 ? .0009 : 0); }
+    pitch += (pitchT - pitch) * .05;
+    const grow = Math.min(1, (now - t0) / 1600);
+    cx.clearRect(0, 0, W, H);
+    const narrow = W < 760;
+    const ox = narrow ? W * .5 : W * .64, oy = narrow ? H * .56 : H * .55;
+    const span = narrow ? Math.min(W * 1.05, H * .62) : Math.min(W * .6, H * .95);
+    const depth = span * (.36 + pitch * .2), hScale = span * .34;
+    const cs = Math.cos(yaw), sn = Math.sin(yaw);
+    let summitPt = null;
+    for (let k = 0; k < SLICES; k++) {
+      const d = -0.52 + (k / (SLICES - 1)) * 1.04; // far -> near
+      const wave = Math.min(1, Math.max(0, grow * 1.6 - (1 - k / SLICES) * .6));
+      const ease = 1 - Math.pow(1 - wave, 3);
+      const persp = 1 / (1 - d * .28);
+      const baseY = oy + d * depth * persp;
+      const pts = [];
+      for (let j = 0; j <= SAMPLES; j++) {
+        const s = -0.55 + (j / SAMPLES) * 1.1;
+        const u = s * cs - d * sn, v = s * sn + d * cs;
+        const h = height(u, v);
+        pts.push(h < 0 ? null : [ox + s * span * persp, baseY - h * ease * hScale * persp]);
+      }
+      const runs = []; let run = [];
+      for (const p of pts) { if (p) run.push(p); else if (run.length) { runs.push(run); run = []; } }
+      if (run.length) runs.push(run);
+      for (const r of runs) {
+        cx.beginPath(); cx.moveTo(r[0][0], baseY + 2);
+        for (const p of r) cx.lineTo(p[0], p[1]);
+        cx.lineTo(r[r.length - 1][0], baseY + 2); cx.closePath();
+        cx.fillStyle = rgb(pal.bg); cx.fill();
+      }
+      cx.beginPath();
+      for (const r of runs) { cx.moveTo(r[0][0], r[0][1]); for (const p of r) cx.lineTo(p[0], p[1]); }
+      cx.strokeStyle = rgb(pal.ink, .25 + .75 * (k / SLICES)); cx.lineWidth = .6 + .9 * (k / SLICES); cx.stroke();
+    }
+    // Summit marker, projected from world coords.
+    const sS = summit.u * cs + summit.v * sn, sD = -summit.u * sn + summit.v * cs;
+    const persp = 1 / (1 - sD * .28);
+    const sx = ox + sS * span * persp, sy = oy + sD * depth * persp - height(summit.u, summit.v) * hScale * persp;
+    if (grow >= 1) {
+      cx.strokeStyle = rgb(pal.ink); cx.lineWidth = 1;
+      cx.beginPath(); cx.moveTo(sx, sy - 10); cx.lineTo(sx, sy - 46); cx.stroke();
+      cx.fillStyle = rgb(pal.ink); cx.font = '500 11px "JetBrains Mono", monospace';
+      cx.fillText('MT TIMPANOGOS  11,749 FT', sx + 8, sy - 38);
+    }
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

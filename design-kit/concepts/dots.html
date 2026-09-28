@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Noah Airmet — concept B: 12,162</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #f4f5f7; --ink: #0f1e47; --soft: #5b6680; --rule: #d6dbe6; --g0: #16295f; --g1: #1f40b6; --g2: #4b6ecc; --g3: #7290d6; --g4: #93aade; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--ink); font-family: "Geist", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; }
+  .ui { position: fixed; inset: 0; pointer-events: none; padding: clamp(20px, 3.5vw, 44px); }
+  .ui a, .ui input, .ui button { pointer-events: auto; }
+  h1 { margin: 0; font-size: clamp(36px, 4.6vw, 64px); font-weight: 600; letter-spacing: -.035em; line-height: .95; }
+  .intro { max-width: 32ch; margin: 14px 0 0; font-size: clamp(15px, 1.2vw, 17px); line-height: 1.45; color: var(--soft); }
+  .links { display: flex; gap: 16px; margin-top: 16px; font: 500 13px/1 "Geist Mono", monospace; }
+  a { color: var(--ink); }
+  .pulpit { position: absolute; left: clamp(20px, 3.5vw, 44px); bottom: clamp(20px, 3.5vw, 44px); max-width: 30ch; font-size: 14px; line-height: 1.45; color: var(--soft); }
+  .pulpit strong { display: block; color: var(--ink); font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .pulpit .more { display: flex; gap: 14px; margin-top: 12px; font: 500 12px/1 "Geist Mono", monospace; }
+  .controls { position: absolute; right: clamp(20px, 3.5vw, 44px); top: clamp(20px, 3.5vw, 44px); display: grid; gap: 10px; justify-items: end; font: 500 12px/1 "Geist Mono", monospace; }
+  .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 999px; padding: 3px; background: var(--bg); }
+  .seg button { font: inherit; color: var(--soft); background: none; border: 0; padding: 7px 12px; border-radius: 999px; cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+  input { font: 400 13px/1 "Geist", sans-serif; width: 220px; padding: 9px 12px; border: 1px solid var(--rule); border-radius: 999px; background: var(--bg); color: var(--ink); outline: none; }
+  input:focus { border-color: var(--ink); }
+  #hits { color: var(--soft); min-height: 12px; }
+  .tip { position: fixed; pointer-events: none; z-index: 3; max-width: 280px; padding: 10px 12px; border-radius: 10px; background: var(--ink); color: #eef2fb; font-size: 13px; line-height: 1.35; opacity: 0; transform: translateY(4px); transition: opacity .12s, transform .12s; }
+  .tip.on { opacity: 1; transform: none; }
+  .tip small { display: block; margin-top: 4px; font: 400 11px/1.3 "Geist Mono", monospace; color: #aab7d6; }
+  @media (max-width: 760px) { .controls { position: static; margin-top: 18px; justify-items: start; grid-template-columns: auto auto; align-items: center; } input { width: 150px; } #hits { grid-column: 1 / -1; } .pulpit { max-width: none; right: 20px; font-size: 13px; } .pulpit .more { flex-wrap: wrap; } }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="ui">
+  <h1>Noah Airmet</h1>
+  <p class="intro">Cybersecurity student at BYU and junior developer at Simplicity Group, working toward AI security and governance.</p>
+  <nav class="links"><a href="#">Résumé</a><a href="#">GitHub</a><a href="#">LinkedIn</a><a href="#">Email</a></nav>
+  <div class="controls">
+    <div class="seg" role="group"><button data-layout="decade" aria-pressed="true">By decade</button><button data-layout="grade" aria-pressed="false">By source</button></div>
+    <input id="q" placeholder="Find a speaker" autocomplete="off" spellcheck="false">
+    <div id="hits"></div>
+  </div>
+  <div class="pulpit">
+    <strong>Pulpit</strong>
+    Every general conference sermon since 1830. Each dot is one of them, shaded by how faithfully its best surviving source records what was said.
+    <div class="more"><a href="https://pulpit-archive.org/">pulpit-archive.org ↗</a><a href="https://github.com/Noah-Airmet/agent-bus">agent-bus ↗</a><a href="#">Writing</a></div>
+  </div>
+</div>
+<div class="tip" id="tip"></div>
+<script>
+(async () => {
+  const D = await (await fetch('sermons.json')).json();
+  const N = D.y.length, GR = ['Verbatim', 'Authoritative print', 'Contemporaneous report', 'Reconstructed', 'Fragmentary'];
+  const css = getComputedStyle(document.documentElement);
+  const COL = [0,1,2,3,4].map(i => css.getPropertyValue('--g' + i).trim());
+  const cv = document.getElementById('c'), cx = cv.getContext('2d');
+  let W, H, dpr;
+  const x = new Float32Array(N), y = new Float32Array(N), vx = new Float32Array(N), vy = new Float32Array(N), tx = new Float32Array(N), ty = new Float32Array(N), delay = new Float32Array(N);
+  let size = 2, layout = 'decade', labels = [];
+
+  const decadeOf = i => Math.floor(D.y[i] / 10) * 10;
+  const place = () => {
+    const narrow = W < 760;
+    const ax = narrow ? 20 : W * .34, aw = narrow ? W - 40 : W * .62 - 20;
+    const ay = narrow ? H * .42 : H * .22, ah = narrow ? H * .27 : H * .66;
+    labels = [];
+    const groups = new Map();
+    for (let i = 0; i < N; i++) { const k = layout === 'decade' ? decadeOf(i) : D.f[i]; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(i); }
+    const keys = [...groups.keys()].sort((a, b) => a - b);
+    const G = keys.length, gap = layout === 'decade' ? (narrow ? 3 : 8) : 18;
+    const M = Math.max(...keys.map(k => groups.get(k).length));
+    let best = { p: 0, k: 1 };
+    for (let k = 2; k <= 60; k++) { const p = Math.min((aw - gap * (G - 1)) / (G * k), ah / Math.ceil(M / k)); if (p > best.p) best = { p, k }; }
+    const { p, k } = best; size = Math.max(1.2, p * .78);
+    const colW = k * p, total = G * colW + (G - 1) * gap, x0 = ax + (aw - total) / 2, base = ay + ah;
+    keys.forEach((key, c) => {
+      const list = groups.get(key);
+      if (layout === 'grade') list.sort((a, b) => D.y[a] - D.y[b]);
+      list.forEach((i, n) => { tx[i] = x0 + c * (colW + gap) + (n % k) * p; ty[i] = base - (Math.floor(n / k) + 1) * p; });
+      const lx = x0 + c * (colW + gap) + colW / 2;
+      if (layout === 'decade') { if (key % 50 === 0 || key === 2020 || key === 1830) labels.push([lx, base + 18, key + 's']); }
+      else labels.push([lx, base + 18, GR[key] + '  ' + list.length.toLocaleString()]);
+    });
+  };
+  const resize = () => { dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; cx.setTransform(dpr, 0, 0, dpr, 0, 0); place(); };
+  resize(); addEventListener('resize', resize);
+  for (let i = 0; i < N; i++) { x[i] = tx[i] + (Math.random() - .5) * 40; y[i] = -20 - Math.random() * H * .6; delay[i] = (H - ty[i]) / H * 50 + Math.random() * 25; }
+
+  document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+    layout = b.dataset.layout; document.querySelectorAll('.seg button').forEach(o => o.setAttribute('aria-pressed', o === b)); place();
+    for (let i = 0; i < N; i++) delay[i] = Math.random() * 18;
+  }));
+
+  let match = null; const q = document.getElementById('q'), hits = document.getElementById('hits');
+  q.addEventListener('input', () => {
+    const s = q.value.trim().toLowerCase();
+    if (s.length < 3) { match = null; hits.textContent = ''; return; }
+    const ok = new Set(); D.speakers.forEach((n, k) => { if (n.toLowerCase().includes(s)) ok.add(k); });
+    match = new Uint8Array(N); let c = 0, names = new Set();
+    for (let i = 0; i < N; i++) if (ok.has(D.s[i])) { match[i] = 1; c++; names.add(D.speakers[D.s[i]]); }
+    hits.textContent = c ? (names.size === 1 ? [...names][0] + ' · ' : '') + c.toLocaleString() + ' sermons' : 'No speaker matches';
+  });
+
+  let mx = -1e4, my = -1e4, hover = -1; const tip = document.getElementById('tip');
+  addEventListener('pointermove', e => { mx = e.clientX; my = e.clientY; });
+  addEventListener('pointerleave', () => { mx = my = -1e4; });
+  cv.addEventListener('click', () => { if (hover >= 0) open('https://pulpit.restorationcommons.org/talks/' + D.id[hover] + '/', '_blank'); });
+
+  let t = 0;
+  const frame = () => {
+    t++;
+    const R = 70;
+    let best = -1, bd = 14 * 14;
+    for (let i = 0; i < N; i++) {
+      if (t < delay[i]) continue;
+      vx[i] = (vx[i] + (tx[i] - x[i]) * .06) * .8; vy[i] = (vy[i] + (ty[i] - y[i]) * .06) * .8;
+      x[i] += vx[i]; y[i] += vy[i];
+    }
+    cx.clearRect(0, 0, W, H);
+    cx.fillStyle = css.getPropertyValue('--soft'); cx.font = '400 11px "Geist Mono", monospace'; cx.textAlign = 'center';
+    for (const [lx, ly, s] of labels) cx.fillText(s, lx, ly);
+    for (let g = 0; g < 5; g++) {
+      for (let pass = 0; pass < 2; pass++) {
+        cx.fillStyle = COL[g]; cx.globalAlpha = pass === 0 ? (match ? .12 : 1) : 1;
+        for (let i = 0; i < N; i++) {
+          if (D.f[i] !== g) continue;
+          if (pass === 1 && !(match && match[i])) continue;
+          if (pass === 0 && match && match[i]) continue;
+          const dx = x[i] - mx, dy = y[i] - my, d2 = dx * dx + dy * dy;
+          let px = x[i], py = y[i], s = size;
+          if (d2 < R * R) { const f = 1 - Math.sqrt(d2) / R; px += dx * f * .9; py += dy * f * .9; s = size * (1 + f * 2.2); if (d2 < bd) { bd = d2; best = i; } }
+          cx.fillRect(px - s / 2, py - s / 2, s, s);
+        }
+      }
+    }
+    cx.globalAlpha = 1;
+    hover = best; cv.style.cursor = best >= 0 ? 'pointer' : 'default';
+    if (best >= 0) {
+      tip.innerHTML = `<b>${D.t[best]}</b><small>${D.speakers[D.s[best]]} · ${D.y[best]} · ${GR[D.f[best]]}</small>`;
+      tip.style.left = Math.min(W - 300, mx + 16) + 'px'; tip.style.top = (my + 18) + 'px'; tip.classList.add('on');
+    } else tip.classList.remove('on');
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
