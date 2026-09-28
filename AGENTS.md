@@ -25,19 +25,27 @@ Katie's workout PWA at `/bee` — read it before touching `public/bee/`.
   shapes) → the exhibit and its label → meta. Load animations run in that
   same order. Label every exhibit where it sits, never in a far corner.
 
-## Rules that still apply
+## Rules, and where each came from
 
-- **Honest copy.** State what is true today; new claims need shipped,
-  linkable work.
-- **Unlisted stays unlisted.** Never link King Follett or Hymn Parts, or
-  any private subdomain (`corpus.` etc.). Smoke-tested.
-- **Strict CSP** (`public/_headers`): same-origin only, no inline scripts
-  or styles. Astro would inline small scripts, so `assetsInlineLimit: 0`
-  stays in `astro.config.mjs`. Setting styles from JS via `el.style` is
-  fine; `style="…"` in markup is not.
-- **URLs are permanent.** Old paths redirect in `public/_redirects`
-  (`/field-notes/*` → `/writing/*`). Never add a `/resume/*` wildcard — it
+Noah asked (2026-09-28) to drop every inherited rule. What remains is here
+with its source, so nobody mistakes an agent's preference for his.
+
+- **From Noah and Katie — Katie's app at `/bee` gets no analytics.** Their
+  household rule is that health data never leaves owned hardware
+  (`docs/BEE-APP.md`). `public/_headers` gives `/bee/*` its own stricter
+  CSP, so Cloudflare's auto-injected analytics beacon is blocked there.
+- **From Noah — King Follett and Hymn Parts stay unlisted** (one is for
+  friends; the other carries copyrighted hymns). Smoke-tested.
+- **Agent default, safety — never link private services** (`corpus.` and
+  other internal subdomains). Smoke-tested.
+- **Agent default, craft — keep old URLs alive** via `public/_redirects`
+  (`/field-notes/*` → `/writing/*`). Never add a `/resume/*` wildcard; it
   loops the PDF.
+- **Agent default, craft — security headers.** Same-origin scripts and
+  styles plus Cloudflare Web Analytics (enabled on the zone since
+  2026-03-13; cookieless). Astro would inline small scripts, so
+  `assetsInlineLimit: 0` stays in `astro.config.mjs`. Noah has no
+  preference here; loosen it whenever a feature needs to.
 
 ## Add a note
 

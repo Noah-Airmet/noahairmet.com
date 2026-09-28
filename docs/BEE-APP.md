@@ -21,7 +21,9 @@ vanilla PWA for hosting here.
    the only bridge is a "Copy for Noah's trainer" button that puts markdown on
    the clipboard for manual pasting. Keep that coupling at zero.
 2. **External `app.js` + `style.css`, no inline scripts or styles.** The
-   site-wide CSP in `public/_headers` is `script-src 'self'; style-src 'self'`.
+   site-wide CSP in `public/_headers` is `style-src 'self'` and allows only
+   same-origin scripts plus Cloudflare's analytics beacon; `/bee/*` adds its
+   own `script-src 'self'; connect-src 'self'` so the beacon never runs here.
    Inline anything and the app breaks in production while working locally.
 3. **Vanilla JS, no build step.** The site's Astro build just copies
    `public/` into `dist/`. No framework, no npm deps, no transpilation. Keep

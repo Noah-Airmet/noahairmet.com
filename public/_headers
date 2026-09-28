@@ -3,7 +3,13 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
   X-Frame-Options: DENY
-  Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+
+# Katie's app: no analytics, per the household rule in docs/BEE-APP.md.
+# Cloudflare joins this with the site-wide policy above; browsers enforce
+# both, so the analytics beacon allowed there stays blocked here.
+/bee/*
+  Content-Security-Policy: script-src 'self'; connect-src 'self'
 
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
