@@ -40,9 +40,22 @@ const fullTitle = pageTitle(title);
     <link rel="alternate" type="application/rss+xml" title={`${site.name} — Writing`} href={absoluteUrl("/rss.xml")} />
     {noindex && <meta name="robots" content="noindex" />}
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={absoluteUrl(path)} />
+    <meta property="og:image" content={absoluteUrl(site.card.image)} />
+    <meta property="og:image:width" content={String(site.card.width)} />
+    <meta property="og:image:height" content={String(site.card.height)} />
+    <meta property="og:image:alt" content="Noah Airmet, with Mount Timpanogos drawn as ridgelines" />
+    <!-- Apps that play og:video (iMessage, Discord) show the mountain turning. -->
+    <meta property="og:video" content={absoluteUrl(site.card.video)} />
+    <meta property="og:video:secure_url" content={absoluteUrl(site.card.video)} />
+    <meta property="og:video:type" content="video/mp4" />
+    <meta property="og:video:width" content={String(site.card.width)} />
+    <meta property="og:video:height" content={String(site.card.height)} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={absoluteUrl(site.card.image)} />
     <meta name="theme-color" content="#ecf0f4" />
     <script is:inline src="/sky.js"></script>
   </head>

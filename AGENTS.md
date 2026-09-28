@@ -20,6 +20,12 @@ Katie's workout PWA at `/bee` — read it before touching `public/bee/`.
   colors, re-run the dataviz ordinal validator on it.
 - **Tabs** are real pages joined by cross-document view transitions: the
   big name morphs into the wordmark, the tab pill slides.
+- **Share card.** `public/og/card.png` (still) and `card.mp4` (one turn of
+  Timp, blue-hour sky, view from Provo) are rendered by
+  `bash scripts/card/render.sh [sky]`; bump `card` `v=` in
+  `src/lib/site.ts` afterward. iMessage and Discord play the `og:video`.
+  Workers static assets ignore Range requests, which Safari needs for
+  video, so `worker/index.js` serves `/og/*` (and only that) with ranges.
 - **Attention order** is the design system (see the header of
   `src/styles/site.css`): headline → lede → actions (the only filled
   shapes) → the exhibit and its label → meta. Load animations run in that

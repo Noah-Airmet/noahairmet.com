@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>card</title>
+<!-- Share-card renderer. Not deployed: scripts/card/render.sh serves the
+     repo root and screenshots this page. Params: ?yaw=<radians>&sky=<name> -->
+<style>
+  @font-face {
+    font-family: "Archivo Card";
+    src: url("/node_modules/@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2") format("woff2-variations");
+    font-weight: 100 900;
+    font-stretch: 62% 125%;
+  }
+  @font-face {
+    font-family: "Mono Card";
+    src: url("/node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2") format("woff2-variations");
+    font-weight: 100 800;
+  }
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body { position: relative; background: var(--bg); color: var(--ink); }
+  canvas { position: absolute; inset: 0; width: 1200px; height: 630px; }
+  .name {
+    position: absolute; left: 72px; top: 76px; margin: 0;
+    font: 800 132px/0.84 "Archivo Card"; font-stretch: 72%;
+    letter-spacing: -0.005em; text-transform: uppercase;
+  }
+  .url {
+    position: absolute; left: 76px; bottom: 70px;
+    font: 500 26px/1 "Mono Card"; color: var(--soft);
+  }
+  .url b { color: var(--ink); font-weight: 500; }
+</style>
+</head>
+<body>
+<canvas id="c" width="2400" height="1260"></canvas>
+<h1 class="name">Noah<br>Airmet</h1>
+<div class="url"><span>[ </span><b>noahairmet.com</b><span> ]</span></div>
+<script>
+const SKY = {
+  day:    { bg: [236, 240, 244], ink: [18, 28, 44],    soft: [78, 89, 110] },
+  golden: { bg: [245, 224, 204], ink: [82, 38, 22],    soft: [118, 78, 58] },
+  blue:   { bg: [36, 37, 66],    ink: [250, 206, 186], soft: [190, 176, 204] },
+  night:  { bg: [11, 16, 29],    ink: [216, 224, 240], soft: [146, 158, 184] },
+};
+const q = new URLSearchParams(location.search);
+const sky = SKY[q.get("sky") || "golden"];
+const rgb = (c, a = 1) => `rgb(${c.join(" ")} / ${a})`;
+for (const k of ["bg", "ink", "soft"]) document.documentElement.style.setProperty(`--${k}`, rgb(sky[k]));
+
+(async () => {
+  const T = await (await fetch("/public/data/timp.json")).json();
+  await document.fonts.load('800 132px "Archivo Card"');
+  await document.fonts.load('500 26px "Mono Card"');
+  const { rows: R, cols: C, elev: E } = T;
+  let lo = Infinity, hi = -Infinity;
+  for (const v of E) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
+  const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+  const height = (u, v) => {
+    const r = Math.hypot(u, v);
+    if (r > 0.5) return -1;
+    const x = (u + 0.5) * (C - 1), y = (v + 0.5) * (R - 1);
+    const x0 = Math.max(0, Math.min(C - 2, Math.floor(x))), y0 = Math.max(0, Math.min(R - 2, Math.floor(y)));
+    const fx = x - x0, fy = y - y0, i = y0 * C + x0;
+    const e = E[i] * (1 - fx) * (1 - fy) + E[i + 1] * fx * (1 - fy) + E[i + C] * (1 - fx) * fy + E[i + C + 1] * fx * fy;
+    return ((e - lo) / (hi - lo)) * (1 - smooth(0.3, 0.5, r));
+  };
+
+  const ctx = document.getElementById("c").getContext("2d");
+  ctx.scale(2, 2);
+  // yaw 0 is the true view from Provo: rows run north→south, so the near
+// slices are the south face and west is on the left.
+const W = 1200, H = 630, yaw = parseFloat(q.get("yaw") || "0");
+  const SLICES = 72, SAMPLES = 180;
+  const span = 680, depth = span * 0.34, lift = span * 0.38;
+  const ox = 846, oy = H - depth * 0.62 - 50;
+  const cs = Math.cos(yaw), sn = Math.sin(yaw);
+  for (let k = 0; k < SLICES; k++) {
+    const d = -0.52 + (k / (SLICES - 1)) * 1.04;
+    const persp = 1 / (1 - d * 0.28);
+    const baseY = oy + d * depth * persp;
+    const runs = []; let run = [];
+    for (let j = 0; j <= SAMPLES; j++) {
+      const s = -0.55 + (j / SAMPLES) * 1.1;
+      const h = height(s * cs - d * sn, s * sn + d * cs);
+      if (h < 0) { if (run.length) runs.push(run); run = []; continue; }
+      run.push([ox + s * span * persp, baseY - h * lift * persp]);
+    }
+    if (run.length) runs.push(run);
+    ctx.fillStyle = rgb(sky.bg);
+    for (const r of runs) {
+      ctx.beginPath(); ctx.moveTo(r[0][0], baseY + 2);
+      for (const [x, y] of r) ctx.lineTo(x, y);
+      ctx.lineTo(r[r.length - 1][0], baseY + 2); ctx.closePath(); ctx.fill();
+    }
+    ctx.beginPath();
+    for (const r of runs) { ctx.moveTo(r[0][0], r[0][1]); for (const [x, y] of r) ctx.lineTo(x, y); }
+    ctx.strokeStyle = rgb(sky.ink, 0.22 + 0.78 * (k / SLICES));
+    ctx.lineWidth = 0.7 + 1.1 * (k / SLICES);
+    ctx.stroke();
+  }
+  document.title = "ready";
+})();
+</script>
+</body>
+</html>

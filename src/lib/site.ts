@@ -9,6 +9,9 @@ export const site = {
   resume: "/resume/noah-airmet-resume.pdf",
   pulpit: "https://pulpit-archive.org/",
   agentBus: "https://github.com/Noah-Airmet/agent-bus",
+  // Share card, rendered by scripts/card/render.sh. Bump v after re-rendering
+  // so chat apps and social sites fetch the new files.
+  card: { image: "/og/card.png?v=1", video: "/og/card.mp4?v=1", width: 1200, height: 630 },
 };
 
 export const tabs = [

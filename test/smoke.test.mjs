@@ -115,3 +115,16 @@ test("built pages do not contain broken internal links", () => {
     }
   }
 });
+
+test("every page carries the share card, and its files exist", () => {
+  for (const file of pages()) {
+    const html = readFileSync(file, "utf8");
+    for (const prop of ["og:image", "og:video"]) {
+      const m = html.match(new RegExp(`<meta property="${prop}" content="https://noahairmet\\.com(/[^"?]+)`));
+      assert.ok(m, `${file}: ${prop}`);
+      assert.ok(existsSync(join(dist, m[1])), `${file}: ${prop} points at missing ${m[1]}`);
+    }
+    assert.match(html, /<meta property="og:video:type" content="video\/mp4">/, file);
+    assert.match(html, /<meta name="twitter:card" content="summary_large_image">/, file);
+  }
+});
