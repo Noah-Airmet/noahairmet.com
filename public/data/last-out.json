@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "staleDays": 45,
+  "areas": [
+    {
+      "key": "timp",
+      "title": "Mount Timpanogos",
+      "kinds": ["hike", "run", "ride"],
+      "catch": { "center": [40.3945, -111.646], "km": 4.2 },
+      "frame": { "center": [40.3945, -111.646], "km": 5.2, "fade": 0.3, "spin": true },
+      "peak": [40.3908, -111.6461]
+    },
+    {
+      "key": "sundance",
+      "title": "Sundance",
+      "kinds": ["ski"],
+      "catch": { "center": [40.383, -111.59], "km": 3.2 },
+      "frame": { "fit": true, "fade": 0.34 },
+      "peak": [40.3908, -111.6461],
+      "backdrop": { "center": [40.393, -111.642], "km": 6.0 }
+    },
+    {
+      "key": "alta",
+      "title": "Alta",
+      "kinds": ["ski", "hike", "run", "ride"],
+      "catch": { "center": [40.5775, -111.6255], "km": 2.8 },
+      "frame": { "center": [40.5775, -111.6255], "km": 5.2, "fade": 0.38 },
+      "peak": [40.5659, -111.6248]
+    },
+    {
+      "key": "brighton",
+      "title": "Brighton",
+      "kinds": ["ski", "hike", "run", "ride"],
+      "catch": { "center": [40.5905, -111.578], "km": 2.8 },
+      "frame": { "center": [40.5905, -111.578], "km": 5.2, "fade": 0.38 },
+      "peak": [40.57, -111.579]
+    },
+    {
+      "key": "corner-canyon",
+      "title": "Corner Canyon",
+      "kinds": ["ride", "run", "hike"],
+      "catch": { "center": [40.492, -111.82], "km": 4.0 },
+      "frame": { "fit": true, "fade": 0.34 },
+      "peak": [40.5269, -111.7561],
+      "backdrop": { "center": [40.519, -111.764], "km": 6.5 }
+    }
+  ]
+}
