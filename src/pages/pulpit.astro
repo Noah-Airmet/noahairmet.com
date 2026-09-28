@@ -1,5 +1,6 @@
 ---
 import core from "../../public/data/pulpit-core.json";
+import Bracket from "../components/Bracket.astro";
 import Site from "../layouts/Site.astro";
 import { site } from "../lib/site";
 
@@ -26,20 +27,20 @@ const fmt = (n: number) => n.toLocaleString("en-US");
         is traced to the best surviving source and shaded by how faithfully that source records what
         was said.
       </p>
-      <div class="actions">
-        <a class="btn btn-solid" href={site.pulpit}>Open Pulpit</a>
-      </div>
+      <nav class="actions" aria-label="Pulpit">
+        <Bracket href={site.pulpit}>open pulpit</Bracket>
+      </nav>
     </section>
 
     <figure class="dots" aria-labelledby="dots-key">
       <div class="dots-tools">
         <div class="seg" role="group" aria-label="Arrange by">
-          <button type="button" data-layout="decade" aria-pressed="true">By decade</button>
-          <button type="button" data-layout="grade" aria-pressed="false">By source</button>
+          <button type="button" data-layout="decade" aria-pressed="true">by decade</button>
+          <button type="button" data-layout="grade" aria-pressed="false">by source</button>
         </div>
         <label class="find">
           <span class="visually-hidden">Find a speaker</span>
-          <input id="find" type="search" placeholder="Find a speaker" autocomplete="off" spellcheck="false" />
+          <input id="find" type="search" placeholder="find a speaker" autocomplete="off" spellcheck="false" />
         </label>
         <output id="found" class="found" for="find" aria-live="polite"></output>
       </div>

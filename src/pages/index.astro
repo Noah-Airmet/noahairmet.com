@@ -1,4 +1,5 @@
 ---
+import Bracket from "../components/Bracket.astro";
 import Site from "../layouts/Site.astro";
 import { site } from "../lib/site";
 ---
@@ -12,14 +13,12 @@ import { site } from "../lib/site";
         <a href="https://www.simplicitygroup.com/">Simplicity Group</a>. I’m working toward a career
         securing and governing AI systems.
       </p>
-      <div class="actions">
-        <a class="btn btn-solid" href={site.resume}>Résumé <span class="btn-note">PDF</span></a>
-        <a class="btn" href={`mailto:${site.email}`}>Email me</a>
-      </div>
-      <p class="more">
-        <a href={site.github}>GitHub</a>
-        <a href={site.linkedin}>LinkedIn</a>
-      </p>
+      <nav class="actions" aria-label="Résumé and contact">
+        <Bracket href={site.resume}>résumé</Bracket>
+        <Bracket href={`mailto:${site.email}`}>email</Bracket>
+        <Bracket href={site.github}>github</Bracket>
+        <Bracket href={site.linkedin}>linkedin</Bracket>
+      </nav>
       <p class="also">
         Also building <a href={site.agentBus}>agent-bus</a>, a small tool that lets AI coding
         assistants hand work to each other.

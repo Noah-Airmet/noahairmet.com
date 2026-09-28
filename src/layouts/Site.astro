@@ -54,8 +54,9 @@ const fullTitle = pageTitle(title);
         {
           tabs.map((t) => (
             <a href={t.href} aria-current={t.id === tab ? "page" : undefined}>
-              {t.id === tab && <span class="pill" aria-hidden="true" />}
-              <span class="label">{t.label}</span>
+              <span class="tb tb-l" aria-hidden="true">[</span>
+              {t.label.toLowerCase()}
+              <span class="tb tb-r" aria-hidden="true">]</span>
             </a>
           ))
         }
