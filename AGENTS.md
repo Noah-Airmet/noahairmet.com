@@ -42,11 +42,11 @@ with its source, so nobody mistakes an agent's preference for his.
   CSP, so Cloudflare's auto-injected analytics beacon is blocked there.
 - **From Noah — King Follett and Hymn Parts stay unlisted** (one is for
   friends; the other carries copyrighted hymns). Smoke-tested.
-- **Agent default, safety — never link private services** (`corpus.` and
+- **Agent default, safety — no links to private services** (`corpus.` and
   other internal subdomains). Smoke-tested.
 - **Agent default, craft — keep old URLs alive** via `public/_redirects`
-  (`/field-notes/*` → `/writing/*`). Never add a `/resume/*` wildcard; it
-  loops the PDF.
+  (`/field-notes/*` → `/writing/*`). A `/resume/*` wildcard loops the PDF, so
+  there isn't one.
 - **Agent default, craft — security headers.** Same-origin scripts and
   styles plus Cloudflare Web Analytics (enabled on the zone since
   2026-03-13; cookieless). Astro would inline small scripts, so
@@ -75,4 +75,4 @@ npm run deploy:production   # ONLY with Noah's explicit authorization
 Deploy = Wrangler (`npx wrangler whoami`). Pushing to GitHub does not
 deploy. After deploying, check `/`, `/pulpit/`, `/writing/`,
 `/resume/noah-airmet-resume.pdf`, `/bee/` return 200 and
-`/field-notes/professional-commitments/` 301s. Don't touch DNS.
+`/field-notes/professional-commitments/` 301s. DNS stays as it is.
