@@ -17,7 +17,7 @@ vanilla PWA for hosting here.
    can live on a public domain without violating the household rule that
    health data never leaves owned hardware. Do not add sync, analytics,
    accounts, or any server component. The fitness repo on the iMac
-   (`~/development/fitness`) is a deliberately separate, agent-driven system;
+   (`~/development/tools/fitness`) is a deliberately separate, agent-driven system;
    the only bridge is a "Copy for Noah's trainer" button that puts markdown on
    the clipboard for manual pasting. Keep that coupling at zero.
 2. **External `app.js` + `style.css`, no inline scripts or styles.** The
