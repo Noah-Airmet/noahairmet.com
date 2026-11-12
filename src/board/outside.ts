@@ -177,7 +177,7 @@ export async function startOutside() {
   let vel = 0;
   let rise = calm || still ? 1 : 0;
   let lifting = calm || still;
-  let asked = false;
+  let asked = calm || still;
   /** Where the summit is on the page right now. */
   const summit = { x: 0, y: 0 };
   let seen = false;

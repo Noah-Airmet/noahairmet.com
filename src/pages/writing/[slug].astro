@@ -18,7 +18,7 @@ const { Content } = await render(note);
   <main id="main" class="page">
     <article>
       <header class="article-head">
-        <h1 class="page-title">{note.data.title}</h1>
+        <h1 class="title page-title">{note.data.title}</h1>
         <p class="say">{note.data.description}</p>
         <time datetime={isoDate(note.data.date)}>{longDate(note.data.date)}</time>
       </header>

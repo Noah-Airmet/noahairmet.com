@@ -140,9 +140,37 @@ button {
 }
 .bar .home {
   color: var(--ink);
-  font-weight: 800;
+  font-weight: 600;
   font-stretch: 130%;
   letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+@media (max-width: 860px) {
+  .bar nav {
+    gap: var(--s-2);
+  }
+}
+
+/* ---- the one display title: section headings on the home page, page titles elsewhere */
+.title {
+  font-family: var(--display);
+  font-weight: 1000;
+  font-stretch: 150%;
+  font-variation-settings: "opsz" 144;
+  font-size: min(calc((100vw - 2 * var(--gutter)) / 9.7), 7.5rem);
+  line-height: 0.86;
+  letter-spacing: -0.03em;
+  margin-left: -0.025em;
+  padding-bottom: 0.14em;
+}
+/* the serif line that says what a thing is */
+.say {
+  max-width: 34ch;
+  font-family: var(--serif);
+  font-size: var(--t-lede);
+  line-height: 1.14;
+  letter-spacing: -0.012em;
+  text-wrap: balance;
 }
 
 @view-transition {

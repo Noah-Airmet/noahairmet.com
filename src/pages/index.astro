@@ -83,7 +83,7 @@ const editions = [
     <div id="work">
       <section class="proj" id="citationbench" aria-labelledby="cb-h">
         <header class="proj-head">
-          <h2 id="cb-h" data-keep="a heading">CitationBench</h2>
+          <h2 class="title" id="cb-h" data-keep="a heading">CitationBench</h2>
           <p class="say" data-keep="a description">
             A benchmark of whether an agent with a library tool cites the right page and quotes it accurately.
           </p>
@@ -146,7 +146,7 @@ const editions = [
 
       <section class="proj" id="safetypage" aria-labelledby="sp-h">
         <header class="proj-head">
-          <h2 id="sp-h" data-keep="a heading">SafetyPage</h2>
+          <h2 class="title" id="sp-h" data-keep="a heading">SafetyPage</h2>
           <p class="say" data-keep="a description">A page-cited library of the AI safety record, built for people and for AI agents.</p>
           <nav class="proj-links" aria-label="SafetyPage">
             <a href={site.safetypage}>Library</a>
@@ -170,7 +170,7 @@ const editions = [
     </div>
 
     <section class="writing" id="writing" aria-labelledby="w-h">
-      <h2 id="w-h" data-keep="a heading">Writing</h2>
+      <h2 class="title" id="w-h" data-keep="a heading">Writing</h2>
       <ol class="notes">
         {
           notes.map((n) => (
@@ -210,6 +210,14 @@ const editions = [
             </li>
           ))
         }
+        {
+          rev && (
+            <li class="rev">
+              <b>Revision</b>
+              <span>{rev}</span>
+            </li>
+          )
+        }
       </ol>
     </div>
     <nav class="col-links" aria-label="Contact">
@@ -219,7 +227,6 @@ const editions = [
       <a href={site.linkedin}>LinkedIn</a>
       <a href={site.resume}>Résumé</a>
       <a href="/rss.xml">RSS</a>
-      {rev && <span class="rev">rev {rev}</span>}
     </nav>
   </footer>
 </Page>

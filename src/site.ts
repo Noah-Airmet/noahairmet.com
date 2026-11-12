@@ -15,7 +15,7 @@ export const site = {
   citationbench: "https://safetypage.noahairmet.com/citationbench",
   safetypageRepo: "https://github.com/Noah-Airmet/safetypage",
   safetypageApi: "https://safetypage-api.noahairmet.com",
-  card: { image: "/og/card.png?v=2", width: 1200, height: 630 },
+  card: { image: "/og/card.png?v=3", width: 1200, height: 630 },
 };
 
 export const absoluteUrl = (path = "/") => new URL(path, site.url).toString();
