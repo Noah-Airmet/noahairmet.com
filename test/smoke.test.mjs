@@ -18,7 +18,7 @@ test("the build emits every route, data file and control file", () => {
     "index.html", "404.html", "writing/index.html", "writing/professional-commitments/index.html",
     "rss.xml", "sitemap-index.xml", "resume/noah-airmet-resume.pdf", "bee/index.html", "bee/sw.js",
     "favicon.svg", "favicon.ico", "apple-touch-icon.png", "og/card.png", "boot.js",
-    "_headers", "_redirects", "robots.txt", "data/timp.json", "data/last-out.json",
+    "_headers", "_redirects", "robots.txt", "data/last-out.json",
     "media/citationbench-replay.mp4", "media/citationbench-replay.webp",
   ]) assert.ok(existsSync(join(dist, file)), `${file} should exist in dist`);
 });
@@ -120,9 +120,21 @@ test("styles are external, fonts self-hosted, reduced motion honored", () => {
   assert.match(read("boot.js"), /prefers-reduced-motion/);
 });
 
-test("the terrain file is whole", () => {
-  const timp = JSON.parse(read("data/timp.json"));
-  assert.equal(timp.elev.length, timp.rows * timp.cols);
+test("every mountain has a whole grid and a trail that stays on the model", () => {
+  const { peaks } = JSON.parse(readFileSync(join(root, "src/data/peaks.json"), "utf8"));
+  assert.ok(peaks.length >= 3);
+  const home = read("index.html");
+  for (const p of peaks) {
+    const d = JSON.parse(read(`data/peaks/${p.key}.json`));
+    assert.equal(d.elev.length, d.rows * d.cols, `${p.key}: grid`);
+    assert.ok(d.route.length > 50, `${p.key}: a trail`);
+    // the model is cut round: a point outside the circle would be dropped
+    assert.ok(d.route.every(([u, v]) => Math.hypot(u, v) < 0.5), `${p.key}: trail inside the cut`);
+    const [lu, lv] = d.route[d.route.length - 1];
+    assert.ok(Math.hypot(lu - d.peak[0], lv - d.peak[1]) < 0.02, `${p.key}: trail ends on the summit`);
+    assert.ok(home.includes(`data-key="${p.key}"`), `${p.key}: on the page`);
+  }
+  assert.match(home, /OpenStreetMap contributors/);
 });
 
 test("rss carries the writing", () => {

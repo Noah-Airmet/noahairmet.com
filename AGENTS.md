@@ -125,8 +125,7 @@ loud"), with the numbers taken from the published runs.
   SafetyPage's viewer puts the highlight.
 - `public/data/peaks/`: one elevation grid and trail per mountain, built by
   `scripts/peaks.py` from USGS 3DEP and OpenStreetMap. The figure credits both.
-- `public/data/timp.json`: Timp's USGS elevation grid. `public/data/last-out.json`
-  is the Worker's list of areas.
+- `public/data/last-out.json` is the Worker's list of areas.
 
 ## Other pieces
 

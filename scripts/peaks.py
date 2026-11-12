@@ -8,7 +8,8 @@ for checking the work at scripts/.cache/peaks-check.png.
 The data needs only the Python standard library. The contact sheet needs
 Pillow:  pip install Pillow    (or: uv run --with pillow scripts/peaks.py)
 
-Run from anywhere: python3 scripts/peaks.py
+Run from anywhere: python3 scripts/peaks.py [key ...]
+(Python 3.10+; the macOS system Python 3.9 can't complete TLS with overpass-api.de)
 Downloads are cached in scripts/.cache/; delete it to refetch.
 
 Elevation: USGS 3D Elevation Program (3DEP), public domain.
@@ -31,6 +32,7 @@ UA = "terrain-build-script/1.0"
 
 # Display order. summit: fallback if OSM has no matching natural=peak node.
 # trailhead: where the hike starts; it is snapped to the nearest mapped trail.
+# (Lone Peak starts at the Peak View trailhead, the official start since 2023.)
 # prefer: ways whose name matches are cheaper to route over, so the path keeps
 # to the named trail rather than a shortcut. via: optional points the route
 # must pass (snapped to the trail), for trails with more than one way up.
@@ -39,11 +41,11 @@ UA = "terrain-build-script/1.0"
 PEAKS = [
     dict(key="timpanogos", name="Mount Timpanogos", elevation_ft=11749, trail="Timpooneke Trail",
          peak_name=r"^Mount Timpanogos$", summit=(40.39083, -111.64611),
-         trailhead=(40.43130, -111.63890), prefer=r"Timpooneke|Timpanogos|Summit",
+         trailhead=(40.43079, -111.63914), prefer=r"Timpooneke|Timpanogos|Summit",
          osm_box=(40.36, -111.70, 40.45, -111.60), toward_summit=0.25),
     dict(key="lone-peak", name="Lone Peak", elevation_ft=11253, trail="Jacob's Ladder",
          peak_name=r"^Lone Peak$", summit=(40.52694, -111.75611),
-         trailhead=(40.49880, -111.81560), prefer=r"Jacob|Lone Peak|Ghost Falls|Bonneville",
+         trailhead=(40.49152, -111.80517), prefer=r"Jacobs? Ladder Trail|Peak View Trail",
          osm_box=(40.47, -111.85, 40.545, -111.74), toward_summit=0.25),
     dict(key="olympus", name="Mount Olympus", elevation_ft=9026, trail="Mount Olympus Trail",
          peak_name=r"^Mount Olympus$", summit=(40.65611, -111.77111),
@@ -51,11 +53,11 @@ PEAKS = [
          osm_box=(40.635, -111.83, 40.67, -111.76), toward_summit=0.25),
     dict(key="pfeifferhorn", name="Pfeifferhorn", elevation_ft=11326, trail="Red Pine Lake Trail",
          peak_name=r"Pfeifferhorn", summit=(40.53139, -111.70528),
-         trailhead=(40.57600, -111.68150), prefer=r"Red Pine|Pfeifferhorn|White Pine",
+         trailhead=(40.57487, -111.68083), prefer=r"Red Pine|Pfeifferhorn|White Pine Trail",
          osm_box=(40.52, -111.72, 40.59, -111.66), toward_summit=0.25),
     dict(key="nebo", name="Mount Nebo", elevation_ft=11928, trail="North Peak Trail",
          peak_name=r"^(Mount Nebo|Nebo|North Peak)", summit=(39.82194, -111.76056),
-         trailhead=(39.87000, -111.72500), prefer=r"Nebo|North Peak",
+         trailhead=(39.84848, -111.72221), prefer=r"Nebo Peak North|North Peak|Nebo",
          osm_box=(39.79, -111.80, 39.92, -111.68), toward_summit=0.25),
 ]
 
@@ -188,10 +190,26 @@ out geom tags;"""
 
 
 def osm_api(box):
+    """The same elements from the main OSM API, splitting the box when it
+    holds more than the API will return in one call."""
+    import urllib.error
     import xml.etree.ElementTree as ET
     s, w, n, e = box
     url = f"https://api.openstreetmap.org/api/0.6/map?bbox={w},{s},{e},{n}"
-    root = ET.fromstring(urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": UA}), timeout=180).read())
+    try:
+        body = urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": UA}), timeout=180).read()
+    except urllib.error.HTTPError as ex:
+        if ex.code != 400:
+            raise
+        ms, mw = (s + n) / 2, (w + e) / 2
+        seen, out = set(), []
+        for q in ((s, w, ms, mw), (s, mw, ms, e), (ms, w, n, mw), (ms, mw, n, e)):
+            for x in osm_api(q)["elements"]:
+                if (x["type"], x["id"]) not in seen:
+                    seen.add((x["type"], x["id"]))
+                    out.append(x)
+        return {"elements": out}
+    root = ET.fromstring(body)
     nodes, out = {}, []
     for nd in root.iter("node"):
         nodes[nd.get("id")] = (float(nd.get("lat")), float(nd.get("lon")))
@@ -247,19 +265,30 @@ def read_tiff(buf):
     return w, h, out, (lon0, lat1, sx, sy)
 
 
+def get(url, tries=4):
+    import time
+    for i in range(tries):
+        try:
+            return urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": UA}), timeout=120).read()
+        except Exception as ex:
+            print(f"  {ex}; retrying" if i < tries - 1 else f"  {ex}")
+            if i == tries - 1:
+                raise
+            time.sleep(5 * (i + 1))
+
+
 class Dem:
     """A 3DEP raster over a lat/lon box, sampled bilinearly at any point."""
     def __init__(self, lat, lon, res_m=10):
         # ArcGIS pads the bbox to the image's aspect, so ask at the box's own
         # aspect in degrees and read the true extent back from the GeoTIFF.
-        h = max(200, min(3000, round((lat[1] - lat[0]) * M_PER_DEG / res_m)))
+        h = max(200, min(1500, round((lat[1] - lat[0]) * M_PER_DEG / res_m)))
         w = round(h * (lon[1] - lon[0]) / (lat[1] - lat[0]))
         url = ("https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/exportImage"
                f"?bbox={lon[0]},{lat[0]},{lon[1]},{lat[1]}&bboxSR=4326&imageSR=4326&size={w},{h}"
                "&format=tiff&pixelType=F32&interpolation=RSP_BilinearInterpolation&f=image")
         key = hashlib.sha1(url.encode()).hexdigest()[:12]
-        buf = cached(f"dem-{key}.tif", lambda: urllib.request.urlopen(
-            urllib.request.Request(url, headers={"User-Agent": UA}), timeout=120).read())
+        buf = cached(f"dem-{key}.tif", lambda: get(url))
         self.w, self.h, self.e, (self.lon0, self.lat1, self.sx, self.sy) = read_tiff(buf)
         assert min(self.e) > -100, "nodata in elevation raster"
 
@@ -523,7 +552,8 @@ def contact_sheet(results, path):
     print(f"contact sheet: {path}")
 
 
-PUBLISHED_MI = {"timpanogos": "7.5", "lone-peak": "6.0", "olympus": "3.5", "pfeifferhorn": "4.5", "nebo": "4.7"}
+# One-way figures as commonly published (guidebooks, SummitPost, trail sites); they vary.
+PUBLISHED_MI = {"timpanogos": "7.3-7.5", "lone-peak": "5.5-7", "olympus": "3.3-3.5", "pfeifferhorn": "4.5-5.5", "nebo": "4.0-4.5"}
 pk_pub = lambda k: PUBLISHED_MI.get(k, "?")
 
 

@@ -1,0 +1,39 @@
+{
+  "peaks": [
+    {
+      "key": "timpanogos",
+      "name": "Mount Timpanogos",
+      "elevation_ft": 11749,
+      "trail": "Timpooneke Trail",
+      "trail_mi": 6.9
+    },
+    {
+      "key": "lone-peak",
+      "name": "Lone Peak",
+      "elevation_ft": 11253,
+      "trail": "Jacob's Ladder",
+      "trail_mi": 6.3
+    },
+    {
+      "key": "olympus",
+      "name": "Mount Olympus",
+      "elevation_ft": 9026,
+      "trail": "Mount Olympus Trail",
+      "trail_mi": 3.4
+    },
+    {
+      "key": "pfeifferhorn",
+      "name": "Pfeifferhorn",
+      "elevation_ft": 11326,
+      "trail": "Red Pine Lake Trail",
+      "trail_mi": 4.9
+    },
+    {
+      "key": "nebo",
+      "name": "Mount Nebo",
+      "elevation_ft": 11928,
+      "trail": "North Peak Trail",
+      "trail_mi": 4.4
+    }
+  ]
+}

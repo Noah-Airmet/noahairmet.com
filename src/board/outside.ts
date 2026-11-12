@@ -191,13 +191,11 @@ export async function startOutside() {
   const metaEl = document.getElementById("peak-meta")!;
   const tabs = document.getElementById("peaks") as HTMLElement | null;
 
-  // What there is to show: a recent day out first, then the peaks.
-  const [rec, index] = await Promise.all([
-    lastOut(),
-    fetch("/data/peaks/index.json")
-      .then((r) => r.json() as Promise<{ peaks: Entry[] }>)
-      .catch(() => ({ peaks: [] as Entry[] })),
-  ]);
+  // What there is to show: a recent day out first, then the peaks the page lists.
+  const rec = await lastOut();
+  const index: { peaks: Entry[] } = {
+    peaks: [...(tabs?.querySelectorAll<HTMLButtonElement>("button[data-key]") ?? [])].map((b) => ({ key: b.dataset.key!, name: b.dataset.name! })),
+  };
   const loaders: (() => Promise<Scene>)[] = [];
   const names: string[] = [];
   if (rec) {
@@ -220,9 +218,18 @@ export async function startOutside() {
     return s;
   };
 
+  /** The turn that puts the trail on the near side of its summit. */
+  const facing = (sc: Scene) => {
+    const pts = sc.route.flatMap((r) => r.pts);
+    if (!pts.length) return -Math.PI / 2 + 0.3;
+    const cu = pts.reduce((n, q) => n + q.u, 0) / pts.length - sc.peak.u;
+    const cv = pts.reduce((n, q) => n + q.v, 0) / pts.length - sc.peak.v;
+    return Math.atan2(cu, cv) + 0.3;
+  };
+
   let at = 0;
   let scene = await load(0);
-  let yaw = -Math.PI / 2 + 0.3;
+  let yaw = facing(scene);
   let spin = calm || still ? 0 : 0.00006;
   let vel = 0;
   /** 0 flat, 1 standing. */
@@ -251,20 +258,21 @@ export async function startOutside() {
     tabs?.querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", String(i === at)));
   };
 
-  if (tabs && names.length > 1) {
-    names.forEach((n, i) => {
+  if (tabs) {
+    if (rec) {
       const b = document.createElement("button");
       b.type = "button";
-      b.textContent = n.replace(/^Mount /, "").replace(/^the /i, "");
-      b.setAttribute("aria-pressed", String(i === 0));
+      b.textContent = rec.title;
+      tabs.prepend(b);
+    }
+    tabs.querySelectorAll("button").forEach((b, i) =>
       b.addEventListener("click", () => {
         theirs = true;
         tabs.style.setProperty("--t", "0");
         void show(i);
-      });
-      tabs.append(b);
-    });
-    tabs.hidden = false;
+      }),
+    );
+    tabs.hidden = names.length < 2;
   }
   caption();
 
@@ -424,6 +432,8 @@ export async function startOutside() {
       }
       scene = await next;
       at = i;
+      yaw = facing(scene);
+      vel = 0;
       caption();
       trace = calm || still ? 1 : 0;
       clock = 0;

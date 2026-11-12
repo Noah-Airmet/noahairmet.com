@@ -3,6 +3,7 @@ import "../styles/home.css";
 import "../styles/work.css";
 import { getCollection } from "astro:content";
 import bench from "../data/citationbench.json";
+import peaks from "../data/peaks.json";
 import { quotes } from "../data/quotes";
 import Page from "../layouts/Page.astro";
 import Icon from "../components/Icon.astro";
@@ -201,10 +202,21 @@ const replay = "/r/cc-haiku-5-5-4e1c63-pc-4bd058594c.1";
         <canvas id="peak" role="img" aria-label="A Utah mountain as stacked contour lines, with a trail drawn on it"></canvas>
         <figcaption>
           <span class="peak-name" id="peak-name">Mount Timpanogos</span>
-          <span class="peak-meta" id="peak-meta">Wasatch Range, Utah</span>
+          <span class="peak-meta" id="peak-meta">{peaks.peaks[0].trail}, {peaks.peaks[0].trail_mi.toFixed(1)} mi</span>
         </figcaption>
-        <div class="seg peaks" id="peaks" role="group" aria-label="Mountain" hidden></div>
-        <small class="credit">Elevation from USGS 3DEP. Trails © OpenStreetMap contributors.</small>
+        <div class="seg peaks" id="peaks" role="group" aria-label="Mountain" hidden>
+          {
+            peaks.peaks.map((p, i) => (
+              <button type="button" data-key={p.key} data-name={p.name} aria-pressed={i === 0 ? "true" : "false"}>
+                {p.name.replace(/^Mount /, "")}
+              </button>
+            ))
+          }
+        </div>
+        <small class="credit">
+          Elevation: U.S. Geological Survey, 3D Elevation Program. Trails
+          <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>.
+        </small>
       </figure>
     </section>
   </main>
