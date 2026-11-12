@@ -5,8 +5,8 @@
 // Each stop below is a whole set of tokens at one sun elevation; between stops
 // of the same family the colours are mixed, and between the last light one and
 // the first dark one they change over (a ground halfway between can't be read
-// with either ink). window.sky lets the dial under the mountain hold another
-// time of day; ?at=17:10 opens the page at one.
+// with either ink). window.sky lets the day bar at the foot of the page hold
+// another time of day; ?at=17:10 opens the page at one.
 (function () {
   var d = document.documentElement;
   var LAT = 40.2338, LON = -111.6585, RAD = Math.PI / 180;
@@ -94,6 +94,11 @@
     /** The time being shown when it isn't now (the dial is holding it), else null. */
     held: null,
     tokens: null,
+    /** The page's ground colour at a moment in time (the day bar draws itself with it). */
+    paper: function (date) {
+      var c = tokens(sun(date))[1][0];
+      return "rgb(" + Math.round(c[0]) + " " + Math.round(c[1]) + " " + Math.round(c[2]) + ")";
+    },
     /** Show the sky for a moment in time; pass null to go back to now. */
     show: function (date) {
       sky.held = date || null;

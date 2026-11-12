@@ -1,7 +1,7 @@
 // The home page's board: hire the agents, set the name, then start the exhibits.
 import { agents, hire, watchPointer } from "./agents";
 import { startBench } from "./bench";
-import { startDial } from "./dial";
+import { startDaybar } from "./daybar";
 import { startGuard } from "./guard";
 import { calm, pageRect, still } from "./kit";
 import { startName } from "./name";
@@ -18,7 +18,7 @@ startReplay();
 startBench();
 startQuote();
 void startOutside();
-startDial();
+startDaybar();
 
 async function start() {
   if (calm) return;

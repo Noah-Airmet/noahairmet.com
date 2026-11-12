@@ -119,7 +119,7 @@ test("styles are external, fonts self-hosted, reduced motion honored", () => {
   // the sky: the page's colours follow the sun, and there is no day/night button
   assert.match(read("boot.js"), /window\.sky/);
   assert.doesNotMatch(read("index.html"), /id="theme"/);
-  assert.match(read("index.html"), /id="dial"/);
+  assert.match(read("index.html"), /id="daybar"/);
   assert.ok(assets.filter((f) => f.endsWith(".woff2")).length >= 4, "four font files are self-hosted");
   assert.match(read("boot.js"), /prefers-reduced-motion/);
 });

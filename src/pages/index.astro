@@ -222,10 +222,15 @@ const replay = "/r/cc-haiku-5-5-4e1c63-pc-4bd058594c.1";
   </main>
 
   <section class="sky" id="sky" aria-label="The time of day in Provo" hidden>
-    <span class="dial-what" id="dial-what">Now</span>
+    <div class="day-head">
+      <span class="day-where">Provo</span>
+      <b id="day-time"></b>
+      <span id="day-what"></span>
+      <button class="day-now" id="day-now" type="button" hidden>Now</button>
+    </div>
     <div
-      class="dial"
-      id="dial"
+      class="daybar"
+      id="daybar"
       role="slider"
       tabindex="0"
       aria-label="Time of day in Provo, Utah"
@@ -233,11 +238,16 @@ const replay = "/r/cc-haiku-5-5-4e1c63-pc-4bd058594c.1";
       aria-valuemax="1439"
       aria-valuenow="720"
     >
-      <canvas></canvas>
-      <div class="dial-read"><b id="dial-time"></b><span id="dial-off"></span></div>
+      <div class="day-strip"></div>
+      <i class="day-mark"></i>
+      <div class="day-scale" aria-hidden="true">
+        <span class="day-hour h0">12 AM</span>
+        <span class="day-hour h6">6</span>
+        <span class="day-hour h12">Noon</span>
+        <span class="day-hour h18">6</span>
+        <span class="day-hour h24">12 AM</span>
+      </div>
     </div>
-    <button class="dial-now" id="dial-now" type="button">Now</button>
-    <span class="dial-day" id="dial-day"></span>
   </section>
 
   <footer class="colophon">

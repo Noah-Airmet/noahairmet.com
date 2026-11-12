@@ -76,18 +76,14 @@ last frame, the mountain holds still.
   elevation, because a ground halfway between can't be read with either ink.
   `src/styles/tokens.css` holds the day's values and everything that isn't a
   colour. There is no day/night button (Noah, 2026-11-12: "it has become an
-  AI cliche"); the control is the solar dial under the mountain
-  (`src/board/dial.ts`), after the Apple Watch Solar Dial face he's worn for
-  years, drawn to its anatomy: a 24-hour face with noon at the top; the day a
-  wedge out of the centre between sunrise and sunset; narrowing bands beside
-  it for civil, nautical and astronomical twilight (the sun 6, 12 and 18
-  degrees down), then night, five shades in all; a dot on the sun's circle
-  for each crossing and for solar noon and midnight; the sun half lit as it
-  crosses the horizon; and the clock's own dial sitting opposite the sun. All
-  of it comes from the sun's elevation over Provo today, so the wedge changes
-  through the year. Turning it holds another time of day and snaps to the
-  crossings; `Now` lets go. `?at=17:10` opens the page at a time, for looking
-  at a sky.
+  AI cliche"); the control is the day bar at the foot of the page
+  (`src/board/daybar.ts`): one strip, midnight to midnight in Provo, coloured
+  as the page is coloured at each hour, with today's sunrise and sunset
+  marked from the sun's real elevation. Sliding the blue mark holds another
+  time of day; `Now` lets go. `?at=17:10` opens the page at a time, for
+  looking at a sky. (A copy of the Apple Watch Solar Dial was built first and
+  taken out the same day: Noah found it didn't fit the rest of the site. It
+  is in git at 95bce36 if it's ever wanted.)
 - Sound is a word in the bar that says its state (`Sound off` / `Sound on`),
   not an icon: Noah's preference.
 - Icons are one component, `src/components/Icon.astro`: brand marks for X,

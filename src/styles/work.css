@@ -559,93 +559,126 @@
   color: var(--ink-3);
 }
 
-/* ---- the time of day in Provo: the page's colours come from this sun */
+/* ---- the day bar: midnight to midnight in Provo, in the page's own colours */
 .sky {
-  display: grid;
-  justify-items: center;
-  gap: var(--s-4);
   padding: var(--s-9) var(--gutter) 0;
 }
 .sky[hidden] {
   display: none;
 }
-.dial-what {
-  font-size: var(--t-sm);
+.day-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  min-height: var(--hit);
+  font-size: var(--t-ui);
+}
+.day-where {
   font-weight: 600;
-  letter-spacing: 0.01em;
 }
-.dial {
-  position: relative;
-  width: min(20rem, 78vw);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  cursor: grab;
-  touch-action: none;
-  box-shadow: 0 24px 60px -24px var(--shade);
-}
-.dial:active {
-  cursor: grabbing;
-}
-.dial canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-}
-.dial-read {
-  --ix: 0px;
-  --iy: 0px;
-  position: absolute;
-  inset: 0;
-  /* the clock's dial sits opposite the sun, and the reading goes with it */
-  transform: translate(var(--ix), var(--iy));
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 2px;
-  color: #fff;
-  pointer-events: none;
-}
-.dial-read b {
-  font-family: var(--display);
-  font-weight: 800;
-  font-stretch: 125%;
-  font-size: clamp(1.75rem, 9vw, 2.5rem);
-  line-height: 1;
-  letter-spacing: -0.02em;
-}
-.dial-read span {
-  font: 500 var(--t-sm) / 1.2 var(--mono);
+.day-head b {
+  font: 500 var(--t-sm) / 1.3 var(--mono);
   font-stretch: 87.5%;
-  color: #ffd98a;
-  min-height: 1.2em;
 }
-.dial-now {
-  height: var(--hit);
-  padding: 0 14px;
+#day-what {
+  color: var(--ink-2);
+}
+.day-now {
+  margin-left: auto;
+  align-self: center;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: var(--paper-2);
   font-size: var(--t-sm);
   font-weight: 500;
-  color: var(--ink);
-  border-radius: 8px;
-  transition:
-    background var(--d-fast) var(--ease),
-    color var(--d-fast) var(--ease);
+  transition: background var(--d-fast) var(--ease);
 }
-.dial-now:not(:disabled) {
-  background: var(--paper-2);
+.day-now[hidden] {
+  display: none;
 }
-.dial-now:not(:disabled):hover {
+.day-now:hover {
   background: var(--rule);
 }
-.dial-now:disabled {
-  color: var(--ink-2);
-  cursor: default;
+.daybar {
+  position: relative;
+  padding: 14px 0 0;
+  cursor: ew-resize;
+  touch-action: pan-y;
 }
-.dial-day {
-  margin-top: calc(var(--s-3) * -1);
-  font-size: var(--t-sm);
-  color: var(--ink-2);
-  min-height: 1.4em;
+.day-strip {
+  height: 14px;
+  border-radius: 3px;
+  /* the page's own ground would vanish into the page: an edge keeps the day in view */
+  box-shadow: inset 0 0 0 1px var(--rule);
+}
+/* where the time is: a blue line through the strip, as the board's other guides */
+.day-mark {
+  position: absolute;
+  top: 4px;
+  width: 2px;
+  height: 34px;
+  margin-left: -1px;
+  background: var(--guide);
+  border-radius: 1px;
+}
+.day-mark::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: var(--guide);
+}
+.day-scale {
+  position: relative;
+  height: 2.4em;
+  margin-top: 10px;
+  font: 400 var(--t-xs) / 1.2 var(--mono);
+  font-stretch: 87.5%;
+  color: var(--ink-3);
+}
+.day-hour,
+.day-event {
+  position: absolute;
+  top: 0;
+  translate: -50% 0;
+  white-space: nowrap;
+}
+.day-hour.h0 {
+  left: 0;
+  translate: 0 0;
+}
+.day-hour.h6 {
+  left: 25%;
+}
+.day-hour.h12 {
+  left: 50%;
+}
+.day-hour.h18 {
+  left: 75%;
+}
+.day-hour.h24 {
+  left: 100%;
+  translate: -100% 0;
+}
+/* sunrise and sunset: a tick up to the strip, and the time */
+.day-event {
+  top: 1.2em;
+  color: var(--guide-ink);
+}
+.day-event::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 1px;
+  height: calc(1.2em + 10px + 14px);
+  background: var(--guide);
+  opacity: 0.7;
 }
 
 /* ---- the foot: how to reach him */
