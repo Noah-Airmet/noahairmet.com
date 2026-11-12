@@ -17,6 +17,11 @@ html {
   font-variant-numeric: tabular-nums;
   scroll-padding-top: calc(var(--bar) + var(--s-4));
 }
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
 
 body {
   margin: 0;
@@ -110,10 +115,10 @@ button {
   padding: 0 var(--gutter);
   font-size: var(--t-ui);
   font-weight: 500;
-  pointer-events: none;
-}
-.bar > * {
-  pointer-events: auto;
+  /* the page scrolls under it: a flat tint of the paper, nothing more */
+  background: color-mix(in srgb, var(--paper) 86%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
 }
 .bar nav {
   display: flex;

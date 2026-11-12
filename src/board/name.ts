@@ -45,6 +45,8 @@ let floorY = 0;
 let walls: Matter.Body[] = [];
 let tempo = 1;
 const knocked: Piece[] = [];
+/** How far each line's pieces sit from its text, so the ink starts on the margin. */
+const shifts: number[] = [];
 
 // ---------------------------------------------------------------- measuring
 
@@ -54,21 +56,28 @@ const pen = scratch.getContext("2d", { willReadFrequently: true })!;
 /** The ink of one glyph as convex outlines (two for an i: stem and dot),
  *  in pixels from the glyph's origin on the baseline. */
 function ink(ch: string, advance: number): Pt[][] {
-  const pad = Math.ceil(size * 0.25);
-  const base = Math.ceil(size * 1.05);
-  scratch.width = Math.ceil(advance + pad * 2);
-  scratch.height = Math.ceil(size * 1.4);
-  pen.font = `1000 extra-expanded ${size}px Flex`;
+  // Drawn at 288px or more whatever the name's size: the name is pinned to the
+  // font's largest optical size, which a canvas only reaches at that scale, and
+  // a small raster would close the gap under an i's dot.
+  const big = Math.max(size, 288);
+  const k = size / big;
+  const pad = Math.ceil(big * 0.25);
+  const base = Math.ceil(big * 1.05);
+  scratch.width = Math.ceil(advance / k + pad * 2);
+  scratch.height = Math.ceil(big * 1.4);
+  pen.font = `1000 extra-expanded ${big}px Flex`;
   pen.textBaseline = "alphabetic";
   pen.fillStyle = "#000";
   pen.fillText(ch, pad, base);
   const kx = advance / (pen.measureText(ch).width || advance);
   const { data, width, height } = pen.getImageData(0, 0, scratch.width, scratch.height);
-  const step = Math.max(1, Math.round(size / 80));
+  // Every row is read, so a hairline gap (an i's dot sits a few pixels above
+  // its stem at this weight) still splits the glyph; the hull keeps every few.
+  const step = Math.max(1, Math.round(big / 80));
   const groups: Pt[][] = [];
   let cur: Pt[] | null = null;
-  let empty = 0;
-  for (let y = 0; y < height; y += step) {
+  let last: Pt[] | null = null;
+  for (let y = 0; y < height; y++) {
     let lo = -1;
     let hi = -1;
     for (let x = 0; x < width; x++) {
@@ -78,12 +87,20 @@ function ink(ch: string, advance: number): Pt[][] {
       }
     }
     if (lo < 0) {
-      if (cur && ++empty >= 2) cur = null;
+      if (cur && last) cur.push(...last);
+      cur = null;
+      last = null;
       continue;
     }
-    empty = 0;
-    if (!cur) groups.push((cur = []));
-    cur.push({ x: (lo - pad) * kx, y: y - base }, { x: (hi + 1 - pad) * kx, y: y - base });
+    const row = [
+      { x: (lo - pad) * kx, y: (y - base) * k },
+      { x: (hi + 1 - pad) * kx, y: (y - base) * k },
+    ];
+    if (!cur) {
+      groups.push((cur = []));
+      cur.push(...row);
+    } else if (y % step === 0) cur.push(...row);
+    last = row;
   }
   return groups.map((g) => thin(hullOf(g)));
 }
@@ -127,7 +144,7 @@ function fit() {
   const lines = [...name.querySelectorAll<HTMLElement>(".ln")];
   hero.style.removeProperty("--name");
   hero.style.removeProperty("--notch");
-  for (const ln of lines) ln.style.marginLeft = "";
+  shifts.length = 0;
   build();
   const cs = getComputedStyle(hero);
   const left = pageRect(hero).x + parseFloat(cs.paddingLeft);
@@ -141,9 +158,8 @@ function fit() {
   const next = Math.min((size * width) / widest, (cap * innerHeight) / 100);
   hero.style.setProperty("--name", `${next.toFixed(2)}px`);
   build();
-  lines.forEach((ln, li) => {
-    ln.style.marginLeft = `${(left - span(li)[0]).toFixed(2)}px`;
-  });
+  // The plain text keeps its boxes; the pieces are what move onto the margin.
+  lines.forEach((_, li) => (shifts[li] = left - span(li)[0]));
   build();
   hero.style.setProperty("--notch", `${(span(0)[1] + size * 0.17).toFixed(1)}px`);
 }
@@ -176,7 +192,7 @@ function build() {
       range.setStart(text, i);
       range.setEnd(text, i + 1);
       const r = range.getBoundingClientRect();
-      const slot = { x: r.left + scrollX, y: r.top + scrollY, w: r.width, h: r.height };
+      const slot = { x: r.left + scrollX + (shifts[li] ?? 0), y: r.top + scrollY, w: r.width, h: r.height };
       const parts = ink(ch, slot.w);
       parts.forEach((part, pi) => {
         const hull = part.map((q) => ({ x: slot.x + q.x, y: base + q.y }));
@@ -571,10 +587,10 @@ export function startName(opts: { intro: boolean }) {
   let done: () => void = () => {};
   const ready = new Promise<void>((r) => (done = r));
   if (opts.intro) {
-    tempo = 0.42;
+    tempo = 0.36;
     spill();
     wake();
-    pieces.forEach((p, i) => setTimeout(() => p.state === "loose" && post(repair(p)), 140 + i * 30));
+    pieces.forEach((p, i) => setTimeout(() => p.state === "loose" && post(repair(p)), 60 + i * 18));
     const check = setInterval(() => {
       if (pieces.every((p) => p.state === "set")) {
         clearInterval(check);

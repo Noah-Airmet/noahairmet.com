@@ -40,7 +40,12 @@ async function start() {
   opus.post = () => ({ x: W() * 0.73, y: band() - 16 });
   opus2.post = () => ({ x: W() * 0.86, y: band() + 22 });
 
-  const seen = sessionStorage.getItem("set") === "1";
+  // If the plain name already came back (a slow load), set the pieces quietly
+  // instead of spilling them over text the visitor has been reading.
+  const root = document.documentElement;
+  const late = !root.classList.contains("live");
+  root.classList.add("live");
+  const seen = late || sessionStorage.getItem("set") === "1";
   if (seen) {
     for (const a of agents) {
       const p = a.post();

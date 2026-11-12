@@ -90,7 +90,7 @@
 .chip {
   padding: 2px 5px;
   border-radius: 2px;
-  background: var(--guide);
+  background: var(--guide-ink);
   color: var(--paper);
   font: 500 10px/1.3 var(--mono);
   font-stretch: 87.5%;
@@ -145,7 +145,7 @@
 }
 @keyframes last {
   0%,
-  78% {
+  94% {
     opacity: 1;
   }
   100% {
@@ -189,6 +189,7 @@
   font-size: var(--name);
   font-weight: 1000;
   font-stretch: 150%;
+  font-variation-settings: "opsz" 144;
   line-height: 0.8;
   letter-spacing: -0.03em;
   --cap: 37;

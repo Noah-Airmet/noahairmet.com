@@ -35,17 +35,18 @@
   --paper: #ecede8;
   --paper-2: #e2e3dd;
   --ink: #121311;
-  --ink-2: #121311a8;
-  --ink-3: #1213116b;
+  --ink-2: #121311c2;
+  --ink-3: #1213119e;
   --rule: #12131124;
 
   /* the two pencils: blue lines things up, red marks what's wrong */
   --guide: #1e9bd6;
-  --mark: #ee3219;
+  --guide-ink: #0b6aa2;
+  --mark: #dc2a12;
   --pass: #12835a;
 
   /* who is working */
-  --fable: #ee3219;
+  --fable: #dc2a12;
   --opus: #2a45f0;
   --on-agent: #fff;
 
@@ -93,10 +94,11 @@
     --paper: #0b1a3c;
     --paper-2: #0f2250;
     --ink: #eef2fa;
-    --ink-2: #eef2faad;
-    --ink-3: #eef2fa70;
+    --ink-2: #eef2fac2;
+    --ink-3: #eef2fa94;
     --rule: #eef2fa26;
     --guide: #63cdf7;
+    --guide-ink: #63cdf7;
     --mark: #ff6a4d;
     --pass: #5fe0a8;
     --fable: #ff6a4d;

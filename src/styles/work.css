@@ -320,7 +320,7 @@
   translate: 0 -100%;
   font: 500 max(0.8125rem, 0.26em) / 1 var(--mono);
   font-stretch: 87.5%;
-  color: var(--guide);
+  color: var(--guide-ink);
   white-space: nowrap;
   animation: rise 220ms var(--ease) both;
 }

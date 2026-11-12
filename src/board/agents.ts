@@ -48,7 +48,7 @@ export class Agent {
     // One hand, one motion: a new move takes over from the last.
     this.moving?.abort();
     const mine = (this.moving = new AbortController());
-    const signal = o.signal ? AbortSignal.any([o.signal, mine.signal]) : mine.signal;
+    const signal = o.signal ? either(o.signal, mine.signal) : mine.signal;
     return run(
       ms,
       (t) => {
@@ -85,6 +85,17 @@ export class Agent {
     await this.press(signal, 90);
     this.lift();
   }
+}
+
+/** A signal that fires when either does (AbortSignal.any, where it exists). */
+function either(a: AbortSignal, b: AbortSignal): AbortSignal {
+  if ("any" in AbortSignal) return AbortSignal.any([a, b]);
+  const c = new AbortController();
+  const stop = () => c.abort();
+  if (a.aborted || b.aborted) stop();
+  a.addEventListener("abort", stop, { once: true });
+  b.addEventListener("abort", stop, { once: true });
+  return c.signal;
 }
 
 export interface Job {
