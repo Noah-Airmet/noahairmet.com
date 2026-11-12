@@ -21,6 +21,7 @@ const first = quotes[0];
 const planted = Math.min(...bench.runs.map((r) => r.planted));
 const realLo = Math.min(...bench.runs.map((r) => r.real));
 const realHi = Math.max(...bench.runs.map((r) => r.real));
+const plantedLine = planted === 100 ? "Plant an error and every agent catches it" : `Plant an error and agents catch it ${planted}% of the time`;
 // The run the recording shows (public/media/citationbench-replay.mp4).
 const replay = "/r/cc-haiku-5-5-4e1c63-pc-4bd058594c.1";
 ---
@@ -76,9 +77,10 @@ const replay = "/r/cc-haiku-5-5-4e1c63-pc-4bd058594c.1";
       <section class="proj" id="citationbench" aria-labelledby="cb-h">
         <header class="proj-head">
           <h2 class="title" id="cb-h" data-keep="a heading">CitationBench</h2>
-          <p class="say" data-keep="a description">
-            Every agent we tried caught {planted}% of the errors we planted, and between {realLo} and {realHi}% of the
-            real ones sitting in published papers.
+          <p class="say pitch" data-keep="a description">
+            Give an agent a real library and it mostly stops making up sources. It still can’t tell you whether the
+            paper says what the sentence citing it claims. {plantedLine}, but on real citations from published papers
+            they’re right {realLo} to {realHi}% of the time.
           </p>
           <nav class="proj-links" aria-label="CitationBench">
             <a href={site.citationbench}>Leaderboard</a>
@@ -148,8 +150,9 @@ const replay = "/r/cc-haiku-5-5-4e1c63-pc-4bd058594c.1";
       <section class="proj" id="safetypage" aria-labelledby="sp-h">
         <header class="proj-head">
           <h2 class="title" id="sp-h" data-keep="a heading">SafetyPage</h2>
-          <p class="say" data-keep="a description">
-            A page-cited library of the AI safety record, built for people and for AI agents.
+          <p class="say pitch" data-keep="a description">
+            AI safety guidance comes out faster than anybody can read it, and agents are the ones quoting it now. This
+            is the record in one library, cited to the page. We check that the page says it, and show you the page.
           </p>
           <nav class="proj-links" aria-label="SafetyPage">
             <a href={site.safetypage}>Library</a>

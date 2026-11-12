@@ -121,11 +121,13 @@ household rule is that health data never leaves owned hardware;
 `docs/BEE-APP.md`), so `public/_headers` gives `/bee/*` its own stricter CSP.
 From Noah: King Follett and Hymn Parts stay unlisted.
 
-Noah reads and owns every published word. The sentences on the home page are
-his or his projects' own: the lede is from the previous edition, SafetyPage's
-line is from its README, and CitationBench's is a draft line from his pitch
-notes (`~/development/writing/safetypage/pitch-notes.md`, "lines to say out
-loud"), with the numbers taken from the published runs.
+Noah reads and owns every published word. The lede is from the previous
+edition. The two project pitches are assembled from his pitch notes
+(`~/development/writing/safetypage/pitch-notes.md`): CitationBench's from the
+"lines to say out loud" drafts, with its numbers computed from the published
+runs; SafetyPage's from his opening line and the product's own tagline ("We
+check that the page says it, and show you the page"). He asked (2026-11-12)
+for each to pitch why the thing is needed, not only say what it is.
 
 ## Data
 

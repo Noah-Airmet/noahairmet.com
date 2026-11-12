@@ -17,6 +17,17 @@
   grid-column: 1 / -1;
   white-space: nowrap;
 }
+/* the pitch: why the thing exists, in three lines across the page */
+.say.pitch {
+  grid-column: 1 / -1;
+  max-width: 76ch;
+  font-size: clamp(1.25rem, 0.85rem + 1.25vw, 2rem);
+  line-height: 1.22;
+  text-wrap: pretty;
+}
+.pitch + .proj-links {
+  grid-column: 1 / -1;
+}
 .proj-links {
   display: flex;
   gap: var(--s-5);
