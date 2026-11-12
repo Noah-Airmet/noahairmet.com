@@ -1,4 +1,5 @@
-/* Every value the site draws with. Day is a drafting board; night is a blueprint. */
+/* Every value the site draws with. Day is a drafting board; night is a blueprint.
+   The colours here are the day's; public/boot.js moves them with the sun. */
 
 @font-face {
   font-family: "Flex";
@@ -39,7 +40,7 @@
   --shade: #12131152;
   --ink: #121311;
   --ink-2: #121311c2;
-  --ink-3: #1213119e;
+  --ink-3: #121311a8;
   --rule: #12131124;
 
   /* the two pencils: blue lines things up, red marks what's wrong */
@@ -92,17 +93,18 @@
   --d-slow: 480ms;
 }
 
-/* Night. The system's setting chooses, unless the visitor has (the bar's
-   control sets data-theme on <html>). The two blocks are the same values. */
+/* Without JavaScript the sky can't be read, so the system's setting chooses
+   between day and night. With it, public/boot.js sets these same tokens from
+   the sun's elevation over Provo. */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root {
     --paper: #0b1a3c;
     --paper-2: #0f2250;
     --sheet: #12265a;
     --shade: #000000a6;
     --ink: #eef2fa;
     --ink-2: #eef2fac2;
-    --ink-3: #eef2fa94;
+    --ink-3: #eef2faa8;
     --rule: #eef2fa26;
     --guide: #63cdf7;
     --guide-ink: #63cdf7;
@@ -114,26 +116,4 @@
     --lift: 0 0.07em 0.08em #00000080;
     color-scheme: dark;
   }
-}
-:root[data-theme="dark"] {
-  --paper: #0b1a3c;
-  --paper-2: #0f2250;
-  --sheet: #12265a;
-  --shade: #000000a6;
-  --ink: #eef2fa;
-  --ink-2: #eef2fac2;
-  --ink-3: #eef2fa94;
-  --rule: #eef2fa26;
-  --guide: #63cdf7;
-  --guide-ink: #63cdf7;
-  --mark: #ff6a4d;
-  --pass: #5fe0a8;
-  --fable: #ff6a4d;
-  --opus: #9db0ff;
-  --on-agent: #0b1a3c;
-  --lift: 0 0.07em 0.08em #00000080;
-  color-scheme: dark;
-}
-:root[data-theme="light"] {
-  color-scheme: light;
 }

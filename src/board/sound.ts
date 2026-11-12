@@ -16,7 +16,7 @@ const btn = document.getElementById("sound") as HTMLButtonElement | null;
 function show() {
   if (!btn) return;
   btn.setAttribute("aria-pressed", String(on));
-  btn.setAttribute("aria-label", on ? "Sound is on. Turn off" : "Sound is off. Turn on");
+  btn.textContent = on ? "Sound on" : "Sound off";
 }
 
 function audio() {

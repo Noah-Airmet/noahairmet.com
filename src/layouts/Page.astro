@@ -2,7 +2,6 @@
 import "../styles/tokens.css";
 import "../styles/base.css";
 import flex from "../fonts/roboto-flex.woff2?url";
-import Icon from "../components/Icon.astro";
 import { absoluteUrl, pageTitle, site } from "../site";
 
 interface Props {
@@ -61,21 +60,13 @@ const fullTitle = pageTitle(title);
         <slot name="bar" />
         {
           board && (
-            <button class="ib" id="sound" type="button" aria-pressed="false" aria-label="Sound is off. Turn on" title="Sound">
-              <Icon name="mute" />
-              <Icon name="sound" />
+            <button class="snd" id="sound" type="button" aria-pressed="false">
+              Sound off
             </button>
           )
         }
-        <button class="ib" id="theme" type="button" aria-pressed="false" aria-label="Day. Switch to night" title="Night">
-          <Icon name="moon" />
-          <Icon name="sun" />
-        </button>
       </div>
     </header>
     <slot />
-    <script>
-      import "../board/chrome.ts";
-    </script>
   </body>
 </html>

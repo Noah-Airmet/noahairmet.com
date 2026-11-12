@@ -6,7 +6,8 @@ import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
 const { chromium } = await import(`${homedir()}/development/tools/ui-check/node_modules/playwright/index.mjs`);
 
-const url = process.argv[2] ?? "http://127.0.0.1:4321/";
+// ?at pins the sky to mid-morning, so the card is the same whenever it is taken
+const url = process.argv[2] ?? "http://127.0.0.1:4321/?at=10:30";
 const out = fileURLToPath(new URL("../public/og/card.png", import.meta.url));
 const browser = await chromium.launch({ channel: "chrome" });
 const page = await browser.newPage({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 1 });

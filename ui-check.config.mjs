@@ -10,6 +10,6 @@ export default {
   widths: [1440, 390],
   // the board has finished setting the name
   ready: "!document.documentElement.classList.contains('live') || (document.querySelectorAll('.pc').length > 0 && [...document.querySelectorAll('.pc')].every((p) => p.dataset.s === 'set'))",
-  // things that tick or come from the network: the last log line, the quote, its live verdict and its page, the recording, the mountain
-  mask: ['#last', '.check-foot', '#peak', '.q', '#replay', '#sheet'],
+  // things that tick or come from the network: the last log line, the quote, its live verdict and its page, the recording, the mountain, the dial (its Now reads the clock)
+  mask: ['#last', '.check-foot', '#peak', '.q', '#replay', '#sheet', '#sky'],
 };

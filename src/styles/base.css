@@ -145,26 +145,17 @@ button {
   margin-right: -10px;
   min-width: 0;
 }
-/* an icon button: a 44px target, the glyph dead centre */
-.ib {
-  display: inline-grid;
-  place-items: center;
-  width: var(--hit);
+/* a plain word that is a switch: it says its state */
+.snd {
   height: var(--hit);
-  color: var(--ink-2);
-  border-radius: 8px;
+  padding: 0 10px;
+  color: var(--ink-3);
+  white-space: nowrap;
   transition: color var(--d-fast) var(--ease);
 }
-.ib:hover {
+.snd:hover,
+.snd[aria-pressed="true"] {
   color: var(--ink);
-}
-/* each holds two glyphs, one per state */
-.ib .icon {
-  grid-area: 1 / 1;
-}
-.ib[aria-pressed="false"] .icon + .icon,
-.ib[aria-pressed="true"] .icon:first-child {
-  display: none;
 }
 .icon {
   display: block;
@@ -230,8 +221,8 @@ button {
   .bar-end {
     gap: 0;
   }
-  .ib {
-    width: 36px;
+  .snd {
+    padding: 0 8px;
   }
 }
 

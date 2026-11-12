@@ -67,13 +67,24 @@ last frame, the mountain holds still.
 
 ## Design
 
-- Day is a drafting board (`--paper`, ink, a blue pencil for lining things up,
-  a red one for what's wrong); night is a blueprint. It follows the visitor's
-  system setting until they press the bar's day/night button, which is kept
-  on their device (`public/boot.js` applies it before first paint). Every
-  value is in `src/styles/tokens.css`.
+- The page takes its colours from the sun over Provo (`public/boot.js`, run
+  before first paint on every page): a drafting board by day (`--paper`, ink,
+  a blue pencil for lining things up, a red one for what's wrong), warming
+  through gold to a peach glow at sunset, then purple dusk, blue hour, and a
+  blueprint at night. Each stop is a whole token set at one sun elevation;
+  stops of the same family are mixed, and light changes over to dark at one
+  elevation, because a ground halfway between can't be read with either ink.
+  `src/styles/tokens.css` holds the day's values and everything that isn't a
+  colour. There is no day/night button (Noah, 2026-11-12: "it has become an
+  AI cliche"); the control is the solar dial under the mountain
+  (`src/board/dial.ts`), after the Apple Watch face he's worn for years: a
+  24-hour face, the day above the line from sunrise to sunset, the sun on its
+  circle. Turning it holds another time of day; `Now` lets go. `?at=17:10`
+  opens the page at a time, for looking at a sky.
+- Sound is a word in the bar that says its state (`Sound off` / `Sound on`),
+  not an icon: Noah's preference.
 - Icons are one component, `src/components/Icon.astro`: brand marks for X,
-  GitHub and LinkedIn; the rest drawn on the same grid.
+  GitHub and LinkedIn, and a drawn envelope and page for email and résumé.
 - Three faces, one job each, self-hosted in `src/fonts/` with their licences:
   Roboto Flex (display at weight 1000 and width 150, and the interface),
   Newsreader (what you read), Martian Mono (values: times, measurements, ids).
@@ -161,4 +172,5 @@ npm run deploy    # verify, then production: only with Noah's explicit authoriza
 
 Pushing to GitHub does not deploy. `ui-check` (`ui-check.config.mjs`) runs the
 geometry, axe and screenshot checks against the dev server; it opens the home
-page as `/?still`, which holds the board at rest (no intro, nothing slips).
+page as `/?still`, which holds the board at rest (no intro, nothing slips)
+and the sky at noon.

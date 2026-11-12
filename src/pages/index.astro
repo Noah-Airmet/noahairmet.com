@@ -221,6 +221,24 @@ const replay = "/r/cc-haiku-5-5-4e1c63-pc-4bd058594c.1";
     </section>
   </main>
 
+  <section class="sky" id="sky" aria-label="The time of day in Provo" hidden>
+    <span class="dial-what" id="dial-what">Now</span>
+    <div
+      class="dial"
+      id="dial"
+      role="slider"
+      tabindex="0"
+      aria-label="Time of day in Provo, Utah"
+      aria-valuemin="0"
+      aria-valuemax="1439"
+      aria-valuenow="720"
+    >
+      <canvas></canvas>
+      <div class="dial-read"><b id="dial-time"></b><span id="dial-off"></span></div>
+    </div>
+    <button class="dial-now" id="dial-now" type="button">Now</button>
+  </section>
+
   <footer class="colophon">
     <a class="col-mail" href={`mailto:${site.email}`}><Icon name="mail" />{site.email}</a>
     <nav class="links" aria-label="Contact">
