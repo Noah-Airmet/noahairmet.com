@@ -25,8 +25,33 @@
   line-height: 1.22;
   text-wrap: pretty;
 }
-.pitch + .proj-links {
+.pitch + .proj-links,
+.points + .proj-links {
   grid-column: 1 / -1;
+}
+/* what it does that a search doesn't: a name and a line each, across the page */
+.points {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s-4) var(--s-6);
+  margin-top: var(--s-3);
+  font-size: var(--t-ui);
+  line-height: 1.4;
+}
+.points li {
+  display: grid;
+  align-content: start;
+  gap: var(--s-1);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--rule);
+}
+.points b {
+  font-weight: 600;
+}
+.points span {
+  color: var(--ink-2);
+  text-wrap: pretty;
 }
 .proj-links {
   display: flex;
@@ -838,6 +863,10 @@
   .proj-head {
     grid-template-columns: 1fr;
     margin-bottom: var(--s-6);
+  }
+  .points {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--s-4);
   }
   /* windows stack: the thing in action first, then the part you can change */
   .bench-stage,

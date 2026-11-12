@@ -148,9 +148,26 @@ const realHi = Math.max(...bench.runs.map((r) => r.real));
           <p class="say pitch" data-keep="a description">
             AI safety guidance comes out faster than anybody can read it, and agents are the ones quoting it now.
             Catchword is your entire library of safety documentation and AI policy writing, built to help you stay on
-            top of it and in the loop. A chatbot with web search can find many of the same documents. Catchword cites
-            the exact page and checks each quote word for word against it, so you can see where an answer comes from.
+            top of it and in the loop. A chatbot with web search can find many of the same documents.
           </p>
+          <ul class="points">
+            <li>
+              <b data-keep="a point">Cited to the page</b>
+              <span>A citation opens the exact page, with the quoted words marked.</span>
+            </li>
+            <li>
+              <b data-keep="a point">Quotes checked</b>
+              <span>Each quote is compared word for word with the page it cites.</span>
+            </li>
+            <li>
+              <b data-keep="a point">Every version kept</b>
+              <span>Drafts and revisions stay separate sources. Ten versions of Anthropic’s Responsible Scaling Policy.</span>
+            </li>
+            <li>
+              <b data-keep="a point">One library</b>
+              <span>13,898 documents: papers, system cards, safety frameworks, government guidance, evaluator reports.</span>
+            </li>
+          </ul>
           <nav class="proj-links" aria-label="Catchword">
             <a href={site.safetypage}>Library</a>
             <a href={site.safetypageRepo}>GitHub</a>
