@@ -1,9 +1,0 @@
----
-// A link set in brackets, like the old site: [ résumé ]
-interface Props {
-  href: string;
-}
-const { href } = Astro.props;
----
-
-<a class="bl" href={href}><span class="bl-b" aria-hidden="true">[</span><span class="bl-t"><slot /></span><span class="bl-b" aria-hidden="true">]</span></a>

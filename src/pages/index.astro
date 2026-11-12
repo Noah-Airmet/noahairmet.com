@@ -1,54 +1,217 @@
 ---
-import Bracket from "../components/Bracket.astro";
-import Site from "../layouts/Site.astro";
-import { site } from "../lib/site";
+import "../styles/home.css";
+import "../styles/work.css";
+import { getCollection } from "astro:content";
+import bench from "../data/citationbench.json";
+import { quotes } from "../data/quotes";
+import Page from "../layouts/Page.astro";
+import { isoDate, longDate, site } from "../site";
+
+const notes = (await getCollection("writing")).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const measures = [
+  { id: "correct", name: "Correct", says: "The verdict is right, a cited page is a gold page, and code rejects no citation." },
+  { id: "page_precision", name: "Page precision", says: "Of the pages an agent cited, the share that are gold pages." },
+  { id: "quote_fidelity", name: "Quote fidelity", says: "Of the quotations an agent gave, the share whose words are on the page it cited." },
+] as const;
+const half = (v: number[]) => Math.round((v[2] - v[1]) / 2);
+const first = quotes[0];
+const editions = [
+  { n: 4, by: "Claude Fable 5.2", when: "November 2026" },
+  { n: 3, by: "Claude Opus 5.5", when: "September 2026" },
+  { n: 2, by: "Claude Fable 5", when: "July 2026" },
+];
 ---
 
-<Site tab="about" bareBar class="page-about">
-  <main id="main" class="about">
-    <section class="intro" aria-labelledby="name">
-      <h1 class="name" id="name">Noah<br />Airmet</h1>
-      <p class="lede">
-        I study cybersecurity at BYU and build software at{" "}
-        <a href="https://www.simplicitygroup.com/">Simplicity Group</a>. I’m working toward a career
-        securing and governing AI systems.
-      </p>
-      <nav class="actions" aria-label="Résumé and contact">
-        <Bracket href={site.resume}>résumé</Bracket>
-        <Bracket href={`mailto:${site.email}`}>email</Bracket>
-        <Bracket href={site.github}>github</Bracket>
-        <Bracket href={site.linkedin}>linkedin</Bracket>
-      </nav>
-      <p class="also">
-        Also building <a href={site.agentBus}>agent-bus</a>, a small tool that lets AI coding
-        assistants hand work to each other.
-      </p>
+<Page here="home">
+  <div class="status" slot="bar">
+    <span class="last" id="last" aria-hidden="true"></span>
+    <button class="state" id="state" type="button" data-state="ok" aria-expanded="false" aria-controls="log">
+      <i></i><span>Intact</span>
+    </button>
+    <aside class="log" id="log" hidden aria-label="What was done to this page, and who put it right">
+      <div class="log-list" id="log-list"></div>
+      <p class="log-none">Nothing yet</p>
+    </aside>
+  </div>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <h1 class="name" id="name" aria-label="Noah Airmet">
+        <span class="ln">Noah</span>
+        <span class="ln">Airmet</span>
+      </h1>
+
+      <ul class="roles">
+        <li>
+          <span>Pentesting and AI safety policy</span>
+          <a href={site.simplicity}>Simplicity Group</a>
+        </li>
+        <li>
+          <span>Lead Technical Fellow</span>
+          <a href={site.mta}>@transfigurism</a>
+        </li>
+        <li>
+          <span>Cybersecurity, class of 2027</span>
+          <a href={site.byu}>BYU</a>
+        </li>
+      </ul>
+
+      <div class="foot">
+        <p class="lede" id="lede">I’m working toward a career securing and governing AI systems.</p>
+        <nav class="links" aria-label="Elsewhere">
+          <a href={site.resume}>Résumé</a>
+          <a href={`mailto:${site.email}`}>Email</a>
+          <a href={site.github}>GitHub</a>
+          <a href={site.linkedin}>LinkedIn</a>
+          <a href={site.x}>X</a>
+        </nav>
+      </div>
     </section>
 
-    <figure class="timp">
-      <canvas id="timp" role="img" aria-label="Mount Timpanogos, drawn as ridgelines from USGS elevation data"></canvas>
-      <figcaption class="caption">
-        <span class="caption-title">Mount Timpanogos</span>
-        <span class="caption-meta">11,749 ft, above Provo, Utah</span>
-        <span class="caption-time">
-          <span id="clock">&nbsp;</span>
-          <span
-            class="daybar"
-            id="daybar"
-            role="slider"
-            tabindex="0"
-            aria-label="Time of day in Provo"
-            aria-valuemin="0"
-            aria-valuemax="1439"
-          >
-            <span class="sun"></span>
-          </span>
-        </span>
-      </figcaption>
-    </figure>
+    <div id="work">
+      <section class="proj" id="citationbench" aria-labelledby="cb-h">
+        <header class="proj-head">
+          <h2 id="cb-h">CitationBench</h2>
+          <p class="say">
+            A benchmark of whether an agent with a library tool cites the right page and quotes it accurately.
+          </p>
+          <nav class="proj-links" aria-label="CitationBench">
+            <a href={site.citationbench}>Leaderboard</a>
+            <a href={`${site.safetypageRepo}/tree/main/citationbench`}>Method</a>
+          </nav>
+        </header>
+
+        <figure class="bench" id="bench" aria-labelledby="bench-cap">
+          <div class="bench-top">
+            <div class="seg" role="group" aria-label="Measure">
+              {
+                measures.map((m, i) => (
+                  <button type="button" data-m={m.id} data-says={m.says} aria-pressed={i === 0 ? "true" : "false"}>
+                    {m.name}
+                  </button>
+                ))
+              }
+            </div>
+            <div class="scale" aria-hidden="true">
+              <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
+            </div>
+          </div>
+          <ol class="rows">
+            {
+              bench.runs.map((r, i) => (
+                <li
+                  class="row"
+                  data-id={r.model}
+                  data-correct={r.correct.join(" ")}
+                  data-page_precision={r.page_precision.join(" ")}
+                  data-quote_fidelity={r.quote_fidelity.join(" ")}
+                >
+                  <div class="who">
+                    <b>{r.model}</b>
+                    <span>
+                      {r.agent} · {r.n} questions
+                    </span>
+                  </div>
+                  <div class="track">
+                    <i class="fill" />
+                    <i class="ci" />
+                    <i class="grip" aria-hidden="true" />
+                    <span class="val">
+                      <b>{Math.round(r.correct[0])}</b>
+                      <i>±{half(r.correct)}</i>
+                    </span>
+                  </div>
+                </li>
+              ))
+            }
+          </ol>
+          <figcaption id="bench-cap">
+            <span class="says" id="bench-says">{measures[0].says}</span>
+            <span class="meta">Percent, with 95% intervals · held-out questions · snapshot {bench.runs[0].snapshot}</span>
+          </figcaption>
+        </figure>
+      </section>
+
+      <section class="proj" id="safetypage" aria-labelledby="sp-h">
+        <header class="proj-head">
+          <h2 id="sp-h">SafetyPage</h2>
+          <p class="say">A page-cited library of the AI safety record, built for people and for AI agents.</p>
+          <nav class="proj-links" aria-label="SafetyPage">
+            <a href={site.safetypage}>Library</a>
+            <a href={site.safetypageRepo}>GitHub</a>
+          </nav>
+        </header>
+
+        <figure class="check" id="check">
+          <blockquote class="q-wrap">
+            <p class="q" id="q" spellcheck="false" aria-label="A quotation to check. Edit it.">{first.text}</p>
+            <div class="q-marks" id="q-marks" aria-hidden="true"></div>
+          </blockquote>
+          <figcaption class="check-foot">
+            <output class="verdict" id="verdict" data-v="ok" for="q"><i></i><span>On the page</span></output>
+            <a class="src" id="q-src" href={first.href}>{first.source}</a>
+            <span class="why" id="q-why"></span>
+            <button class="next" id="q-next" type="button">Another</button>
+          </figcaption>
+        </figure>
+      </section>
+    </div>
+
+    <section class="writing" id="writing" aria-labelledby="w-h">
+      <h2 id="w-h">Writing</h2>
+      <ol class="notes">
+        {
+          notes.map((n) => (
+            <li>
+              <a href={`/writing/${n.id}/`}>
+                <span class="note-title">{n.data.title}</span>
+                <time datetime={isoDate(n.data.date)}>{longDate(n.data.date)}</time>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <section class="outside" id="outside" aria-labelledby="o-h">
+      <h2 id="o-h" class="sr">Outside</h2>
+      <figure class="peak">
+        <canvas id="peak" role="img" aria-label="Mount Timpanogos as stacked contour lines, from USGS elevation data"
+        ></canvas>
+        <figcaption>
+          <span class="peak-name" id="peak-name">Mount Timpanogos</span>
+          <span class="peak-meta" id="peak-meta">Wasatch Range, above Provo, Utah</span>
+        </figcaption>
+      </figure>
+    </section>
   </main>
-</Site>
+
+  <footer class="colophon">
+    <div class="col-a">
+      <p class="col-say">Every time a new frontier model takes the throne, it rebuilds this site from scratch.</p>
+      <ol class="editions">
+        {
+          editions.map((e) => (
+            <li>
+              <span>Edition {e.n}</span>
+              <b>{e.by}</b>
+              <span>{e.when}</span>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+    <nav class="col-links" aria-label="Contact">
+      <a href={`mailto:${site.email}`}>{site.email}</a>
+      <a href={site.x}>@AirmetNoah</a>
+      <a href={site.github}>GitHub</a>
+      <a href={site.linkedin}>LinkedIn</a>
+      <a href={site.resume}>Résumé</a>
+      <a href="/rss.xml">RSS</a>
+    </nav>
+  </footer>
+</Page>
 
 <script>
-  import "../scripts/timp.ts";
+  import "../board/main.ts";
 </script>

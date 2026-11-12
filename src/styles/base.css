@@ -1,0 +1,155 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 100%;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+  font-variant-numeric: tabular-nums;
+  scroll-padding-top: calc(var(--bar) + var(--s-4));
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  overflow-x: clip;
+  position: relative;
+}
+
+h1,
+h2,
+h3,
+p,
+dl,
+dd,
+ol,
+ul,
+figure {
+  margin: 0;
+  padding: 0;
+}
+
+ol,
+ul {
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--ink-3);
+  text-underline-offset: 0.2em;
+  transition: text-decoration-color var(--d-fast) var(--ease);
+}
+a:hover {
+  text-decoration-color: currentColor;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--guide);
+  outline-offset: 3px;
+  border-radius: var(--r);
+}
+
+::selection {
+  background: var(--guide);
+  color: var(--paper);
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip {
+  position: absolute;
+  left: var(--gutter);
+  top: -100px;
+  z-index: 50;
+  background: var(--ink);
+  color: var(--paper);
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r);
+}
+.skip:focus {
+  top: var(--s-2);
+}
+
+/* ---- the bar: where you can go on the left, the page's state on the right */
+.bar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: var(--bar);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--gutter);
+  font-size: var(--t-ui);
+  font-weight: 500;
+  pointer-events: none;
+}
+.bar > * {
+  pointer-events: auto;
+}
+.bar nav {
+  display: flex;
+  gap: var(--s-5);
+  margin-left: -10px;
+}
+.bar a {
+  display: inline-flex;
+  align-items: center;
+  height: var(--hit);
+  padding: 0 10px;
+  text-decoration: none;
+  color: var(--ink-2);
+  transition: color var(--d-fast) var(--ease);
+}
+.bar a:hover,
+.bar a[aria-current] {
+  color: var(--ink);
+}
+.bar .home {
+  color: var(--ink);
+  font-weight: 800;
+  font-stretch: 130%;
+  letter-spacing: -0.01em;
+}
+
+@view-transition {
+  navigation: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

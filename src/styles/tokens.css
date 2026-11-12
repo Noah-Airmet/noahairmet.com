@@ -1,0 +1,107 @@
+/* Every value the site draws with. Day is a drafting board; night is a blueprint. */
+
+@font-face {
+  font-family: "Flex";
+  src: url("../fonts/roboto-flex.woff2") format("woff2");
+  font-weight: 100 1000;
+  font-stretch: 25% 151%;
+  font-display: block;
+}
+@font-face {
+  font-family: "Newsreader";
+  src: url("../fonts/newsreader.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Newsreader";
+  src: url("../fonts/newsreader-italic.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Martian";
+  src: url("../fonts/martian-mono.woff2") format("woff2");
+  font-weight: 100 800;
+  font-stretch: 75% 112.5%;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light dark;
+
+  /* ground and ink */
+  --paper: #ecede8;
+  --paper-2: #e2e3dd;
+  --ink: #121311;
+  --ink-2: #121311a8;
+  --ink-3: #1213116b;
+  --rule: #12131124;
+
+  /* the two pencils: blue lines things up, red marks what's wrong */
+  --guide: #1e9bd6;
+  --mark: #ee3219;
+  --pass: #12835a;
+
+  /* who is working */
+  --fable: #ee3219;
+  --opus: #2a45f0;
+  --on-agent: #fff;
+
+  --lift: 0 0.07em 0.06em #1213114d;
+
+  /* faces: one job each */
+  --display: "Flex", "Arial Black", sans-serif;
+  --sans: "Flex", system-ui, sans-serif;
+  --serif: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --mono: "Martian", ui-monospace, "SF Mono", monospace;
+
+  /* scale */
+  --t-xs: 0.6875rem;
+  --t-sm: 0.8125rem;
+  --t-ui: 0.9375rem;
+  --t-body: 1.0625rem;
+  --t-read: 1.25rem;
+  --t-lede: clamp(1.5rem, 1rem + 1.5vw, 2.25rem);
+  --t-h2: clamp(2.5rem, 1rem + 6.4vw, 7rem);
+
+  /* space */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 72px;
+  --s-9: 120px;
+  --gutter: clamp(16px, 3.6vw, 56px);
+  --bar: 56px;
+  --hit: 44px;
+  --r: 3px;
+
+  /* motion */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --d-fast: 120ms;
+  --d-pop: 200ms;
+  --d-slow: 480ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0b1a3c;
+    --paper-2: #0f2250;
+    --ink: #eef2fa;
+    --ink-2: #eef2faad;
+    --ink-3: #eef2fa70;
+    --rule: #eef2fa26;
+    --guide: #63cdf7;
+    --mark: #ff6a4d;
+    --pass: #5fe0a8;
+    --fable: #ff6a4d;
+    --opus: #9db0ff;
+    --on-agent: #0b1a3c;
+    --lift: 0 0.07em 0.08em #00000080;
+  }
+}

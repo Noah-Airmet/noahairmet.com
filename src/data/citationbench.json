@@ -1,0 +1,96 @@
+{
+ "runs": [
+  {
+   "id": "agy-gemini-3.8-flash-high",
+   "agent": "Antigravity",
+   "model": "gemini-3.8-flash-high",
+   "n": 50,
+   "date": "2026-11-10",
+   "snapshot": "2026.11.3",
+   "correct": [
+    66.0,
+    52.8,
+    78.4
+   ],
+   "page_precision": [
+    30.8,
+    24.5,
+    37.6
+   ],
+   "quote_fidelity": [
+    100.0,
+    100.0,
+    100.0
+   ]
+  },
+  {
+   "id": "codex-gpt-6.1-sol",
+   "agent": "Codex",
+   "model": "gpt-6.1-sol",
+   "n": 50,
+   "date": "2026-11-10",
+   "snapshot": "2026.11.3",
+   "correct": [
+    60.0,
+    46.3,
+    73.5
+   ],
+   "page_precision": [
+    40.2,
+    29.3,
+    50.5
+   ],
+   "quote_fidelity": [
+    100.0,
+    100.0,
+    100.0
+   ]
+  },
+  {
+   "id": "cc-haiku-5-5",
+   "agent": "Claude Code",
+   "model": "claude-haiku-5-5",
+   "n": 75,
+   "date": "2026-11-10",
+   "snapshot": "2026.11.3",
+   "correct": [
+    41.3,
+    30.1,
+    52.5
+   ],
+   "page_precision": [
+    25.7,
+    19.2,
+    32.1
+   ],
+   "quote_fidelity": [
+    95.2,
+    92.7,
+    97.4
+   ]
+  },
+  {
+   "id": "codex-gpt-6-luna",
+   "agent": "Codex",
+   "model": "gpt-6-luna",
+   "n": 50,
+   "date": "2026-11-10",
+   "snapshot": "2026.11.3",
+   "correct": [
+    40.0,
+    25.0,
+    54.0
+   ],
+   "page_precision": [
+    32.5,
+    22.1,
+    43.2
+   ],
+   "quote_fidelity": [
+    84.2,
+    68.4,
+    100.0
+   ]
+  }
+ ]
+}
