@@ -4,8 +4,8 @@
 // the page marks what the source says instead; leave it wrong and an agent
 // puts the source's words back.
 import { quotes, type Quote } from "../data/quotes";
-import { post, recall, type Agent } from "./agents";
-import { calm, pageRect, wait } from "./kit";
+import { free, post, recall, type Agent } from "./agents";
+import { calm, pageRect, still, wait } from "./kit";
 import { flag, record } from "./ledger";
 
 const API = "https://safetypage-api.noahairmet.com/api/verify";
@@ -259,10 +259,35 @@ export function startQuote() {
   addEventListener("resize", () => out.dataset.v === "miss" && draw(diff(text(), cur.text)));
 
   // The first verdict is live too, once the figure is on screen.
-  const io = new IntersectionObserver((e) => {
-    if (!e.some((x) => x.isIntersecting)) return;
-    io.disconnect();
-    void check();
-  });
+  // An agent presses the check itself, if one is free.
+  const io = new IntersectionObserver(
+    (e) => {
+      if (!e.some((x) => x.isIntersecting)) return;
+      io.disconnect();
+      if (calm || still || !free()) return void check();
+      say("busy", "Checking");
+      let begun = false;
+      post({
+        key: "check",
+        at: () => spot(),
+        async run(a, signal) {
+          begun = true;
+          try {
+            const dot = out.querySelector("i")!.getBoundingClientRect();
+            await a.moveTo({ x: dot.left + scrollX + dot.width / 2, y: dot.top + scrollY + dot.height / 2 }, { signal, tempo: 0.8 });
+            await a.click(signal);
+          } finally {
+            void check();
+          }
+        },
+      });
+      setTimeout(() => {
+        if (begun) return;
+        recall("check");
+        void check();
+      }, 1500);
+    },
+    { threshold: 0.6 },
+  );
   io.observe(q);
 }

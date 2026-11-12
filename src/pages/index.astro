@@ -15,10 +15,11 @@ const measures = [
 ] as const;
 const half = (v: number[]) => Math.round((v[2] - v[1]) / 2);
 const first = quotes[0];
+// From the repo's history: each from-scratch rebuild and the model its commits credit.
 const editions = [
-  { n: 4, by: "Claude Fable 5.2", when: "November 2026" },
-  { n: 3, by: "Claude Opus 5.5", when: "September 2026" },
-  { n: 2, by: "Claude Fable 5", when: "July 2026" },
+  { by: "Claude Fable 5.2", when: "November 2026" },
+  { by: "Claude Opus 5.5", when: "September 2026" },
+  { by: "Claude Fable 5", when: "July 2026" },
 ];
 ---
 
@@ -193,7 +194,6 @@ const editions = [
         {
           editions.map((e) => (
             <li>
-              <span>Edition {e.n}</span>
               <b>{e.by}</b>
               <span>{e.when}</span>
             </li>

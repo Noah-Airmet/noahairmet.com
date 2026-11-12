@@ -2,7 +2,8 @@
 // the USGS elevation grid is one sheet, drawn bottom to top so the high ground
 // hides what is behind it. /api/last-out supplies the terrain and the route
 // when there is a recent activity; otherwise it is Mount Timpanogos.
-import { calm, clamp, onTick } from "./kit";
+import { free, post } from "./agents";
+import { calm, clamp, onTick, run, still } from "./kit";
 
 type Grid = { rows: number; cols: number; elev: number[] };
 type Frame = Grid & { fade: number; peak: [number, number] };
@@ -172,9 +173,13 @@ export async function startOutside() {
   }));
 
   let yaw = -Math.PI / 2 + 0.3;
-  let spin = calm ? 0 : 0.00006;
+  let spin = calm || still ? 0 : 0.00006;
   let vel = 0;
-  let rise = calm ? 1 : 0;
+  let rise = calm || still ? 1 : 0;
+  let lifting = calm || still;
+  let asked = false;
+  /** Where the summit is on the page right now. */
+  const summit = { x: 0, y: 0 };
   let seen = false;
   let dirty = true;
   let dragging = false;
@@ -277,6 +282,9 @@ export async function startOutside() {
     });
     // the summit, measured
     const top = project(peak.u, peak.v, model.sample(peak.u, peak.v));
+    const box = cv.getBoundingClientRect();
+    summit.x = box.left + scrollX + top[0] / dpr;
+    summit.y = box.top + scrollY + top[1] / dpr;
     const up = 56 * dpr * ease(rise);
     const label = `${peakFt.toLocaleString("en-US")} ft`;
     ctx.globalAlpha = ease(rise);
@@ -302,12 +310,40 @@ export async function startOutside() {
     (e) => {
       seen = e.some((x) => x.isIntersecting);
     },
-    { threshold: 0.15 },
+    { threshold: 0.4 },
   ).observe(cv);
+
+  // The stack starts flat. An agent takes it by the summit and lifts it; with
+  // nobody free it rises on its own.
+  const lift = () => {
+    if (asked) return;
+    asked = true;
+    if (!free()) return void (lifting = true);
+    post({
+      key: "lift",
+      at: () => summit,
+      async run(a, signal) {
+        try {
+          await a.moveTo(() => summit, { signal, tempo: 0.8 });
+          await a.press(signal, 80);
+          lifting = true;
+          await run(1450, () => a.set(summit.x, summit.y), signal);
+        } finally {
+          lifting = true;
+          a.lift();
+        }
+      },
+    });
+    setTimeout(() => (lifting = true), 1600);
+  };
 
   onTick((dt) => {
     if (!seen) return;
-    if (rise < 1) {
+    if (!asked) {
+      draw();
+      lift();
+    }
+    if (rise < 1 && lifting) {
       rise = Math.min(1, rise + dt / 1400);
       dirty = true;
     }

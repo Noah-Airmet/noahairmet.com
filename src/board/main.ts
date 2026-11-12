@@ -2,7 +2,7 @@
 import { agents, hire, watchPointer } from "./agents";
 import { startBench } from "./bench";
 import { startGuard } from "./guard";
-import { calm, pageRect } from "./kit";
+import { calm, pageRect, still } from "./kit";
 import { startName } from "./name";
 import { startOutside } from "./outside";
 import { startQuote } from "./quote";
@@ -45,8 +45,6 @@ async function start() {
   const root = document.documentElement;
   const late = !root.classList.contains("live");
   root.classList.add("live");
-  // ?still holds the board at rest (no intro, nothing slips): for screenshots and checks.
-  const still = new URLSearchParams(location.search).has("still");
   const seen = still || late || sessionStorage.getItem("set") === "1";
   if (seen) {
     for (const a of agents) {

@@ -75,6 +75,10 @@ export function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, 
 
 export const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+/** ?still holds the board at rest (no intro, nothing slips, nothing is acted
+ *  out): for screenshots and checks. */
+export const still = new URLSearchParams(location.search).has("still");
+
 /** Provo's wall clock, the only one the page keeps. */
 export const provoTime = (d = new Date()) =>
   d.toLocaleTimeString("en-US", { hour12: false, timeZone: "America/Denver" });

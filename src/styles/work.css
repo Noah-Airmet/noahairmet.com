@@ -178,9 +178,14 @@
   border: solid var(--guide);
   border-width: 0 2px;
   background: linear-gradient(var(--guide), var(--guide)) 0 50% / 100% 2px no-repeat;
+  opacity: 0;
   transition:
     left var(--d-slow) var(--ease),
-    width var(--d-slow) var(--ease);
+    width var(--d-slow) var(--ease),
+    opacity var(--d-pop) linear;
+}
+.row.set .ci {
+  opacity: 1;
 }
 .grip {
   position: absolute;
@@ -482,7 +487,7 @@
 }
 .editions li {
   display: grid;
-  grid-template-columns: 4.6rem 8.6rem auto;
+  grid-template-columns: 8.6rem auto;
   white-space: nowrap;
   justify-content: start;
   gap: var(--s-4);

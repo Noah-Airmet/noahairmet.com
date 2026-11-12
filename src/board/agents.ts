@@ -175,17 +175,23 @@ async function take(a: Agent, job: Live) {
   }
 }
 
-/** With nothing to do, an agent drifts back to its post. */
+const onScreen = (p: Pt) => p.y > scrollY - 40 && p.y < scrollY + innerHeight + 40;
+
+/** With nothing to do, an agent drifts back to its post, if the visitor can
+ *  see it; otherwise it waits where its last job left it. */
 async function stand(a: Agent) {
   try {
     await wait(700 + Math.random() * 600);
     if (a.busy) return;
     const p = a.post();
-    if (Math.hypot(p.x - a.x, p.y - a.y) > 4) await a.moveTo(p, { tempo: 1.5 });
+    if (onScreen(p) && Math.hypot(p.x - a.x, p.y - a.y) > 4) await a.moveTo(p, { tempo: 1.5 });
   } catch {
     /* called away */
   }
 }
+
+/** Is anyone free to take a job right now? */
+export const free = () => agents.some((a) => a.seen && !a.busy);
 
 /** Idle agents keep clear of the visitor's pointer. */
 export function watchPointer() {
@@ -193,6 +199,18 @@ export function watchPointer() {
     if (e.pointerType === "mouse") pointer = { x: e.pageX, y: e.pageY };
   });
   document.addEventListener("pointerleave", () => (pointer = null));
+  // Back at the top, anyone left down the page comes home.
+  let settle = 0;
+  addEventListener(
+    "scroll",
+    () => {
+      clearTimeout(settle);
+      settle = window.setTimeout(() => {
+        for (const a of agents) if (!a.busy && a.seen && !onScreen({ x: a.x, y: a.y })) void stand(a);
+      }, 250);
+    },
+    { passive: true },
+  );
   const dodging = new WeakSet<Agent>();
   onTick(() => {
     if (!pointer) return;

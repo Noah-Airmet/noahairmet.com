@@ -2,7 +2,7 @@
 title: "Professional commitments"
 date: 2026-06-04
 tag: ethics
-description: "A personal code of ethics for work in cybersecurity and AI governance — written for a class, kept because I mean it."
+description: "A personal code of ethics for work in cybersecurity and AI governance, written for a class and kept because I mean it."
 ---
 
 *Written for a cybersecurity ethics class at BYU, 2026. Lightly reformatted for

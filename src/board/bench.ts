@@ -2,8 +2,8 @@
 // (data-* on each row, from src/data/citationbench.json); this sizes the bars,
 // switches measures, and lets a visitor drag a bar to a number it never
 // scored, which an agent then drags back.
-import { post, recall, type Agent } from "./agents";
-import { Stop, calm, clamp, ease, pageRect, run } from "./kit";
+import { free, post, recall, type Agent } from "./agents";
+import { Stop, calm, clamp, ease, pageRect, run, still } from "./kit";
 import { chip, vline } from "./layer";
 import { flag, record } from "./ledger";
 
@@ -40,15 +40,56 @@ export function startBench() {
     const half = Math.round((hi - lo) / 2);
     r.el.querySelector(".val i")!.textContent = half ? `±${half}` : "";
     r.el.classList.remove("off");
+    r.el.classList.add("set");
     flag(`bar:${r.id}`, false);
   };
 
-  // Bars grow when the figure first comes into view.
+  // The first time the figure comes into view, the agents pull each bar out to
+  // its score (which is also how a visitor learns the ends can be dragged). If
+  // nobody is free, the bars grow on their own.
   const io = new IntersectionObserver(
     (entries) => {
       if (!entries.some((e) => e.isIntersecting)) return;
       io.disconnect();
-      rows.forEach((r, i) => setTimeout(() => settle(r), calm ? 0 : i * 70));
+      const hands = !calm && !still && free();
+      rows.forEach((r, i) => {
+        if (!hands) return void setTimeout(() => settle(r), calm || still ? 0 : i * 70);
+        const key = `draw:${r.id}`;
+        let begun = false;
+        post({
+          key,
+          rank: i,
+          at: () => end(r),
+          async run(a, signal) {
+            begun = true;
+            const [mean] = truth(r);
+            r.el.classList.add("drag");
+            try {
+              await a.moveTo(() => end(r), { signal, tempo: 0.8 });
+              await a.press(signal, 60);
+              await run(
+                300 + mean * 3,
+                (k) => {
+                  paint(r, mean * ease.hand(k));
+                  const p = end(r);
+                  a.set(p.x, p.y);
+                },
+                signal,
+              );
+            } finally {
+              r.el.classList.remove("drag");
+              settle(r);
+              a.lift();
+            }
+          },
+        });
+        // not picked up soon enough: draw it without them
+        setTimeout(() => {
+          if (begun) return;
+          recall(key);
+          settle(r);
+        }, 1800 + i * 500);
+      });
     },
     { threshold: 0.35 },
   );
