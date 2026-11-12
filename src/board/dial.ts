@@ -290,9 +290,13 @@ export function startDial() {
     const ix = c - ux * R * 0.18;
     const iy = c - uy * R * 0.18;
     const ir = R * 0.5;
+    // nearly solid, in the sky's own colours: the lines behind it don't show through
+    const face = ctx.createLinearGradient(0, iy - ir, 0, iy + ir);
+    face.addColorStop(0, css(mix(sky.mid, [255, 255, 255], 0.1), 0.94));
+    face.addColorStop(1, css(mix(sky.top, BANDS[1], 0.5), 0.94));
     ctx.beginPath();
     ctx.arc(ix, iy, ir, 0, Math.PI * 2);
-    ctx.fillStyle = css(mix(sky.mid, [255, 255, 255], 0.18), 0.5);
+    ctx.fillStyle = face;
     ctx.fill();
     ctx.strokeStyle = "rgb(255 255 255 / 0.72)";
     ctx.lineWidth = dpr * 1.2;
