@@ -6,9 +6,11 @@ import { calm, pageRect, still } from "./kit";
 import { startName } from "./name";
 import { startOutside } from "./outside";
 import { startQuote } from "./quote";
+import { startSound } from "./sound";
 
 const hero = document.getElementById("top") as HTMLElement;
 
+startSound();
 startBench();
 startQuote();
 void startOutside();

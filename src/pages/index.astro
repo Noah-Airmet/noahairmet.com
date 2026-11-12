@@ -5,7 +5,16 @@ import { getCollection } from "astro:content";
 import bench from "../data/citationbench.json";
 import { quotes } from "../data/quotes";
 import Page from "../layouts/Page.astro";
+import { execSync } from "node:child_process";
 import { isoDate, longDate, site } from "../site";
+
+// The commit this build was made from, for the colophon.
+let rev = "";
+try {
+  rev = execSync("git rev-parse --short HEAD", { encoding: "utf8" }).trim();
+} catch {
+  /* not a checkout */
+}
 
 const notes = (await getCollection("writing")).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 const measures = [
@@ -26,6 +35,7 @@ const editions = [
 <Page here="home">
   <div class="status" slot="bar">
     <span class="last" id="last" aria-hidden="true"></span>
+    <button class="snd" id="sound" type="button" aria-pressed="false">Sound off</button>
     <button class="state" id="state" type="button" data-state="ok" aria-expanded="false" aria-controls="log">
       <i></i><span>Intact</span>
     </button>
@@ -41,6 +51,7 @@ const editions = [
         <span class="ln">Noah</span>
         <span class="ln">Airmet</span>
       </h1>
+      <button class="sr-key" id="scatter" type="button">Scatter the letters</button>
 
       <ul class="roles">
         <li>
@@ -110,7 +121,7 @@ const editions = [
                   <div class="who">
                     <b>{r.model}</b>
                     <span>
-                      {r.agent} · {r.n} questions
+                      {r.agent}, {r.n} questions
                     </span>
                   </div>
                   <div class="track">
@@ -128,7 +139,7 @@ const editions = [
           </ol>
           <figcaption id="bench-cap">
             <span class="says" id="bench-says">{measures[0].says}</span>
-            <span class="meta">Percent, with 95% intervals · held-out questions · snapshot {bench.runs[0].snapshot}</span>
+            <span class="meta">Percent, with 95% intervals. Held-out questions, snapshot {bench.runs[0].snapshot}.</span>
           </figcaption>
         </figure>
       </section>
@@ -208,6 +219,7 @@ const editions = [
       <a href={site.linkedin}>LinkedIn</a>
       <a href={site.resume}>Résumé</a>
       <a href="/rss.xml">RSS</a>
+      {rev && <span class="rev">rev {rev}</span>}
     </nav>
   </footer>
 </Page>

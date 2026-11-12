@@ -6,6 +6,7 @@ import { free, post, recall, type Agent } from "./agents";
 import { Stop, calm, clamp, ease, pageRect, run, still } from "./kit";
 import { chip, vline } from "./layer";
 import { flag, record } from "./ledger";
+import { click } from "./sound";
 
 const fig = document.getElementById("bench");
 
@@ -182,6 +183,7 @@ export function startBench() {
     }
     settle(r);
     a.lift();
+    click();
     record(a.name, "restored", r.id, (performance.now() - since) / 1000);
   }
 }

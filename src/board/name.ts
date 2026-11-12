@@ -7,6 +7,7 @@ import { post, recall, type Agent } from "./agents";
 import { Stop, calm, clamp, ease, el, onTick, pageRect, rand, run, wait, type Pt } from "./kit";
 import { chip, hline, vline } from "./layer";
 import { flag, record } from "./ledger";
+import { click, thud } from "./sound";
 
 const { Bodies, Body, Composite, Constraint, Engine, Events } = Matter;
 
@@ -311,6 +312,9 @@ Events.on(engine, "collisionStart", (ev) => {
   for (const pair of ev.pairs) {
     const a = (pair.bodyA as Matter.Body & { piece?: Piece }).piece;
     const b = (pair.bodyB as Matter.Body & { piece?: Piece }).piece;
+    // how hard: the closing speed, against what a long fall reaches
+    const hit = Math.hypot(pair.bodyA.velocity.x - pair.bodyB.velocity.x, pair.bodyA.velocity.y - pair.bodyB.velocity.y);
+    if (running && tempo >= 1) thud(hit / (size * 0.12));
     if (!a || !b) continue;
     const [still, mover] = a.state === "set" ? [a, b] : b.state === "set" ? [b, a] : [null, null];
     if (!still || !mover || mover.state === "set") continue;
@@ -430,6 +434,7 @@ async function place(p: Piece, who: string, signal?: AbortSignal, agent?: Agent,
     p.el.classList.remove("tick");
     void p.el.offsetWidth;
     p.el.classList.add("tick");
+    if (tempo >= 1) click();
     tag.set("0");
     tag.fade(380);
     base.fade(420);
@@ -629,6 +634,13 @@ export function startName(opts: { intro: boolean; slips: boolean }) {
   });
   return { ready };
 }
+
+// The keyboard's way in: a button after the name that sends the letters flying.
+const key = document.getElementById("scatter");
+key?.addEventListener("click", () => {
+  record("you", "scattered", "the name");
+  scatter();
+});
 
 function rebinding() {
   holder.addEventListener("pointerdown", grab);

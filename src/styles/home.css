@@ -115,6 +115,36 @@
   gap: var(--s-4);
   min-width: 0;
 }
+.snd {
+  height: var(--hit);
+  padding: 0 10px;
+  color: var(--ink-3);
+  white-space: nowrap;
+  transition: color var(--d-fast) var(--ease);
+}
+.snd:hover,
+.snd[aria-pressed="true"] {
+  color: var(--ink);
+}
+/* shown only to the keyboard: the way to play without a pointer */
+.sr-key {
+  position: absolute;
+  left: var(--gutter);
+  top: calc(var(--bar) + var(--s-2));
+  z-index: 6;
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: var(--t-sm);
+  font-weight: 500;
+  opacity: 0;
+  pointer-events: none;
+}
+.sr-key:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
 .state {
   display: inline-flex;
   align-items: center;
@@ -362,7 +392,8 @@
     gap: var(--s-5);
     flex-wrap: wrap;
   }
-  .last {
+  .last,
+  .snd {
     display: none;
   }
 }

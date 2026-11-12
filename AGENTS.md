@@ -25,15 +25,30 @@ be put out of place, an agent cursor puts it back, and the bar's state
   Edit it and the page strikes what the source doesn't say; left wrong, an
   agent restores it.
 - **Text** (`src/board/guard.ts`): anything marked `data-keep` that gets
-  rewritten (from the console, say) is typed back.
+  rewritten (from the console, say) is typed back. A second check sweeps
+  every few seconds for what an observer can't see, such as the whole element
+  being swapped for another. The console prints one line: an example to try.
 - **The mountain** (`src/board/outside.ts`): the terrain from `/api/last-out`
   (the last place Noah was out, uploaded by his Ledger app; `worker/last-out.js`)
   or Mount Timpanogos, as a round-cut stack of contour sheets. Drag to turn.
 
 `src/board/agents.ts` is the agents themselves: work is posted as jobs, the
 nearest free agent takes one, and a job is an async script that can be called
-off at any await (when a visitor grabs the letter back). `ledger.ts` is the
-state and the log; `layer.ts` draws the blue alignment lines and the chips.
+off at any await (when a visitor grabs the letter back). The first time each
+exhibit scrolls into view the agents do its opening move too: they pull the
+bars out to their scores, press the quote check, and lift the mountain by its
+summit. `ledger.ts` is the state and the log (the tab title carries the count
+of things out of place); `layer.ts` draws the blue alignment lines and the
+chips; `sound.ts` is the opt-in sound (off until the bar's control is
+pressed), all synthesized.
+
+Why this and not just throwable letters: research on 2026-11-12 found that
+physics letters and fake multiplayer cursors are sold as drop-in components,
+while a page whose agents visibly repair it had no prior example on a
+personal site. The repair, the log and the real data are the point.
+
+The keyboard's way in is a button after the name (visible on focus) that
+scatters the letters.
 
 With `prefers-reduced-motion`, none of the board runs: the name is plain
 text, the chart and the quote check still work, the mountain holds still.

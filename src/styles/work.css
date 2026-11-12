@@ -498,6 +498,14 @@
   font-weight: 500;
   color: var(--ink);
 }
+.rev {
+  display: inline-flex;
+  align-items: center;
+  height: var(--hit);
+  font: 400 var(--t-xs) / 1 var(--mono);
+  font-stretch: 87.5%;
+  color: var(--ink-3);
+}
 .col-links {
   display: flex;
   flex-wrap: wrap;

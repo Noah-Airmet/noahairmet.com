@@ -12,6 +12,7 @@ export interface Entry {
 const entries: Entry[] = [];
 const listeners = new Set<() => void>();
 const out = new Set<string>();
+const title = document.title;
 
 const stateBtn = document.getElementById("state") as HTMLButtonElement | null;
 const stateText = stateBtn?.querySelector("span");
@@ -46,6 +47,7 @@ function row(e: Entry) {
 export function flag(key: string, on: boolean) {
   if (on) out.add(key);
   else out.delete(key);
+  document.title = out.size ? `(${out.size}) ${title}` : title;
   if (!stateBtn || !stateText) return;
   stateBtn.dataset.state = out.size ? "off" : "ok";
   stateText.textContent = out.size ? `${out.size} out of place` : "Intact";

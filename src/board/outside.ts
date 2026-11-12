@@ -61,7 +61,7 @@ function describe(r: Out) {
     parts.push(`${((s.distance_m / 1000) * MI).toFixed(1)} mi`, `${n(s.ascent_m * FT)} ft up`);
   }
   parts.push(h ? `${h}h ${String(m).padStart(2, "0")}m` : `${m} min`);
-  return parts.join(" · ");
+  return parts.join(", ");
 }
 
 /** One sheet per level: where the ground is at least that high, and its edge.
