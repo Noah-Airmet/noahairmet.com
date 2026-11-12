@@ -1,78 +1,118 @@
-# noahairmet.com — Agent Guide
+# noahairmet.com
 
-Noah Airmet's personal site, rebuilt from scratch on 2026-09-28. Three tabs,
-each one screen: **About** (`/`, Mount Timpanogos), **Pulpit** (`/pulpit/`,
-every sermon as a dot), **Writing** (`/writing/`). Astro static → Cloudflare
-Worker `noahairmet-com` (noahairmet.com + www). `docs/BEE-APP.md` covers
-Katie's workout PWA at `/bee` — read it before touching `public/bee/`.
+Noah Airmet's personal site, rebuilt from scratch on 2026-11-12 by Claude
+Fable 5.2 (Noah has each new frontier model rebuild it; the colophon on the
+home page lists the editions). Astro static pages, served as Cloudflare
+Workers static assets by the Worker `noahairmet-com` (noahairmet.com and www).
+`docs/BEE-APP.md` covers Katie's workout app at `/bee`; read it before
+touching `public/bee/`.
 
-## How it works
+## The idea
 
-- **The sky.** `public/sky.js` loads synchronously in `<head>` and sets
-  `--bg`, `--ink`, `--soft`, `--accent` from the sun's real elevation over
-  Provo. Light skies and dark skies never blend into each other (the
-  midpoint is unreadable); they crossfade. `?at=21:30` previews a time.
-- **Timp** (`src/scripts/timp.ts`): ridgelines from USGS elevation in
-  `public/data/timp.json`. Drag to turn; the day bar scrubs the sky.
-- **Dots** (`src/scripts/dots.ts`): `public/data/pulpit-core.json` draws
-  the dots; `pulpit-titles.json` loads after first paint. The dot ramp
-  (accent → sky) is validated in all four skies; if you change a sky's
-  colors, re-run the dataviz ordinal validator on it.
-- **Tabs** are real pages joined by cross-document view transitions: the
-  big name morphs into the wordmark, the tab pill slides.
-- **Share card.** `public/og/card.png` (still) and `card.mp4` (one turn of
-  Timp, blue-hour sky, view from Provo) are rendered by
-  `bash scripts/card/render.sh [sky]`; bump `card` `v=` in
-  `src/lib/site.ts` afterward. iMessage and Discord play the `og:video`.
-  Workers static assets ignore Range requests, which Safari needs for
-  video, so `worker/index.js` serves `/og/*` (and only that) with ranges.
-- **Attention order** is the design system (see the header of
-  `src/styles/site.css`): headline → lede → actions (the only filled
-  shapes) → the exhibit and its label → meta. Load animations run in that
-  same order. Label every exhibit where it sits, never in a far corner.
+The page is kept by agents, and a visitor can test that. Everything on it can
+be put out of place, an agent cursor puts it back, and the bar's state
+(`Intact` / `2 out of place`) and its log say what happened.
 
-## Rules, and where each came from
+- **The name** (`src/board/name.ts`): each letter is a rigid body (Matter.js)
+  cut from the glyph's own outline. Pull one off, throw it, knock the others
+  loose; double-click to send them all. On a first visit the letters start in
+  a heap and the agents set the name. Now and then one slips on its own.
+- **CitationBench** (`src/board/bench.ts`): the published runs as bars with
+  their 95% intervals. A bar's end drags to a number it never scored; an agent
+  drags it back.
+- **SafetyPage** (`src/board/quote.ts`): a quotation checked live against the
+  library's verifier (`POST https://safetypage-api.noahairmet.com/api/verify`).
+  Edit it and the page strikes what the source doesn't say; left wrong, an
+  agent restores it.
+- **Text** (`src/board/guard.ts`): anything marked `data-keep` that gets
+  rewritten (from the console, say) is typed back.
+- **The mountain** (`src/board/outside.ts`): the terrain from `/api/last-out`
+  (the last place Noah was out, uploaded by his Ledger app; `worker/last-out.js`)
+  or Mount Timpanogos, as a round-cut stack of contour sheets. Drag to turn.
 
-Noah asked (2026-09-28) to drop every inherited rule. What remains is here
-with its source, so nobody mistakes an agent's preference for his.
+`src/board/agents.ts` is the agents themselves: work is posted as jobs, the
+nearest free agent takes one, and a job is an async script that can be called
+off at any await (when a visitor grabs the letter back). `ledger.ts` is the
+state and the log; `layer.ts` draws the blue alignment lines and the chips.
 
-- **From Noah and Katie — Katie's app at `/bee` gets no analytics.** Their
-  household rule is that health data never leaves owned hardware
-  (`docs/BEE-APP.md`). `public/_headers` gives `/bee/*` its own stricter
-  CSP, so Cloudflare's auto-injected analytics beacon is blocked there.
-- **From Noah — King Follett and Hymn Parts stay unlisted** (one is for
-  friends; the other carries copyrighted hymns). Smoke-tested.
-- **Agent default, safety — no links to private services** (`corpus.` and
-  other internal subdomains). Smoke-tested.
-- **Agent default, craft — keep old URLs alive** via `public/_redirects`
-  (`/field-notes/*` → `/writing/*`). A `/resume/*` wildcard loops the PDF, so
-  there isn't one.
-- **Agent default, craft — security headers.** Same-origin scripts and
-  styles plus Cloudflare Web Analytics (enabled on the zone since
-  2026-03-13; cookieless). Astro would inline small scripts, so
-  `assetsInlineLimit: 0` stays in `astro.config.mjs`. Noah has no
-  preference here; loosen it whenever a feature needs to.
+With `prefers-reduced-motion`, none of the board runs: the name is plain
+text, the chart and the quote check still work, the mountain holds still.
+
+## Design
+
+- Day is a drafting board (`--paper`, ink, a blue pencil for lining things up,
+  a red one for what's wrong); night is a blueprint. It follows the visitor's
+  system setting. Every value is in `src/styles/tokens.css`.
+- Three faces, one job each, self-hosted in `src/fonts/` with their licences:
+  Roboto Flex (display at weight 1000 and width 150, and the interface),
+  Newsreader (what you read), Martian Mono (values: times, measurements, ids).
+  `roboto-flex.woff2` is a cut of the full font holding only the weight, width
+  and optical-size axes.
+- The interface doesn't explain itself: names, values, states of three words
+  or fewer, controls. Sentences are for content.
+
+## What goes on the site
+
+Noah, 2026-11-12: "be clean and careful in what you advertise on my site as
+my 'resume.'" He is proud of CitationBench and SafetyPage. "i'm not
+particularly 'proud' of my clip farms and can't really advertise GSA (or even
+pulpit) since they're internal research tools." MTA is "a simple 'Lead
+Technical Fellow @transfigurism' (with the handle hyperlinked to their
+twitter)". At Simplicity his title is junior developer, "but you can lead
+with the fact that i do pentesting and write ai safety policy." And: "a
+personal site is for the things youre proud of, not an official job
+application or comprehensive inventory." `test/smoke.test.mjs` checks the
+built site for the names that stay off it.
+
+Also from Noah and Katie: Katie's app at `/bee` gets no analytics (their
+household rule is that health data never leaves owned hardware;
+`docs/BEE-APP.md`), so `public/_headers` gives `/bee/*` its own stricter CSP.
+From Noah: King Follett and Hymn Parts stay unlisted.
+
+Noah reads and owns every published word. The sentences on the home page are
+his or his projects' own: the lede is from the previous edition, the two
+project lines are from SafetyPage's README, the colophon line is his
+description of the tradition.
+
+## Data
+
+- `src/data/citationbench.json`: `python3 scripts/bench-data.py` copies the
+  runs committed in `~/development/safetypage/citationbench/results` (the ones
+  the public leaderboard shows). Uncommitted result files are work in
+  progress and are left out.
+- `src/data/quotes.ts`: the quotations the check cycles through, each
+  verified against the live library when added.
+- `public/data/timp.json`: Timp's USGS elevation grid. `public/data/last-out.json`
+  is the Worker's list of areas.
+
+## Other pieces
+
+- `public/boot.js` runs before first paint: with motion allowed it hides the
+  plain name so the pieces can take its place, and brings it back if the board
+  never loads.
+- Headers (`public/_headers`): same-origin scripts and styles, Cloudflare Web
+  Analytics, and `connect-src` for the SafetyPage API. Astro would inline
+  small scripts, so `assetsInlineLimit: 0` stays in `astro.config.mjs`.
+- `public/_redirects` keeps old addresses alive. A `/resume/*` wildcard loops
+  the PDF, so there isn't one.
+- Icon: `scripts/icons.py` then `node scripts/icons.mjs`. Share card:
+  `node scripts/card.mjs` against a running server, then bump `card.image`'s
+  `v` in `src/site.ts`.
 
 ## Add a note
 
-Create `src/content/writing/<slug>.md` with `title`, `date`, optional
-`tag`, and a one-sentence `description`. Noah reads and owns every
-published word; disclose substantive AI assistance in the note.
+Create `src/content/writing/<slug>.md` with `title`, `date`, optional `tag`,
+and a one-sentence `description`.
 
-## Refresh data
-
-```bash
-python3 scripts/build-data.py   # re-tallies Pulpit from the live archive; rebuilds timp.json
-```
-
-## Verify, deploy
+## Check and deploy
 
 ```bash
-npm run verify              # astro check + build + smoke tests
-npm run deploy:production   # ONLY with Noah's explicit authorization
+npm run dev       # http://localhost:4321 (the mountain falls back to Timp: no Worker here)
+npm run verify    # astro check, build, tests
+npm run preview   # the built site under Wrangler, with the Worker and the real headers
+npx wrangler versions upload   # a preview URL, without touching production
+npm run deploy    # verify, then production
 ```
 
-Deploy = Wrangler (`npx wrangler whoami`). Pushing to GitHub does not
-deploy. After deploying, check `/`, `/pulpit/`, `/writing/`,
-`/resume/noah-airmet-resume.pdf`, `/bee/` return 200 and
-`/field-notes/professional-commitments/` 301s. DNS stays as it is.
+Pushing to GitHub does not deploy. `ui-check` (`ui-check.config.mjs`) runs the
+geometry, axe and screenshot checks.

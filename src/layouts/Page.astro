@@ -1,6 +1,7 @@
 ---
 import "../styles/tokens.css";
 import "../styles/base.css";
+import flex from "../fonts/roboto-flex.woff2?url";
 import { absoluteUrl, pageTitle, site } from "../site";
 
 interface Props {
@@ -41,6 +42,7 @@ const fullTitle = pageTitle(title);
     <meta name="twitter:image" content={absoluteUrl(site.card.image)} />
     <meta name="theme-color" content="#ecede8" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0b1a3c" media="(prefers-color-scheme: dark)" />
+    <link rel="preload" href={flex} as="font" type="font/woff2" crossorigin />
     {here === "home" && <script is:inline src="/boot.js" />}
   </head>
   <body>

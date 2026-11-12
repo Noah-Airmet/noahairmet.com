@@ -8,6 +8,8 @@
 /about / 301
 /resume /resume/noah-airmet-resume.pdf 301
 /resume/ /resume/noah-airmet-resume.pdf 301
+/pulpit/* / 301
+/pulpit / 301
 /colophon/* / 301
 /colophon / 301
 /privacy/* / 301

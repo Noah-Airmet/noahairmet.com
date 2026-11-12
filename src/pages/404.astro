@@ -1,0 +1,36 @@
+---
+import "../styles/home.css";
+import Page from "../layouts/Page.astro";
+---
+
+<Page here="home" title="Not found" noindex>
+  <div class="status" slot="bar">
+    <span class="last" id="last" aria-hidden="true"></span>
+    <button class="state" id="state" type="button" data-state="ok" aria-expanded="false" aria-controls="log">
+      <i></i><span>Intact</span>
+    </button>
+    <aside class="log" id="log" hidden aria-label="What was done to this page, and who put it right">
+      <div class="log-list" id="log-list"></div>
+      <p class="log-none">Nothing yet</p>
+    </aside>
+  </div>
+  <main id="main">
+    <section class="hero" id="top">
+      <h1 class="name" id="name" aria-label="Not here">
+        <span class="ln">Not</span>
+        <span class="ln">here</span>
+      </h1>
+      <div class="foot">
+        <p class="lede">Nothing lives at this address.</p>
+        <nav class="links" aria-label="Elsewhere">
+          <a href="/">Home</a>
+          <a href="/writing/">Writing</a>
+        </nav>
+      </div>
+    </section>
+  </main>
+</Page>
+
+<script>
+  import "../board/main.ts";
+</script>

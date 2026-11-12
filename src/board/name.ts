@@ -451,7 +451,7 @@ function repair(p: Piece) {
         await a.moveTo(dest, { signal, tempo: tempo * 1.15, bow: rise });
       } catch (err) {
         swapFilter(p, true);
-        if (p.state === "carried") mark(p, "loose");
+        if ((p.state as State) === "carried") mark(p, "loose");
         throw err;
       } finally {
         follow();
@@ -614,6 +614,7 @@ export function startName(opts: { intro: boolean }) {
 
 function rebinding() {
   holder.addEventListener("pointerdown", grab);
+  holder.addEventListener("dblclick", scatter);
   holder.addEventListener("pointermove", move);
   holder.addEventListener("pointerup", release);
   holder.addEventListener("pointercancel", release);

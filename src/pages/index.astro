@@ -43,21 +43,21 @@ const editions = [
 
       <ul class="roles">
         <li>
-          <span>Pentesting and AI safety policy</span>
+          <span data-keep="a role">Pentesting and AI safety policy</span>
           <a href={site.simplicity}>Simplicity Group</a>
         </li>
         <li>
-          <span>Lead Technical Fellow</span>
+          <span data-keep="a role">Lead Technical Fellow</span>
           <a href={site.mta}>@transfigurism</a>
         </li>
         <li>
-          <span>Cybersecurity, class of 2027</span>
+          <span data-keep="a role">Cybersecurity, class of 2027</span>
           <a href={site.byu}>BYU</a>
         </li>
       </ul>
 
       <div class="foot">
-        <p class="lede" id="lede">I’m working toward a career securing and governing AI systems.</p>
+        <p class="lede" id="lede" data-keep="the lede">I’m working toward a career securing and governing AI systems.</p>
         <nav class="links" aria-label="Elsewhere">
           <a href={site.resume}>Résumé</a>
           <a href={`mailto:${site.email}`}>Email</a>
@@ -71,8 +71,8 @@ const editions = [
     <div id="work">
       <section class="proj" id="citationbench" aria-labelledby="cb-h">
         <header class="proj-head">
-          <h2 id="cb-h">CitationBench</h2>
-          <p class="say">
+          <h2 id="cb-h" data-keep="a heading">CitationBench</h2>
+          <p class="say" data-keep="a description">
             A benchmark of whether an agent with a library tool cites the right page and quotes it accurately.
           </p>
           <nav class="proj-links" aria-label="CitationBench">
@@ -98,7 +98,7 @@ const editions = [
           </div>
           <ol class="rows">
             {
-              bench.runs.map((r, i) => (
+              bench.runs.map((r) => (
                 <li
                   class="row"
                   data-id={r.model}
@@ -134,8 +134,8 @@ const editions = [
 
       <section class="proj" id="safetypage" aria-labelledby="sp-h">
         <header class="proj-head">
-          <h2 id="sp-h">SafetyPage</h2>
-          <p class="say">A page-cited library of the AI safety record, built for people and for AI agents.</p>
+          <h2 id="sp-h" data-keep="a heading">SafetyPage</h2>
+          <p class="say" data-keep="a description">A page-cited library of the AI safety record, built for people and for AI agents.</p>
           <nav class="proj-links" aria-label="SafetyPage">
             <a href={site.safetypage}>Library</a>
             <a href={site.safetypageRepo}>GitHub</a>
@@ -158,7 +158,7 @@ const editions = [
     </div>
 
     <section class="writing" id="writing" aria-labelledby="w-h">
-      <h2 id="w-h">Writing</h2>
+      <h2 id="w-h" data-keep="a heading">Writing</h2>
       <ol class="notes">
         {
           notes.map((n) => (
@@ -188,7 +188,7 @@ const editions = [
 
   <footer class="colophon">
     <div class="col-a">
-      <p class="col-say">Every time a new frontier model takes the throne, it rebuilds this site from scratch.</p>
+      <p class="col-say" data-keep="the colophon">Every time a new frontier model takes the throne, it rebuilds this site from scratch.</p>
       <ol class="editions">
         {
           editions.map((e) => (

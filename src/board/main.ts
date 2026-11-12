@@ -1,6 +1,7 @@
 // The home page's board: hire the agents, set the name, then start the exhibits.
 import { agents, hire, watchPointer } from "./agents";
 import { startBench } from "./bench";
+import { startGuard } from "./guard";
 import { calm, pageRect } from "./kit";
 import { startName } from "./name";
 import { startOutside } from "./outside";
@@ -27,7 +28,9 @@ async function start() {
   // Where each waits between jobs: the open band between the name and the lede.
   const band = () => {
     const y = (sel: string, edge: "y" | "end") => {
-      const r = pageRect(hero.querySelector(sel)!);
+      const node = hero.querySelector(sel);
+      if (!node) return 0;
+      const r = pageRect(node);
       return edge === "y" ? r.y : r.y + r.h;
     };
     const top = Math.max(y(".name", "end"), y(".roles", "end"));
@@ -51,6 +54,7 @@ async function start() {
   }
   const { ready } = startName({ intro: !seen });
   watchPointer();
+  startGuard();
   await ready;
   sessionStorage.setItem("set", "1");
 }

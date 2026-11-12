@@ -15,13 +15,13 @@
     }
   ],
   "main": "worker/index.js",
-  // Latest outdoor activity for the About page (worker/last-out.js).
+  // Latest outdoor activity for the mountain on the home page (worker/last-out.js).
   // The Ledger upload token is a secret: `wrangler secret put LAST_OUT_TOKEN`.
   "kv_namespaces": [{ "binding": "LAST_OUT", "id": "9123fd4eabbf4abaaaa1a2376e7447fd" }],
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
-    "run_worker_first": ["/og/*", "/api/*"],
+    "run_worker_first": ["/api/*"],
     "not_found_handling": "404-page",
     "html_handling": "auto-trailing-slash"
   }

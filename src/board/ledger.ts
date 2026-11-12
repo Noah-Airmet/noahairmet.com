@@ -58,10 +58,10 @@ if (stateBtn && panel) {
     panel.hidden = !open;
     stateBtn.setAttribute("aria-expanded", String(open));
   };
-  stateBtn.addEventListener("click", () => set(panel.hidden));
+  stateBtn.addEventListener("click", () => set(panel.hasAttribute("hidden")));
   addEventListener("keydown", (e) => e.key === "Escape" && set(false));
   addEventListener("pointerdown", (e) => {
-    if (!panel.hidden && !(e.target as Element).closest("#log, #state")) set(false);
+    if (!panel.hasAttribute("hidden") && !(e.target as Element).closest("#log, #state")) set(false);
   });
 }
 

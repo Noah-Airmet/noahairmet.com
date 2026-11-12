@@ -1,0 +1,69 @@
+/* ---- reading pages: an essay, the list of them */
+.page {
+  padding: calc(var(--bar) + var(--s-8)) var(--gutter) var(--s-9);
+}
+.page-title {
+  font-family: var(--display);
+  font-weight: 1000;
+  font-stretch: 150%;
+  font-size: clamp(2.5rem, 1rem + 6.4vw, 7rem);
+  line-height: 0.88;
+  letter-spacing: -0.03em;
+  margin-left: -0.025em;
+  max-width: 12em;
+  text-wrap: balance;
+}
+.article-head {
+  display: grid;
+  gap: var(--s-5);
+  margin-bottom: var(--s-8);
+}
+.article-head .say {
+  max-width: 30ch;
+}
+.article-head time {
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+}
+.prose {
+  max-width: 62ch;
+  font-family: var(--serif);
+  font-size: var(--t-read);
+  line-height: 1.55;
+}
+.prose > * + * {
+  margin-top: 1.1em;
+}
+.prose h2 {
+  margin-top: 2.2em;
+  font-family: var(--sans);
+  font-size: var(--t-body);
+  font-weight: 700;
+  letter-spacing: -0.005em;
+}
+.prose h2 + * {
+  margin-top: 0.5em;
+}
+.prose hr {
+  width: 3rem;
+  height: 1px;
+  margin: 2.4em 0;
+  border: 0;
+  background: var(--ink-3);
+}
+.prose em {
+  font-style: italic;
+}
+.prose ul,
+.prose ol {
+  padding-left: 1.2em;
+  list-style: revert;
+}
+.prose blockquote {
+  margin: 0;
+  padding-left: 1.2em;
+  border-left: 2px solid var(--guide);
+}
+.page .writing-list {
+  margin-top: var(--s-7);
+}

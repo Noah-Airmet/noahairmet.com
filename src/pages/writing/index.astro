@@ -1,0 +1,27 @@
+---
+import "../../styles/work.css";
+import "../../styles/prose.css";
+import { getCollection } from "astro:content";
+import Page from "../../layouts/Page.astro";
+import { isoDate, longDate } from "../../site";
+
+const notes = (await getCollection("writing")).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<Page here="writing" title="Writing" description="Essays and notes by Noah Airmet." path="/writing/">
+  <main id="main" class="page">
+    <h1 class="page-title">Writing</h1>
+    <ol class="notes writing-list">
+      {
+        notes.map((n) => (
+          <li>
+            <a href={`/writing/${n.id}/`}>
+              <span class="note-title">{n.data.title}</span>
+              <time datetime={isoDate(n.data.date)}>{longDate(n.data.date)}</time>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </main>
+</Page>

@@ -141,8 +141,9 @@ function sheets(g: Grid) {
 }
 
 export async function startOutside() {
-  const cv = document.getElementById("peak") as HTMLCanvasElement | null;
-  if (!cv) return;
+  const found = document.getElementById("peak") as HTMLCanvasElement | null;
+  if (!found) return;
+  const cv = found;
   const ctx = cv.getContext("2d")!;
   const fallback = fetch("/data/timp.json").then((r) => r.json() as Promise<Grid>);
   const rec = await lastOut();
