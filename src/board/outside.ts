@@ -1,12 +1,12 @@
-// The mountain Noah was last out on, as a stack of cut contours: each level of
-// the USGS elevation grid is one sheet, drawn bottom to top so the high ground
-// hides what is behind it. /api/last-out supplies the terrain and the route
-// when there is a recent activity; otherwise it is Mount Timpanogos.
-import { free, post } from "./agents";
+// Utah mountains as stacks of cut contours: each level of the USGS elevation
+// grid is one sheet, drawn bottom to top so the high ground hides what is
+// behind it, with a real trail traced from trailhead to summit. The figure
+// turns through a few peaks on its own; when Ledger has uploaded a recent
+// day out (/api/last-out), that mountain and that route come first.
+import { free, post, recall, type Agent } from "./agents";
 import { calm, clamp, onTick, run, still } from "./kit";
 
 type Grid = { rows: number; cols: number; elev: number[] };
-type Frame = Grid & { fade: number; peak: [number, number] };
 type Seg = { lift: boolean; uv: [number, number][] };
 type Stats = { duration_s: number; distance_m: number; ascent_m: number; descent_m: number; runs: number | null };
 type Kind = "hike" | "run" | "ride" | "ski";
@@ -17,14 +17,40 @@ interface Out {
   end: string;
   staleAfter: string;
   stats: Stats;
-  frame: Frame;
+  frame: Grid & { peak: [number, number] };
   segs: Seg[];
+}
+interface Peak extends Grid {
+  key: string;
+  name: string;
+  elevation_ft: number;
+  trail: string;
+  trail_mi: number;
+  peak: [number, number];
+  route: [number, number][];
+}
+interface Entry {
+  key: string;
+  name: string;
+}
+/** One thing the figure can show. */
+interface Scene {
+  name: string;
+  meta: string;
+  label: string;
+  model: ReturnType<typeof sheets>;
+  peak: { u: number; v: number };
+  route: { lift: boolean; pts: { u: number; v: number; z: number }[] }[];
+  /** Route length in points, for tracing it from the start. */
+  steps: number;
 }
 
 const LEVELS = 34;
 const FT = 3.28084;
 const MI = 0.621371;
 const VERB = { hike: "Hiked", run: "Ran", ride: "Rode", ski: "Skied" };
+/** How long a mountain stays up before the next. */
+const TURN = 16000;
 
 async function lastOut(): Promise<Out | null> {
   try {
@@ -83,7 +109,7 @@ function sheets(g: Grid) {
     const edge = new Path2D();
     for (let r = 0; r < R - 1; r++) {
       const y = r - (R - 1) / 2;
-      let run = -1;
+      let strip = -1;
       for (let c = 0; c < C; c++) {
         const v = c < C - 1 ? [at(r, c), at(r, c + 1), at(r + 1, c + 1), at(r + 1, c)] : [-1, -1, -1, -1];
         const inside = v.map((x) => x >= t);
@@ -91,12 +117,12 @@ function sheets(g: Grid) {
         const x = c - (C - 1) / 2;
         // whole cells go down as one strip per run
         if (n === 4) {
-          if (run < 0) run = c;
+          if (strip < 0) strip = c;
           continue;
         }
-        if (run >= 0) {
-          fill.rect(run - (C - 1) / 2 - 0.02, y - 0.02, c - run + 0.04, 1.04);
-          run = -1;
+        if (strip >= 0) {
+          fill.rect(strip - (C - 1) / 2 - 0.02, y - 0.02, c - strip + 0.04, 1.04);
+          strip = -1;
         }
         if (!n) continue;
         // Walk the cell's corners; where the level crosses a side, cut there.
@@ -141,51 +167,106 @@ function sheets(g: Grid) {
   return { out, sample, lo, hi, span: Math.min(R, C) - 1 };
 }
 
+function sceneOf(g: Grid, name: string, meta: string, peak: [number, number], label: string | null, segs: Seg[]): Scene {
+  const model = sheets(g);
+  const route = segs.map((s) => ({ lift: s.lift, pts: s.uv.map(([u, v]) => ({ u, v, z: model.sample(u, v) })) }));
+  const feet = Math.round((model.lo + model.sample(peak[0], peak[1]) * (model.hi - model.lo)) * FT);
+  return {
+    name,
+    meta,
+    label: label ?? `${feet.toLocaleString("en-US")} ft`,
+    model,
+    peak: { u: peak[0], v: peak[1] },
+    route,
+    steps: route.reduce((n, s) => n + s.pts.length, 0),
+  };
+}
+
 export async function startOutside() {
   const found = document.getElementById("peak") as HTMLCanvasElement | null;
   if (!found) return;
   const cv = found;
   const ctx = cv.getContext("2d")!;
-  const fallback = fetch("/data/timp.json").then((r) => r.json() as Promise<Grid>);
-  const rec = await lastOut();
-  const frame: Frame = rec ? rec.frame : { ...(await fallback), fade: 0, peak: [0, 0] };
-  const segs = rec?.segs ?? [];
+  const nameEl = document.getElementById("peak-name")!;
+  const metaEl = document.getElementById("peak-meta")!;
+  const tabs = document.getElementById("peaks") as HTMLElement | null;
+
+  // What there is to show: a recent day out first, then the peaks.
+  const [rec, index] = await Promise.all([
+    lastOut(),
+    fetch("/data/peaks/index.json")
+      .then((r) => r.json() as Promise<{ peaks: Entry[] }>)
+      .catch(() => ({ peaks: [] as Entry[] })),
+  ]);
+  const loaders: (() => Promise<Scene>)[] = [];
+  const names: string[] = [];
   if (rec) {
-    document.getElementById("peak-name")!.textContent = rec.title;
-    document.getElementById("peak-meta")!.textContent = describe(rec);
-    cv.setAttribute("aria-label", `${rec.title} as stacked contour lines, with the route Noah ${VERB[rec.kind].toLowerCase()}`);
+    names.push(rec.title);
+    loaders.push(async () => sceneOf(rec.frame, rec.title, describe(rec), rec.frame.peak, null, rec.segs));
   }
-  const model = sheets(frame);
-
-  // The summit: the record's named peak, or the highest point of the grid.
-  let peak = { u: frame.peak[0], v: frame.peak[1] };
-  if (!rec) {
-    const i = frame.elev.indexOf(Math.max(...frame.elev));
-    peak = { u: (i % frame.cols) / (frame.cols - 1) - 0.5, v: Math.floor(i / frame.cols) / (frame.rows - 1) - 0.5 };
+  for (const p of index.peaks) {
+    names.push(p.name);
+    loaders.push(async () => {
+      const d = (await (await fetch(`/data/peaks/${p.key}.json`)).json()) as Peak;
+      const miles = `${d.trail_mi.toFixed(1)} mi`;
+      return sceneOf(d, d.name, `${d.trail}, ${miles}`, d.peak, `${d.elevation_ft.toLocaleString("en-US")} ft`, [{ lift: false, uv: d.route }]);
+    });
   }
-  // A 10 m grid shaves a summit; Timp's surveyed height is 11,749 ft.
-  const peakFt = rec ? Math.round((model.lo + model.sample(peak.u, peak.v) * (model.hi - model.lo)) * FT) : 11749;
+  if (!loaders.length) return;
+  const cache = new Map<number, Promise<Scene>>();
+  const load = (i: number) => {
+    let s = cache.get(i);
+    if (!s) cache.set(i, (s = loaders[i]()));
+    return s;
+  };
 
-  // Route points, each filed under the level it stands on so higher sheets cover it.
-  const route = segs.map((s) => ({
-    lift: s.lift,
-    pts: s.uv.map(([u, v]) => ({ u, v, z: model.sample(u, v) })),
-  }));
-
+  let at = 0;
+  let scene = await load(0);
   let yaw = -Math.PI / 2 + 0.3;
   let spin = calm || still ? 0 : 0.00006;
   let vel = 0;
+  /** 0 flat, 1 standing. */
   let rise = calm || still ? 1 : 0;
   let lifting = calm || still;
+  /** How much of the trail has been walked, 0..1. */
+  let trace = calm || still ? 1 : 0;
   let asked = calm || still;
-  /** Where the summit is on the page right now. */
-  const summit = { x: 0, y: 0 };
+  let swapping = false;
+  let clock = 0;
+  let theirs = false;
   let seen = false;
   let dirty = true;
   let dragging = false;
   let W = 0;
   let H = 0;
   let dpr = 1;
+  /** Where the summit, and the walker on the trail, are on the page right now. */
+  const summit = { x: 0, y: 0 };
+  const walker = { x: 0, y: 0 };
+
+  const caption = () => {
+    nameEl.textContent = scene.name;
+    metaEl.textContent = scene.meta;
+    cv.setAttribute("aria-label", `${scene.name} as stacked contour lines, with the trail drawn on it`);
+    tabs?.querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", String(i === at)));
+  };
+
+  if (tabs && names.length > 1) {
+    names.forEach((n, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = n.replace(/^Mount /, "").replace(/^the /i, "");
+      b.setAttribute("aria-pressed", String(i === 0));
+      b.addEventListener("click", () => {
+        theirs = true;
+        tabs.style.setProperty("--t", "0");
+        void show(i);
+      });
+      tabs.append(b);
+    });
+    tabs.hidden = false;
+  }
+  caption();
 
   const size = () => {
     dpr = Math.min(2, devicePixelRatio || 1);
@@ -198,15 +279,12 @@ export async function startOutside() {
   size();
   new ResizeObserver(size).observe(cv);
 
-  const css = getComputedStyle(document.documentElement);
-  const tone = (name: string) => css.getPropertyValue(name).trim();
+  const tone = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   let paper = tone("--paper");
   let ink = tone("--ink");
   let guide = tone("--guide");
   let markC = tone("--mark");
   document.addEventListener("themechange", () => {
-    const css = getComputedStyle(document.documentElement);
-    const tone = (name: string) => css.getPropertyValue(name).trim();
     paper = tone("--paper");
     ink = tone("--ink");
     guide = tone("--guide");
@@ -214,7 +292,10 @@ export async function startOutside() {
     dirty = true;
   });
 
+  const ease = (t: number) => 1 - (1 - t) ** 3;
+
   function draw() {
+    const { model } = scene;
     const tilt = 0.46;
     const D = Math.min(W * 0.94, H * 1.19) * dpr; // the model's width on screen
     const s = D / model.span;
@@ -228,10 +309,17 @@ export async function startOutside() {
       const y = v * model.span;
       return [cx + s * (x * cos - y * sin), cy + s * tilt * (x * sin + y * cos) - z * lift];
     };
+    const box = cv.getBoundingClientRect();
+    const toPage = (p: number[], into: { x: number; y: number }) => {
+      into.x = box.left + scrollX + p[0] / dpr;
+      into.y = box.top + scrollY + p[1] / dpr;
+    };
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, cv.width, cv.height);
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
+    const walked = Math.floor(trace * scene.steps);
+    let tip: number[] | null = null;
     model.out.forEach((sheet, l) => {
       const oy = cy - sheet.z * lift;
       const m = new DOMMatrix([s * cos, s * tilt * sin, -s * sin, s * tilt * cos, cx, oy]);
@@ -245,7 +333,6 @@ export async function startOutside() {
       const index = l % 5 === 0;
       ctx.strokeStyle = ink;
       ctx.lineWidth = dpr * (index ? 1.5 : 0.9);
-      ctx.globalAlpha = 1;
       ctx.save();
       ctx.clip(rim);
       ctx.fillStyle = paper;
@@ -260,13 +347,15 @@ export async function startOutside() {
       ctx.stroke(rim);
       ctx.restore();
       ctx.globalAlpha = 1;
-      // the route's pieces that stand on this sheet
-      for (const seg of route) {
+      // the trail's pieces that stand on this sheet, as far as it has been walked
+      let n = 0;
+      for (const seg of scene.route) {
         ctx.strokeStyle = seg.lift ? guide : markC;
-        ctx.lineWidth = dpr * (seg.lift ? 1 : 2);
+        ctx.lineWidth = dpr * (seg.lift ? 1 : 2.2);
         ctx.beginPath();
         let pen = false;
-        for (let i = 0; i + 1 < seg.pts.length; i++) {
+        for (let i = 0; i + 1 < seg.pts.length; i++, n++) {
+          if (n >= walked) break;
           const a = seg.pts[i];
           const b = seg.pts[i + 1];
           if (Math.hypot(a.u, a.v) > 0.5 || Math.min(LEVELS - 1, Math.floor(Math.max(a.z, b.z) * LEVELS)) !== l) {
@@ -278,17 +367,29 @@ export async function startOutside() {
           if (!pen) ctx.moveTo(p[0], p[1]);
           ctx.lineTo(q2[0], q2[1]);
           pen = true;
+          if (n === walked - 1) tip = q2;
         }
         ctx.stroke();
+        n++;
       }
     });
+    // whoever is walking the trail is at its tip
+    if (tip) {
+      toPage(tip, walker);
+      if (trace < 1) {
+        ctx.fillStyle = markC;
+        ctx.beginPath();
+        ctx.arc(tip[0], tip[1], 3.2 * dpr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else if (scene.route[0]?.pts[0]) {
+      const p0 = scene.route[0].pts[0];
+      toPage(project(p0.u, p0.v, p0.z), walker);
+    }
     // the summit, measured
-    const top = project(peak.u, peak.v, model.sample(peak.u, peak.v));
-    const box = cv.getBoundingClientRect();
-    summit.x = box.left + scrollX + top[0] / dpr;
-    summit.y = box.top + scrollY + top[1] / dpr;
+    const top = project(scene.peak.u, scene.peak.v, model.sample(scene.peak.u, scene.peak.v));
+    toPage(top, summit);
     const up = 56 * dpr * ease(rise);
-    const label = `${peakFt.toLocaleString("en-US")} ft`;
     ctx.globalAlpha = ease(rise);
     ctx.strokeStyle = guide;
     ctx.lineWidth = dpr;
@@ -300,23 +401,48 @@ export async function startOutside() {
     ctx.textBaseline = "middle";
     ctx.lineWidth = 5 * dpr;
     ctx.strokeStyle = paper;
-    ctx.strokeText(label, top[0] + 7 * dpr, top[1] - up);
+    ctx.strokeText(scene.label, top[0] + 7 * dpr, top[1] - up);
     ctx.fillStyle = guide;
-    ctx.fillText(label, top[0] + 7 * dpr, top[1] - up);
+    ctx.fillText(scene.label, top[0] + 7 * dpr, top[1] - up);
     ctx.globalAlpha = 1;
   }
 
-  const ease = (t: number) => 1 - (1 - t) ** 3;
+  /** Lay the stack flat, change mountains, stand it up again. */
+  async function show(i: number) {
+    if (swapping || i === at) return;
+    swapping = true;
+    recall("lift");
+    recall("walk");
+    const next = load(i);
+    try {
+      if (!calm && !still) {
+        const from = rise;
+        await run(420, (t) => {
+          rise = from * (1 - ease(t));
+          dirty = true;
+        });
+      }
+      scene = await next;
+      at = i;
+      caption();
+      trace = calm || still ? 1 : 0;
+      clock = 0;
+      if (calm || still) {
+        rise = 1;
+      } else {
+        rise = 0;
+        lifting = true;
+      }
+      dirty = true;
+    } finally {
+      swapping = false;
+    }
+    // have the next one ready
+    void load((i + 1) % loaders.length);
+  }
 
-  new IntersectionObserver(
-    (e) => {
-      seen = e.some((x) => x.isIntersecting);
-    },
-    { threshold: 0.4 },
-  ).observe(cv);
-
-  // The stack starts flat. An agent takes it by the summit and lifts it; with
-  // nobody free it rises on its own.
+  // The stack starts flat. An agent takes it by the summit and lifts it, and
+  // one walks the trail as it is drawn; with nobody free both happen anyway.
   const lift = () => {
     if (asked) return;
     asked = true;
@@ -324,7 +450,7 @@ export async function startOutside() {
     post({
       key: "lift",
       at: () => summit,
-      async run(a, signal) {
+      async run(a: Agent, signal: AbortSignal) {
         try {
           await a.moveTo(() => summit, { signal, tempo: 0.8 });
           await a.press(signal, 80);
@@ -338,6 +464,30 @@ export async function startOutside() {
     });
     setTimeout(() => (lifting = true), 1600);
   };
+  let walking = false;
+  const walk = () => {
+    if (walking || !scene.steps || !free()) return;
+    walking = true;
+    post({
+      key: "walk",
+      at: () => walker,
+      async run(a: Agent, signal: AbortSignal) {
+        try {
+          await a.moveTo(() => walker, { signal, tempo: 0.7 });
+          while (trace < 1 && !signal.aborted) await run(60, () => a.set(walker.x, walker.y), signal);
+        } finally {
+          walking = false;
+        }
+      },
+    });
+  };
+
+  new IntersectionObserver(
+    (e) => {
+      seen = e.some((x) => x.isIntersecting);
+    },
+    { threshold: 0.4 },
+  ).observe(cv);
 
   onTick((dt) => {
     if (!seen) return;
@@ -345,8 +495,14 @@ export async function startOutside() {
       draw();
       lift();
     }
-    if (rise < 1 && lifting) {
+    if (rise < 1 && lifting && !swapping) {
       rise = Math.min(1, rise + dt / 1400);
+      dirty = true;
+    }
+    // once it stands, the trail is walked from the trailhead up
+    if (rise >= 0.6 && trace < 1 && !swapping && scene.steps) {
+      if (trace === 0) walk();
+      trace = Math.min(1, trace + dt / 3600);
       dirty = true;
     }
     if (!dragging) {
@@ -358,6 +514,12 @@ export async function startOutside() {
         yaw += spin * dt;
         dirty = true;
       }
+    }
+    // turning to the next mountain, unless the visitor has taken over
+    if (loaders.length > 1 && !theirs && !dragging && !swapping && !calm && !still && !document.hidden) {
+      clock += dt;
+      tabs?.style.setProperty("--t", Math.min(1, clock / TURN).toFixed(4));
+      if (clock >= TURN) void show((at + 1) % loaders.length);
     }
     if (dirty) {
       dirty = false;

@@ -116,7 +116,7 @@ button {
   font-size: var(--t-ui);
   font-weight: 500;
   /* the page scrolls under it: a flat tint of the paper, nothing more */
-  background: color-mix(in srgb, var(--paper) 86%, transparent);
+  background: color-mix(in srgb, var(--paper) 91%, transparent);
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
 }

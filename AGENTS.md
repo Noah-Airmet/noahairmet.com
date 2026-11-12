@@ -1,8 +1,8 @@
 # noahairmet.com
 
 Noah Airmet's personal site, rebuilt from scratch on 2026-11-12 by Claude
-Fable 5.2 (Noah has each new frontier model rebuild it; the colophon on the
-home page lists the editions). Astro static pages, served as Cloudflare
+Fable 5.2 (Noah has each new frontier model rebuild it; the page itself says
+nothing about that, at his request). Astro static pages, served as Cloudflare
 Workers static assets by the Worker `noahairmet-com` (noahairmet.com and www).
 `docs/BEE-APP.md` covers Katie's workout app at `/bee`; read it before
 touching `public/bee/`.
@@ -17,20 +17,31 @@ be put out of place, an agent cursor puts it back, and the bar's state
   cut from the glyph's own outline. Pull one off, throw it, knock the others
   loose; double-click to send them all. On a first visit the letters start in
   a heap and the agents set the name. Now and then one slips on its own.
-- **CitationBench** (`src/board/bench.ts`): the published runs as bars with
-  their 95% intervals. A bar's end drags to a number it never scored; an agent
-  drags it back.
-- **SafetyPage** (`src/board/quote.ts`): a quotation checked live against the
-  library's verifier (`POST https://safetypage-api.noahairmet.com/api/verify`).
-  Edit it and the page strikes what the source doesn't say; left wrong, an
-  agent restores it.
+- **CitationBench**: two floating windows. One is a recording of a real run
+  from SafetyPage's replay player (`public/media/citationbench-replay.mp4`,
+  made by `scripts/replay-video.mjs`; it links to the live replay). Over its
+  corner is the leaderboard (`src/board/bench.ts`): the published runs as bars
+  with their 95% intervals. A bar's end drags to a number it never scored; an
+  agent drags it back. The one sentence above them is the pitch's finding,
+  with its numbers computed from the published runs.
+- **SafetyPage** (`src/board/quote.ts`): the check in a card, beside
+  SafetyPage's own scan of the cited page with the library's yellow highlight
+  on the words. Every wording is checked live against the library's verifier
+  (`POST https://safetypage-api.noahairmet.com/api/verify`). Left alone it
+  demonstrates itself: an agent gets one word wrong, the check strikes it and
+  writes what the source says, another agent restores it, and the next
+  quotation comes up (the line under `Another` is the time left). Touch it
+  and the demonstration stops.
 - **Text** (`src/board/guard.ts`): anything marked `data-keep` that gets
   rewritten (from the console, say) is typed back. A second check sweeps
   every few seconds for what an observer can't see, such as the whole element
   being swapped for another. The console prints one line: an example to try.
-- **The mountain** (`src/board/outside.ts`): the terrain from `/api/last-out`
-  (the last place Noah was out, uploaded by his Ledger app; `worker/last-out.js`)
-  or Mount Timpanogos, as a round-cut stack of contour sheets. Drag to turn.
+- **The mountain** (`src/board/outside.ts`): Utah peaks as round-cut stacks of
+  contour sheets, each with a real trail walked from trailhead to summit, the
+  figure turning to the next on its own. A fresh record from `/api/last-out`
+  (the last place Noah was out, uploaded by his Ledger app;
+  `worker/last-out.js`) comes first when there is one. Drag to turn.
+- The windows turn a little toward the pointer (`src/board/tilt.ts`).
 
 `src/board/agents.ts` is the agents themselves: work is posted as jobs, the
 nearest free agent takes one, and a job is an async script that can be called
@@ -51,13 +62,18 @@ The keyboard's way in is a button after the name (visible on focus) that
 scatters the letters.
 
 With `prefers-reduced-motion`, none of the board runs: the name is plain
-text, the chart and the quote check still work, the mountain holds still.
+text, the chart and the quote check still work, the recording waits on its
+last frame, the mountain holds still.
 
 ## Design
 
 - Day is a drafting board (`--paper`, ink, a blue pencil for lining things up,
   a red one for what's wrong); night is a blueprint. It follows the visitor's
-  system setting. Every value is in `src/styles/tokens.css`.
+  system setting until they press the bar's day/night button, which is kept
+  on their device (`public/boot.js` applies it before first paint). Every
+  value is in `src/styles/tokens.css`.
+- Icons are one component, `src/components/Icon.astro`: brand marks for X,
+  GitHub and LinkedIn; the rest drawn on the same grid.
 - Three faces, one job each, self-hosted in `src/fonts/` with their licences:
   Roboto Flex (display at weight 1000 and width 150, and the interface),
   Newsreader (what you read), Martian Mono (values: times, measurements, ids).
@@ -79,15 +95,23 @@ personal site is for the things youre proud of, not an official job
 application or comprehensive inventory." `test/smoke.test.mjs` checks the
 built site for the names that stay off it.
 
+After seeing the rebuild the same day: the project sections had "a lot of
+text" and needed "more screenshots and stuff in action" (he suggested "a
+floating rounded rec window that subtly moves as you move your cursor"); the
+quotation "just looks like hero text, not something built in to safety
+page"; and of a colophon line about models rebuilding the site, "way too
+much explaining the design for me."
+
 Also from Noah and Katie: Katie's app at `/bee` gets no analytics (their
 household rule is that health data never leaves owned hardware;
 `docs/BEE-APP.md`), so `public/_headers` gives `/bee/*` its own stricter CSP.
 From Noah: King Follett and Hymn Parts stay unlisted.
 
 Noah reads and owns every published word. The sentences on the home page are
-his or his projects' own: the lede is from the previous edition, the two
-project lines are from SafetyPage's README, the colophon line is his
-description of the tradition.
+his or his projects' own: the lede is from the previous edition, SafetyPage's
+line is from its README, and CitationBench's is a draft line from his pitch
+notes (`~/development/writing/safetypage/pitch-notes.md`, "lines to say out
+loud"), with the numbers taken from the published runs.
 
 ## Data
 
@@ -95,8 +119,12 @@ description of the tradition.
   runs committed in `~/development/safetypage/citationbench/results` (the ones
   the public leaderboard shows). Uncommitted result files are work in
   progress and are left out.
-- `src/data/quotes.ts`: the quotations the check cycles through, each
-  verified against the live library when added.
+- `src/data/quotes.json`: the quotations the check turns through. `node
+  scripts/quote-pages.mjs` verifies each against the live library (and that
+  its misquote fails), then saves the page scan to `public/pages/` and where
+  SafetyPage's viewer puts the highlight.
+- `public/data/peaks/`: one elevation grid and trail per mountain, built by
+  `scripts/peaks.py` from USGS 3DEP and OpenStreetMap. The figure credits both.
 - `public/data/timp.json`: Timp's USGS elevation grid. `public/data/last-out.json`
   is the Worker's list of areas.
 
@@ -105,6 +133,9 @@ description of the tradition.
 - `public/boot.js` runs before first paint: with motion allowed it hides the
   plain name so the pieces can take its place, and brings it back if the board
   never loads.
+- The Worker (`worker/index.js`) answers `/api/last-out`, and Range requests
+  for `/media/*` (Workers static assets ignore them, and Safari won't play an
+  MP4 without them).
 - Headers (`public/_headers`): same-origin scripts and styles, Cloudflare Web
   Analytics, and `connect-src` for the SafetyPage API. Astro would inline
   small scripts, so `assetsInlineLimit: 0` stays in `astro.config.mjs`.

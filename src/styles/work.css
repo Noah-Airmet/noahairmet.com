@@ -529,6 +529,35 @@
   font-size: var(--t-sm);
   color: var(--ink-2);
 }
+/* which mountain: the line under the row is how long until it turns itself */
+.peaks {
+  --t: 0;
+  position: absolute;
+  right: 0;
+  bottom: var(--s-6);
+  overflow: hidden;
+}
+.peaks[hidden] {
+  display: none;
+}
+.peaks::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--ink);
+  transform-origin: 0 50%;
+  transform: scaleX(var(--t));
+}
+.credit {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  font-size: var(--t-xs);
+  color: var(--ink-3);
+}
 
 /* ---- the foot: how to reach him */
 .colophon {
@@ -602,6 +631,16 @@
   .peak figcaption {
     position: static;
     margin-top: var(--s-3);
+  }
+  .peaks,
+  .credit {
+    position: static;
+    display: flex;
+    margin-top: var(--s-3);
+  }
+  .peaks {
+    max-width: 100%;
+    overflow-x: auto;
   }
   .notes a {
     grid-template-columns: 1fr;
