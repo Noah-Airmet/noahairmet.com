@@ -593,8 +593,12 @@
   border-radius: 50%;
 }
 .dial-read {
+  --ix: 0px;
+  --iy: 0px;
   position: absolute;
   inset: 0;
+  /* the clock's dial sits opposite the sun, and the reading goes with it */
+  transform: translate(var(--ix), var(--iy));
   display: grid;
   place-content: center;
   justify-items: center;
@@ -636,6 +640,12 @@
 .dial-now:disabled {
   color: var(--ink-2);
   cursor: default;
+}
+.dial-day {
+  margin-top: calc(var(--s-3) * -1);
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+  min-height: 1.4em;
 }
 
 /* ---- the foot: how to reach him */

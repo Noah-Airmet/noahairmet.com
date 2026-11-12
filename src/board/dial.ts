@@ -1,8 +1,18 @@
-// The solar dial under the mountain: a 24-hour face with noon at the top, the
-// day above the line from sunrise to sunset, and the sun on its circle. The
-// page takes its colours from the sun (public/boot.js); turning the dial holds
-// another time of day, and Now lets go of it.
+// The solar dial under the mountain, after the Apple Watch face of that name.
+//
+// A 24-hour face, noon at the top and midnight at the foot. The sun rides a
+// circle once a day. The day is a wedge out of the centre between sunrise and
+// sunset; beside it, narrowing bands for civil, nautical and astronomical
+// twilight (the sun 6, 12 and 18 degrees under the horizon), then night: five
+// shades in all. Every one of those crossings is a dot on the sun's circle,
+// with solar noon and solar midnight. All of it is worked out from the sun's
+// real elevation over Provo today, so the wedge widens and narrows through the
+// year. The clock in the middle sits opposite the sun.
+//
+// The page takes its colours from the same sun (public/boot.js). Turning the
+// dial holds another time of day; Now lets go of it.
 import { clamp, onTick } from "./kit";
+import { click } from "./sound";
 
 declare global {
   interface Window {
@@ -16,13 +26,22 @@ declare global {
 
 const DAY = 1440;
 type RGB = [number, number, number];
-/** The dial's own sky, by the sun's elevation: top of the day, its middle, the horizon. */
+/** The day wedge's sky, by the sun's elevation: its top, its middle, and down by the horizon. */
 const SKIES: { at: number; top: RGB; mid: RGB; low: RGB }[] = [
-  { at: 14, top: [34, 92, 220], mid: [78, 140, 240], low: [150, 200, 255] },
-  { at: 5, top: [70, 86, 216], mid: [190, 130, 200], low: [255, 190, 130] },
-  { at: 0, top: [78, 62, 186], mid: [226, 98, 150], low: [255, 152, 88] },
-  { at: -5, top: [44, 38, 132], mid: [120, 60, 140], low: [206, 92, 120] },
-  { at: -12, top: [20, 28, 92], mid: [22, 32, 100], low: [30, 40, 112] },
+  { at: 14, top: [38, 98, 226], mid: [70, 132, 240], low: [128, 184, 255] },
+  { at: 5, top: [72, 88, 220], mid: [176, 124, 206], low: [255, 186, 128] },
+  { at: 0, top: [80, 64, 190], mid: [224, 98, 152], low: [255, 150, 86] },
+  { at: -6, top: [52, 46, 150], mid: [128, 66, 150], low: [214, 96, 124] },
+  // with the sun well down the wedge is still the lightest of the five shades
+  { at: -12, top: [56, 72, 176], mid: [66, 78, 180], low: [98, 84, 176] },
+  { at: -18, top: [54, 72, 174], mid: [58, 76, 178], low: [62, 80, 182] },
+];
+/** The darker shades, lightest first: civil, nautical, astronomical, night. */
+const BANDS: RGB[] = [
+  [38, 52, 150],
+  [28, 40, 124],
+  [20, 30, 100],
+  [12, 20, 72],
 ];
 
 const mix = (a: RGB, b: RGB, t: number): RGB => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
@@ -43,16 +62,26 @@ function skyAt(el: number) {
   return last;
 }
 
+/** The crossings, outermost first: [degrees under the horizon, morning name, evening name]. */
+const LINES: [number, string, string][] = [
+  [-18, "Astronomical dawn", "Astronomical dusk"],
+  [-12, "Nautical dawn", "Nautical dusk"],
+  [-6, "Civil dawn", "Civil dusk"],
+  [-0.833, "Sunrise", "Sunset"],
+];
+
 export function startDial() {
   const root = document.getElementById("dial");
   const section = document.getElementById("sky");
   if (!root || !section || !window.sky) return;
   const cv = root.querySelector("canvas")!;
   const ctx = cv.getContext("2d")!;
+  const readout = root.querySelector<HTMLElement>(".dial-read")!;
   const what = document.getElementById("dial-what")!;
   const time = document.getElementById("dial-time")!;
   const off = document.getElementById("dial-off")!;
   const nowBtn = document.getElementById("dial-now") as HTMLButtonElement;
+  const dayEl = document.getElementById("dial-day");
   section.hidden = false;
 
   // Provo's wall clock for today, whatever the visitor's own zone is.
@@ -64,42 +93,57 @@ export function startDial() {
   const minuteOf = (d: Date) => (((d.getTime() - midnight) / 60000) % DAY + DAY) % DAY;
   const elev = (m: number) => window.sky.sun(dateAt(m));
 
-  // The day's events: where the sun crosses the horizon and civil twilight, its highest and lowest.
+  // Today's crossings, read off the sun's own elevation minute by minute.
   const events: { m: number; name: string }[] = [];
+  /** For each line, the minute it is crossed in the morning and in the evening (or null: it never is today). */
+  const cross: { dawn: number | null; dusk: number | null }[] = LINES.map(() => ({ dawn: null, dusk: null }));
   let hi = 0;
   let lo = 0;
   for (let m = 1; m < DAY; m++) {
     const a = elev(m - 1);
     const b = elev(m);
-    if ((a + 0.833) * (b + 0.833) < 0) events.push({ m, name: b > a ? "Sunrise" : "Sunset" });
-    if ((a + 6) * (b + 6) < 0) events.push({ m, name: b > a ? "Dawn" : "Dusk" });
+    LINES.forEach(([deg, dawn, dusk], i) => {
+      if ((a - deg) * (b - deg) >= 0) return;
+      if (b > a) {
+        cross[i].dawn = m;
+        events.push({ m, name: dawn });
+      } else {
+        cross[i].dusk = m;
+        events.push({ m, name: dusk });
+      }
+    });
     if (b > elev(hi)) hi = m;
     if (b < elev(lo)) lo = m;
   }
-  events.push({ m: hi, name: "Solar noon" }, { m: lo, name: "Midnight" });
-  const rise = events.find((e) => e.name === "Sunrise")?.m ?? 360;
-  const set = events.find((e) => e.name === "Sunset")?.m ?? 1080;
+  events.push({ m: hi, name: "Solar noon" }, { m: lo, name: "Solar midnight" });
+  const sunUp = cross[3];
+  if (dayEl && sunUp.dawn != null && sunUp.dusk != null) {
+    const len = sunUp.dusk - sunUp.dawn;
+    dayEl.textContent = `Daylight ${Math.floor(len / 60)}h ${String(len % 60).padStart(2, "0")}m`;
+  }
 
   let now = minuteOf(new Date());
   /** The minute the dial is held at, or null when it shows now. */
   let held: number | null = window.sky.held ? minuteOf(window.sky.held) : null;
   let dirty = true;
+  let lastEvent = "";
 
   const clock = (m: number, ampm = false) => {
     const h = Math.floor(m / 60);
     const mm = String(Math.floor(m % 60)).padStart(2, "0");
     return ampm ? `${h % 12 || 12}:${mm} ${h < 12 ? "AM" : "PM"}` : `${h % 12 || 12}:${mm}`;
   };
+  const near = (m: number, within: number) => events.find((e) => Math.abs(e.m - m) <= within);
   const phase = (m: number) => {
-    const near = events.find((e) => Math.abs(e.m - m) <= 4);
-    if (near) return near.name;
+    const ev = near(m, 3);
+    if (ev) return ev.name;
     const e = elev(m);
-    return e > -0.833 ? "Day" : e > -6 ? "Twilight" : "Night";
+    return e > -0.833 ? "Day" : e > -6 ? "Civil twilight" : e > -12 ? "Nautical twilight" : e > -18 ? "Astronomical twilight" : "Night";
   };
 
   function read() {
     const m = held ?? now;
-    what.textContent = held == null ? "Now" : phase(m);
+    what.textContent = phase(m);
     time.textContent = clock(m);
     if (held == null) off.textContent = "";
     else {
@@ -120,6 +164,13 @@ export function startDial() {
     window.sky.show(m == null ? null : dateAt(m));
     dirty = true;
     read();
+    // crossing one of the day's marks is felt: a click if sound is on, a tick on phones that can
+    const ev = m == null ? "" : (near(m, 0)?.name ?? "");
+    if (ev && ev !== lastEvent) {
+      click();
+      navigator.vibrate?.(6);
+    }
+    lastEvent = ev;
   }
 
   const angle = (m: number) => -Math.PI / 2 + ((m - 720) / DAY) * Math.PI * 2;
@@ -134,53 +185,69 @@ export function startDial() {
     const e = elev(m);
     const sky = skyAt(e);
     const at = (mm: number, r: number) => [c + Math.cos(angle(mm)) * r, c + Math.sin(angle(mm)) * r];
+    /** The wedge out of the centre from one minute round through noon to another. */
+    const wedge = (from: number, to: number) => {
+      ctx.beginPath();
+      ctx.moveTo(c, c);
+      ctx.arc(c, c, R * 1.02, angle(from), angle(to));
+      ctx.closePath();
+    };
     ctx.clearRect(0, 0, cv.width, cv.height);
     ctx.save();
     ctx.beginPath();
     ctx.arc(c, c, R, 0, Math.PI * 2);
     ctx.clip();
 
-    // night: the whole face, deepest at the foot
-    const night = ctx.createLinearGradient(0, 0, 0, R * 2);
-    night.addColorStop(0, "#1b2670");
-    night.addColorStop(1, "#0a1238");
-    ctx.fillStyle = night;
+    // night, the darkest of the five shades, over the whole face
+    ctx.fillStyle = css(BANDS[3]);
     ctx.fillRect(0, 0, R * 2, R * 2);
-
-    // day: everything above the line from sunrise to sunset
-    const [rx, ry] = at(rise, R);
-    const [sx, sy] = at(set, R);
-    const horizon = (ry + sy) / 2;
-    ctx.beginPath();
-    ctx.moveTo(rx, ry);
-    ctx.arc(c, c, R, angle(rise), angle(set));
-    ctx.closePath();
-    const day = ctx.createLinearGradient(0, 0, 0, horizon);
+    // then each twilight inside the last: astronomical, nautical, civil
+    for (let i = 0; i < 3; i++) {
+      const { dawn, dusk } = cross[i];
+      if (dawn == null || dusk == null) continue;
+      wedge(dawn, dusk);
+      ctx.fillStyle = css(BANDS[2 - i]);
+      ctx.fill();
+    }
+    // and the day, lit by wherever the sun is
+    const dawn = sunUp.dawn ?? 360;
+    const dusk = sunUp.dusk ?? 1080;
+    wedge(dawn, dusk);
+    const day = ctx.createLinearGradient(0, c - R, 0, c + R * 0.12);
     day.addColorStop(0, css(sky.top));
-    day.addColorStop(0.62, css(sky.mid));
+    day.addColorStop(0.55, css(sky.mid));
     day.addColorStop(1, css(sky.low));
     ctx.fillStyle = day;
     ctx.fill();
-    // the glow where the sun meets the horizon
-    const closeness = clamp(1 - Math.abs(e) / 9, 0, 1);
+    // the glow, when the sun is near the horizon: over the day and the first of the twilight
+    const closeness = clamp(1 - Math.abs(e + 1) / 10, 0, 1);
     if (closeness > 0) {
-      const [gx, gy] = at(m, R * 0.66);
+      const [gx, gy] = at(m, R * 0.655);
       ctx.save();
+      const civil = cross[2];
+      wedge(civil.dawn ?? dawn, civil.dusk ?? dusk);
       ctx.clip();
-      const glow = ctx.createRadialGradient(gx, horizon, 0, gx, horizon, R * 0.9);
-      glow.addColorStop(0, css([255, 214, 150], 0.85 * closeness));
-      glow.addColorStop(0.35, css([255, 140, 110], 0.4 * closeness));
-      glow.addColorStop(1, css([255, 120, 140], 0));
+      const glow = ctx.createRadialGradient(gx, gy, 0, gx, gy, R * 0.95);
+      glow.addColorStop(0, css([255, 216, 150], 0.9 * closeness));
+      glow.addColorStop(0.3, css([255, 142, 108], 0.46 * closeness));
+      glow.addColorStop(1, css([255, 110, 150], 0));
       ctx.fillStyle = glow;
       ctx.fillRect(0, 0, R * 2, R * 2);
       ctx.restore();
     }
-    ctx.strokeStyle = "rgb(255 255 255 / 0.5)";
-    ctx.lineWidth = dpr;
-    ctx.beginPath();
-    ctx.moveTo(rx, ry);
-    ctx.lineTo(sx, sy);
-    ctx.stroke();
+    // the lines themselves, straight out of the centre: the horizon's bright, the twilights' faint
+    cross.forEach(({ dawn: a, dusk: b }, i) => {
+      ctx.strokeStyle = `rgb(255 255 255 / ${i === 3 ? 0.62 : 0.2})`;
+      ctx.lineWidth = dpr * (i === 3 ? 1.2 : 1);
+      for (const mm of [a, b]) {
+        if (mm == null) continue;
+        const [x, y] = at(mm, R);
+        ctx.beginPath();
+        ctx.moveTo(c, c);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      }
+    });
 
     // the hours: a tick every quarter, a numeral every other hour
     for (let i = 0; i < 96; i++) {
@@ -199,40 +266,74 @@ export function startDial() {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     for (let h = 2; h <= 24; h += 2) {
-      const [x, y] = at((h % 24) * 60, R * 0.775);
+      const [x, y] = at((h % 24) * 60, R * 0.79);
       ctx.fillText(String(h).padStart(2, "0"), x, y);
     }
 
-    // the sun's circle, the day's events on it, and the sun
-    const path = R * 0.6;
-    ctx.strokeStyle = "rgb(255 255 255 / 0.6)";
+    // the sun's circle, and a dot for each of the day's crossings
+    const track = R * 0.655;
+    ctx.strokeStyle = "rgb(255 255 255 / 0.62)";
     ctx.lineWidth = dpr * 1.25;
     ctx.beginPath();
-    ctx.arc(c, c, path, 0, Math.PI * 2);
+    ctx.arc(c, c, track, 0, Math.PI * 2);
     ctx.stroke();
-    ctx.fillStyle = "rgb(255 255 255 / 0.85)";
+    ctx.fillStyle = "rgb(255 255 255 / 0.9)";
     for (const ev of events) {
-      const [x, y] = at(ev.m, path);
+      const [x, y] = at(ev.m, track);
       ctx.beginPath();
-      ctx.arc(x, y, dpr * 2, 0, Math.PI * 2);
+      ctx.arc(x, y, dpr * 2.1, 0, Math.PI * 2);
       ctx.fill();
     }
-    const [ux, uy] = at(m, path);
-    const up = e > -0.833;
+
+    // the clock's own dial, opposite the sun
+    const [ux, uy] = [Math.cos(angle(m)), Math.sin(angle(m))];
+    const ix = c - ux * R * 0.18;
+    const iy = c - uy * R * 0.18;
+    const ir = R * 0.5;
     ctx.beginPath();
-    ctx.arc(ux, uy, R * 0.055, 0, Math.PI * 2);
-    ctx.fillStyle = up ? "#fff" : "#0a1238";
-    ctx.shadowColor = up ? "rgb(255 240 200 / 0.9)" : "transparent";
-    ctx.shadowBlur = up ? R * 0.12 : 0;
+    ctx.arc(ix, iy, ir, 0, Math.PI * 2);
+    ctx.fillStyle = css(mix(sky.mid, [255, 255, 255], 0.18), 0.5);
     ctx.fill();
-    ctx.shadowBlur = 0;
+    ctx.strokeStyle = "rgb(255 255 255 / 0.72)";
+    ctx.lineWidth = dpr * 1.2;
+    for (let i = 0; i < 60; i++) {
+      const a = (i / 60) * Math.PI * 2;
+      const r0 = ir * (i % 5 === 0 ? 0.86 : 0.9);
+      ctx.beginPath();
+      ctx.moveTo(ix + Math.cos(a) * r0, iy + Math.sin(a) * r0);
+      ctx.lineTo(ix + Math.cos(a) * ir * 0.96, iy + Math.sin(a) * ir * 0.96);
+      ctx.stroke();
+    }
+    readout.style.setProperty("--ix", `${((ix - c) / dpr).toFixed(1)}px`);
+    readout.style.setProperty("--iy", `${((iy - c) / dpr).toFixed(1)}px`);
+
+    // the sun: lit above the horizon, dark below it, and half of each as it crosses
+    const sx = c + ux * track;
+    const sy = c + uy * track;
+    const sr = R * 0.058;
+    ctx.beginPath();
+    ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+    ctx.fillStyle = css(BANDS[3]);
+    ctx.fill();
+    ctx.save();
+    wedge(dawn, dusk);
+    ctx.clip();
+    ctx.beginPath();
+    ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+    ctx.fillStyle = "#fff";
+    ctx.shadowColor = "rgb(255 240 200 / 0.9)";
+    ctx.shadowBlur = R * 0.12;
+    ctx.fill();
+    ctx.restore();
+    ctx.beginPath();
+    ctx.arc(sx, sy, sr, 0, Math.PI * 2);
     ctx.strokeStyle = "#fff";
     ctx.lineWidth = dpr * 1.6;
     ctx.stroke();
 
     // where now is, when the dial is somewhere else
     if (held != null) {
-      const [nx0, ny0] = at(now, R * 0.84);
+      const [nx0, ny0] = at(now, R * 0.86);
       const [nx1, ny1] = at(now, R);
       ctx.strokeStyle = "#fff";
       ctx.lineWidth = dpr * 2.4;
@@ -241,12 +342,6 @@ export function startDial() {
       ctx.lineTo(nx1, ny1);
       ctx.stroke();
     }
-
-    // the reading's own disc
-    ctx.beginPath();
-    ctx.arc(c, c, R * 0.4, 0, Math.PI * 2);
-    ctx.fillStyle = "rgb(255 255 255 / 0.16)";
-    ctx.fill();
     ctx.restore();
   }
 
@@ -256,8 +351,8 @@ export function startDial() {
     const a = Math.atan2(ev.clientY - (r.top + r.height / 2), ev.clientX - (r.left + r.width / 2));
     let m = ((a + Math.PI / 2) / (Math.PI * 2)) * DAY + 720;
     m = ((m % DAY) + DAY) % DAY;
-    const near = events.find((e) => Math.abs(e.m - m) <= 5);
-    return near ? near.m : Math.round(m);
+    const snap = near(m, 4);
+    return snap ? snap.m : Math.round(m);
   };
   let turning = false;
   root.addEventListener("pointerdown", (ev) => {
