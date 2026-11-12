@@ -50,7 +50,12 @@ export function flag(key: string, on: boolean) {
   document.title = out.size ? `(${out.size}) ${title}` : title;
   if (!stateBtn || !stateText) return;
   stateBtn.dataset.state = out.size ? "off" : "ok";
-  stateText.textContent = out.size ? `${out.size} out of place` : "Intact";
+  // the count always shows; its words give way on a phone
+  if (out.size) {
+    const words = document.createElement("em");
+    words.textContent = " out of place";
+    stateText.replaceChildren(String(out.size), words);
+  } else stateText.textContent = "Intact";
 }
 
 // The log opens under the state, and closes on Escape or a press elsewhere.

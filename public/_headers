@@ -20,5 +20,11 @@
 /og/*
   Cache-Control: public, max-age=86400
 
+/media/*
+  Cache-Control: public, max-age=86400
+
+/pages/*
+  Cache-Control: public, max-age=86400
+
 /boot.js
   Cache-Control: public, max-age=3600

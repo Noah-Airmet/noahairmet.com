@@ -31,6 +31,9 @@ for rel in sorted(tracked):
         "date": d["created_at"][:10],
         "snapshot": d["snapshot"],
         **{m: [round(d["measures"][m][k] * 100, 1) for k in ("mean", "ci_low", "ci_high")] for m in MEASURES},
+        # the verdict alone, on errors the benchmark planted and on real citing sentences from published papers
+        "planted": round(d["by_method"]["perturbed_claim"]["verdict_correct"]["mean"] * 100),
+        "real": round(d["by_method"]["citing_sentence"]["verdict_correct"]["mean"] * 100),
     })
 
 if not runs:

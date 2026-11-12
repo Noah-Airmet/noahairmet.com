@@ -7,10 +7,13 @@ import { startName } from "./name";
 import { startOutside } from "./outside";
 import { startQuote } from "./quote";
 import { startSound } from "./sound";
+import { startReplay, startTilt } from "./tilt";
 
 const hero = document.getElementById("top") as HTMLElement;
 
 startSound();
+startTilt();
+startReplay();
 startBench();
 startQuote();
 void startOutside();

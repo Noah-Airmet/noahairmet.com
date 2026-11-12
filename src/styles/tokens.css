@@ -34,6 +34,9 @@
   /* ground and ink */
   --paper: #ecede8;
   --paper-2: #e2e3dd;
+  /* a window lying on the board, and the shadow under it */
+  --sheet: #f9f9f6;
+  --shade: #12131152;
   --ink: #121311;
   --ink-2: #121311c2;
   --ink-3: #1213119e;
@@ -89,10 +92,14 @@
   --d-slow: 480ms;
 }
 
+/* Night. The system's setting chooses, unless the visitor has (the bar's
+   control sets data-theme on <html>). The two blocks are the same values. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --paper: #0b1a3c;
     --paper-2: #0f2250;
+    --sheet: #12265a;
+    --shade: #000000a6;
     --ink: #eef2fa;
     --ink-2: #eef2fac2;
     --ink-3: #eef2fa94;
@@ -105,5 +112,28 @@
     --opus: #9db0ff;
     --on-agent: #0b1a3c;
     --lift: 0 0.07em 0.08em #00000080;
+    color-scheme: dark;
   }
+}
+:root[data-theme="dark"] {
+  --paper: #0b1a3c;
+  --paper-2: #0f2250;
+  --sheet: #12265a;
+  --shade: #000000a6;
+  --ink: #eef2fa;
+  --ink-2: #eef2fac2;
+  --ink-3: #eef2fa94;
+  --rule: #eef2fa26;
+  --guide: #63cdf7;
+  --guide-ink: #63cdf7;
+  --mark: #ff6a4d;
+  --pass: #5fe0a8;
+  --fable: #ff6a4d;
+  --opus: #9db0ff;
+  --on-agent: #0b1a3c;
+  --lift: 0 0.07em 0.08em #00000080;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
 }

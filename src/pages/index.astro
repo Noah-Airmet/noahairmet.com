@@ -5,16 +5,8 @@ import { getCollection } from "astro:content";
 import bench from "../data/citationbench.json";
 import { quotes } from "../data/quotes";
 import Page from "../layouts/Page.astro";
-import { execSync } from "node:child_process";
+import Icon from "../components/Icon.astro";
 import { isoDate, longDate, site } from "../site";
-
-// The commit this build was made from, for the colophon.
-let rev = "";
-try {
-  rev = execSync("git rev-parse --short HEAD", { encoding: "utf8" }).trim();
-} catch {
-  /* not a checkout */
-}
 
 const notes = (await getCollection("writing")).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 const measures = [
@@ -24,18 +16,17 @@ const measures = [
 ] as const;
 const half = (v: number[]) => Math.round((v[2] - v[1]) / 2);
 const first = quotes[0];
-// From the repo's history: each from-scratch rebuild and the model its commits credit.
-const editions = [
-  { by: "Claude Fable 5.2", when: "November 2026" },
-  { by: "Claude Opus 5.5", when: "September 2026" },
-  { by: "Claude Fable 5", when: "July 2026" },
-];
+// The verdict alone: on errors the benchmark planted, and on real citing sentences.
+const planted = Math.min(...bench.runs.map((r) => r.planted));
+const realLo = Math.min(...bench.runs.map((r) => r.real));
+const realHi = Math.max(...bench.runs.map((r) => r.real));
+// The run the recording shows (public/media/citationbench-replay.mp4).
+const replay = "/r/cc-haiku-5-5-4e1c63-pc-4bd058594c.1";
 ---
 
-<Page here="home">
+<Page here="home" board>
   <div class="status" slot="bar">
     <span class="last" id="last" aria-hidden="true"></span>
-    <button class="snd" id="sound" type="button" aria-pressed="false">Sound off</button>
     <button class="state" id="state" type="button" data-state="ok" aria-expanded="false" aria-controls="log">
       <i></i><span>Intact</span>
     </button>
@@ -71,11 +62,11 @@ const editions = [
       <div class="foot">
         <p class="lede" id="lede" data-keep="the lede">I’m working toward a career securing and governing AI systems.</p>
         <nav class="links" aria-label="Elsewhere">
-          <a href={site.resume}>Résumé</a>
-          <a href={`mailto:${site.email}`}>Email</a>
-          <a href={site.github}>GitHub</a>
-          <a href={site.linkedin}>LinkedIn</a>
-          <a href={site.x}>X</a>
+          <a href={site.resume}><Icon name="file" />Résumé</a>
+          <a href={`mailto:${site.email}`}><Icon name="mail" />Email</a>
+          <a class="mark" href={site.github} aria-label="GitHub" title="GitHub"><Icon name="github" /></a>
+          <a class="mark" href={site.linkedin} aria-label="LinkedIn" title="LinkedIn"><Icon name="linkedin" /></a>
+          <a class="mark" href={site.x} aria-label="X" title="X"><Icon name="x" /></a>
         </nav>
       </div>
     </section>
@@ -85,16 +76,33 @@ const editions = [
         <header class="proj-head">
           <h2 class="title" id="cb-h" data-keep="a heading">CitationBench</h2>
           <p class="say" data-keep="a description">
-            A benchmark of whether an agent with a library tool cites the right page and quotes it accurately.
+            Every agent we tried caught {planted}% of the errors we planted, and between {realLo} and {realHi}% of the
+            real ones sitting in published papers.
           </p>
           <nav class="proj-links" aria-label="CitationBench">
             <a href={site.citationbench}>Leaderboard</a>
+            <a href={`${site.safetypage}/r`}>Replays</a>
             <a href={`${site.safetypageRepo}/tree/main/citationbench`}>Method</a>
           </nav>
         </header>
 
-        <figure class="bench" id="bench" aria-labelledby="bench-cap">
-          <div class="bench-top">
+        <div class="stage bench-stage" data-tilt>
+          <a class="slab replay" data-depth="1" href={`${site.safetypage}${replay}`} aria-label="A CitationBench run, replayed. Open it on SafetyPage">
+            <video
+              id="replay"
+              muted
+              loop
+              playsinline
+              preload="metadata"
+              poster="/media/citationbench-replay.webp"
+              width="1200"
+              height="750"
+            >
+              <source src="/media/citationbench-replay.mp4" type="video/mp4" />
+            </video>
+          </a>
+
+          <figure class="slab bench" id="bench" data-depth="1.7" aria-labelledby="bench-says">
             <div class="seg" role="group" aria-label="Measure">
               {
                 measures.map((m, i) => (
@@ -104,68 +112,70 @@ const editions = [
                 ))
               }
             </div>
-            <div class="scale" aria-hidden="true">
-              <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
-            </div>
-          </div>
-          <ol class="rows">
-            {
-              bench.runs.map((r) => (
-                <li
-                  class="row"
-                  data-id={r.model}
-                  data-correct={r.correct.join(" ")}
-                  data-page_precision={r.page_precision.join(" ")}
-                  data-quote_fidelity={r.quote_fidelity.join(" ")}
-                >
-                  <div class="who">
-                    <b>{r.model}</b>
-                    <span>
-                      {r.agent}, {r.n} questions
-                    </span>
-                  </div>
-                  <div class="track">
-                    <i class="fill" />
-                    <i class="ci" />
-                    <i class="grip" aria-hidden="true" />
-                    <span class="val">
-                      <b>{Math.round(r.correct[0])}</b>
-                      <i>±{half(r.correct)}</i>
-                    </span>
-                  </div>
-                </li>
-              ))
-            }
-          </ol>
-          <figcaption id="bench-cap">
-            <span class="says" id="bench-says">{measures[0].says}</span>
-            <span class="meta">Percent, with 95% intervals. Held-out questions, snapshot {bench.runs[0].snapshot}.</span>
-          </figcaption>
-        </figure>
+            <ol class="rows">
+              {
+                bench.runs.map((r) => (
+                  <li
+                    class="row"
+                    data-id={r.model}
+                    data-correct={r.correct.join(" ")}
+                    data-page_precision={r.page_precision.join(" ")}
+                    data-quote_fidelity={r.quote_fidelity.join(" ")}
+                  >
+                    <div class="who">
+                      <b>{r.model}</b>
+                      <span>{r.agent}</span>
+                    </div>
+                    <div class="track">
+                      <i class="fill" />
+                      <i class="ci" />
+                      <i class="grip" aria-hidden="true" />
+                      <span class="val">
+                        <b>{Math.round(r.correct[0])}</b>
+                        <i>±{half(r.correct)}</i>
+                      </span>
+                    </div>
+                  </li>
+                ))
+              }
+            </ol>
+            <figcaption class="says" id="bench-says">{measures[0].says}</figcaption>
+          </figure>
+        </div>
       </section>
 
       <section class="proj" id="safetypage" aria-labelledby="sp-h">
         <header class="proj-head">
           <h2 class="title" id="sp-h" data-keep="a heading">SafetyPage</h2>
-          <p class="say" data-keep="a description">A page-cited library of the AI safety record, built for people and for AI agents.</p>
+          <p class="say" data-keep="a description">
+            A page-cited library of the AI safety record, built for people and for AI agents.
+          </p>
           <nav class="proj-links" aria-label="SafetyPage">
             <a href={site.safetypage}>Library</a>
             <a href={site.safetypageRepo}>GitHub</a>
           </nav>
         </header>
 
-        <figure class="check" id="check">
-          <blockquote class="q-wrap">
-            <p class="q" id="q" spellcheck="false" aria-label="A quotation to check. Edit it.">{first.text}</p>
-            <div class="q-marks" id="q-marks" aria-hidden="true"></div>
-          </blockquote>
-          <figcaption class="check-foot">
-            <output class="verdict" id="verdict" data-v="ok" for="q"><i></i><span>On the page</span></output>
-            <a class="src" id="q-src" href={first.href}>{first.source}</a>
-            <span class="why" id="q-why"></span>
-            <button class="next" id="q-next" type="button">Another</button>
-          </figcaption>
-        </figure>
+        <div class="stage check-stage" data-tilt>
+          <a class="slab sheet" id="sheet" data-depth="1" href={first.href} aria-label="The cited page, on SafetyPage">
+            <span class="sheet-in" id="sheet-in">
+              <img id="sheet-img" src={first.page.img} width={first.page.w} height={first.page.h} alt={`${first.title}, the cited page`} />
+            </span>
+          </a>
+
+          <figure class="slab check" id="check" data-depth="1.7">
+            <blockquote class="q-wrap">
+              <p class="q" id="q" spellcheck="false" aria-label="A quotation to check. Edit it.">{first.text}</p>
+              <div class="q-marks" id="q-marks" aria-hidden="true"></div>
+            </blockquote>
+            <figcaption class="check-foot">
+              <output class="verdict" id="verdict" data-v="ok" for="q"><i></i><span>On the page</span></output>
+              <a class="src" id="q-src" href={first.href}>{first.source}</a>
+              <button class="next" id="q-next" type="button"><span>Another</span><i class="timer" aria-hidden="true"></i></button>
+              <span class="why" id="q-why"></span>
+            </figcaption>
+          </figure>
+        </div>
       </section>
     </div>
 
@@ -199,34 +209,12 @@ const editions = [
   </main>
 
   <footer class="colophon">
-    <div class="col-a">
-      <p class="col-say" data-keep="the colophon">Every time a new frontier model takes the throne, it rebuilds this site from scratch.</p>
-      <ol class="editions">
-        {
-          editions.map((e) => (
-            <li>
-              <b>{e.by}</b>
-              <span>{e.when}</span>
-            </li>
-          ))
-        }
-        {
-          rev && (
-            <li class="rev">
-              <b>Revision</b>
-              <span>{rev}</span>
-            </li>
-          )
-        }
-      </ol>
-    </div>
-    <nav class="col-links" aria-label="Contact">
-      <a href={`mailto:${site.email}`}>{site.email}</a>
-      <a href={site.x}>@AirmetNoah</a>
-      <a href={site.github}>GitHub</a>
-      <a href={site.linkedin}>LinkedIn</a>
-      <a href={site.resume}>Résumé</a>
-      <a href="/rss.xml">RSS</a>
+    <a class="col-mail" href={`mailto:${site.email}`}><Icon name="mail" />{site.email}</a>
+    <nav class="links" aria-label="Contact">
+      <a href={site.resume}><Icon name="file" />Résumé</a>
+      <a class="mark" href={site.github} aria-label="GitHub" title="GitHub"><Icon name="github" /></a>
+      <a class="mark" href={site.linkedin} aria-label="LinkedIn" title="LinkedIn"><Icon name="linkedin" /></a>
+      <a class="mark" href={site.x} aria-label="X" title="X"><Icon name="x" /></a>
     </nav>
   </footer>
 </Page>

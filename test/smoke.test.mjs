@@ -19,6 +19,7 @@ test("the build emits every route, data file and control file", () => {
     "rss.xml", "sitemap-index.xml", "resume/noah-airmet-resume.pdf", "bee/index.html", "bee/sw.js",
     "favicon.svg", "favicon.ico", "apple-touch-icon.png", "og/card.png", "boot.js",
     "_headers", "_redirects", "robots.txt", "data/timp.json", "data/last-out.json",
+    "media/citationbench-replay.mp4", "media/citationbench-replay.webp",
   ]) assert.ok(existsSync(join(dist, file)), `${file} should exist in dist`);
 });
 
@@ -66,10 +67,20 @@ test("the home page shows CitationBench's published runs and a SafetyPage quotat
   }
   assert.match(home, /id="q"[^>]*>AI risk management is a key component/);
   assert.match(home, /safetypage\.noahairmet\.com\/d\/nist\//);
+  // every quotation has its page scan and at least one highlight on it
+  const { quotes } = JSON.parse(readFileSync(join(root, "src/data/quotes.json"), "utf8"));
+  assert.ok(quotes.length >= 3);
+  for (const q of quotes) {
+    assert.ok(existsSync(join(dist, q.page.img)), `${q.key}: ${q.page.img}`);
+    assert.ok(q.page.hl.length >= 1, `${q.key}: a highlight`);
+    assert.ok(q.text.match(new RegExp(`\\b${q.slip[0]}\\b`)), `${q.key}: the slipped word is in the text`);
+  }
 });
 
 // Noah, 2026-11-12: GSA and Pulpit are internal research tools and the clip
 // farms aren't for the site. King Follett and Hymn Parts are for friends.
+// The same day: no line about models rebuilding the site ("way too much
+// explaining the design").
 test("only what Noah wants advertised is on the site", () => {
   const files = walk(dist).filter((f) => /\.(html|css|js|xml|txt)$/.test(f) && !f.includes("/bee/"));
   for (const file of files) {
@@ -77,6 +88,7 @@ test("only what Noah wants advertised is on the site", () => {
     assert.doesNotMatch(text, /corpus\./i, `${file} must not reference corpus`);
     assert.doesNotMatch(text, /kingfollett\.|hymns\.noahairmet/i, `${file} must not link unlisted projects`);
     assert.doesNotMatch(text, /pulpit-archive|Gospel Scholar|clipfarm|gleaner/i, `${file} must not advertise internal tools`);
+    assert.doesNotMatch(text, /frontier model|Claude Fable|Claude Opus/i, `${file} must not explain how the site was made`);
   }
 });
 

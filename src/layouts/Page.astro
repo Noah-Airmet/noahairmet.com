@@ -2,6 +2,7 @@
 import "../styles/tokens.css";
 import "../styles/base.css";
 import flex from "../fonts/roboto-flex.woff2?url";
+import Icon from "../components/Icon.astro";
 import { absoluteUrl, pageTitle, site } from "../site";
 
 interface Props {
@@ -10,14 +11,16 @@ interface Props {
   path?: string;
   noindex?: boolean;
   here?: "home" | "writing";
+  /** The page runs the board (the name in pieces, the agents, sound). */
+  board?: boolean;
 }
 
-const { title, description = site.description, path = "/", noindex = false, here } = Astro.props;
+const { title, description = site.description, path = "/", noindex = false, here, board = false } = Astro.props;
 const fullTitle = pageTitle(title);
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-board={board ? "" : undefined}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -43,7 +46,7 @@ const fullTitle = pageTitle(title);
     <meta name="theme-color" content="#ecede8" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0b1a3c" media="(prefers-color-scheme: dark)" />
     <link rel="preload" href={flex} as="font" type="font/woff2" crossorigin />
-    {here === "home" && <script is:inline src="/boot.js" />}
+    <script is:inline src="/boot.js" />
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
@@ -54,8 +57,25 @@ const fullTitle = pageTitle(title);
         <a href="/writing/" aria-current={here === "writing" ? "page" : undefined}>Writing</a>
         <a href="/#outside">Outside</a>
       </nav>
-      <slot name="bar" />
+      <div class="bar-end">
+        <slot name="bar" />
+        {
+          board && (
+            <button class="ib" id="sound" type="button" aria-pressed="false" aria-label="Sound is off. Turn on" title="Sound">
+              <Icon name="mute" />
+              <Icon name="sound" />
+            </button>
+          )
+        }
+        <button class="ib" id="theme" type="button" aria-pressed="false" aria-label="Day. Switch to night" title="Night">
+          <Icon name="moon" />
+          <Icon name="sun" />
+        </button>
+      </div>
     </header>
     <slot />
+    <script>
+      import "../board/chrome.ts";
+    </script>
   </body>
 </html>

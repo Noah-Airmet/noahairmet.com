@@ -138,6 +138,80 @@ button {
 .bar a[aria-current] {
   color: var(--ink);
 }
+.bar-end {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-right: -10px;
+  min-width: 0;
+}
+/* an icon button: a 44px target, the glyph dead centre */
+.ib {
+  display: inline-grid;
+  place-items: center;
+  width: var(--hit);
+  height: var(--hit);
+  color: var(--ink-2);
+  border-radius: 8px;
+  transition: color var(--d-fast) var(--ease);
+}
+.ib:hover {
+  color: var(--ink);
+}
+/* each holds two glyphs, one per state */
+.ib .icon {
+  grid-area: 1 / 1;
+}
+.ib[aria-pressed="false"] .icon + .icon,
+.ib[aria-pressed="true"] .icon:first-child {
+  display: none;
+}
+.icon {
+  display: block;
+  flex: none;
+}
+.icon-fill {
+  fill: currentColor;
+}
+.icon-line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* a row of ways to reach him: words with their glyph, marks on their own */
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--s-5);
+  font-size: var(--t-ui);
+  font-weight: 500;
+}
+.links a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  height: var(--hit);
+  text-decoration: none;
+  color: var(--ink);
+}
+.links a:not(.mark):hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+.links .mark {
+  width: var(--hit);
+  justify-content: center;
+  margin: 0 -10px;
+  color: var(--ink-2);
+  transition: color var(--d-fast) var(--ease);
+}
+.links .mark:hover {
+  color: var(--ink);
+}
 .bar .home {
   color: var(--ink);
   font-weight: 600;
@@ -147,7 +221,17 @@ button {
 }
 @media (max-width: 860px) {
   .bar nav {
-    gap: var(--s-2);
+    gap: 0;
+    margin-left: -8px;
+  }
+  .bar a {
+    padding: 0 8px;
+  }
+  .bar-end {
+    gap: 0;
+  }
+  .ib {
+    width: 36px;
   }
 }
 

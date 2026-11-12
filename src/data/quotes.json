@@ -1,0 +1,116 @@
+{
+  "quotes": [
+    {
+      "key": "nist-rmf-p6",
+      "text": "AI risk management is a key component of responsible development and use of AI systems.",
+      "cite": "nist:nist.ai.100-1/r1/p6",
+      "source": "NIST 2023, p. 6",
+      "title": "AI Risk Management Framework 1.0",
+      "slip": [
+        "a",
+        "the"
+      ],
+      "href": "https://safetypage.noahairmet.com/d/nist/nist.ai.100-1/r1/p6?q=AI%20risk%20management%20is%20a%20key%20component%20of%20responsible%20development%20and%20use%20of%20AI%20systems",
+      "page": {
+        "img": "/pages/nist-rmf-p6.webp",
+        "w": 1100,
+        "h": 1424,
+        "hl": [
+          [
+            0.1449,
+            0.6994,
+            0.6721,
+            0.0155
+          ],
+          [
+            0.1449,
+            0.7028,
+            0.7095,
+            0.0273
+          ]
+        ]
+      }
+    },
+    {
+      "key": "shevlane-p6",
+      "text": "Model evaluation is one of the main tools we have for AI risk assessment.",
+      "cite": "arxiv:2305.15324/v2/p6",
+      "source": "Shevlane et al. 2023, p. 6",
+      "title": "Model evaluation for extreme risks",
+      "slip": [
+        "risk",
+        "safety"
+      ],
+      "href": "https://safetypage.noahairmet.com/d/arxiv/2305.15324/v2/p6?q=Model%20evaluation%20is%20one%20of%20the%20main%20tools%20we%20have%20for%20AI%20risk%20assessment",
+      "page": {
+        "img": "/pages/shevlane-p6.webp",
+        "w": 1100,
+        "h": 1556,
+        "hl": [
+          [
+            0.1028,
+            0.1979,
+            0.5836,
+            0.0115
+          ]
+        ]
+      }
+    },
+    {
+      "key": "nist-genai-p8",
+      "text": "The production of confidently stated but erroneous or false content",
+      "cite": "nist:ai-600-1/r1/p8",
+      "source": "NIST 2024, p. 8",
+      "title": "Generative AI Profile",
+      "slip": [
+        "confidently",
+        "deliberately"
+      ],
+      "href": "https://safetypage.noahairmet.com/d/nist/ai-600-1/r1/p8?q=The%20production%20of%20confidently%20stated%20but%20erroneous%20or%20false%20content",
+      "page": {
+        "img": "/pages/nist-genai-p8.webp",
+        "w": 1100,
+        "h": 1424,
+        "hl": [
+          [
+            0.2885,
+            0.0935,
+            0.4957,
+            0.014
+          ]
+        ]
+      }
+    },
+    {
+      "key": "nist-rmf-p6-controls",
+      "text": "Without proper controls, AI systems can amplify, perpetuate, or exacerbate inequitable or undesirable outcomes for individuals and communities.",
+      "cite": "nist:nist.ai.100-1/r1/p6",
+      "source": "NIST 2023, p. 6",
+      "title": "AI Risk Management Framework 1.0",
+      "slip": [
+        "can",
+        "will"
+      ],
+      "href": "https://safetypage.noahairmet.com/d/nist/nist.ai.100-1/r1/p6?q=Without%20proper%20controls%2C%20AI%20systems%20can%20amplify%2C%20perpetuate%2C%20or%20exacerbate%20inequitable%20or%20undesirable%20outcomes%20for%20individuals%20and%20communities",
+      "page": {
+        "img": "/pages/nist-rmf-p6-controls.webp",
+        "w": 1100,
+        "h": 1424,
+        "hl": [
+          [
+            0.3735,
+            0.6317,
+            0.4807,
+            0.0155
+          ],
+          [
+            0.1451,
+            0.6501,
+            0.6629,
+            0.0154
+          ]
+        ]
+      }
+    }
+  ]
+}

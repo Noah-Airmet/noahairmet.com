@@ -112,19 +112,8 @@
 .status {
   display: flex;
   align-items: center;
-  gap: var(--s-5);
+  gap: var(--s-4);
   min-width: 0;
-}
-.snd {
-  height: var(--hit);
-  padding: 0 10px;
-  color: var(--ink-3);
-  white-space: nowrap;
-  transition: color var(--d-fast) var(--ease);
-}
-.snd:hover,
-.snd[aria-pressed="true"] {
-  color: var(--ink);
 }
 /* shown only to the keyboard: the way to play without a pointer */
 .sr-key {
@@ -151,9 +140,11 @@
   gap: var(--s-2);
   height: var(--hit);
   padding: 0 10px;
-  margin-right: -10px;
   color: var(--ink);
   white-space: nowrap;
+}
+.state em {
+  font-style: normal;
 }
 .state i {
   width: 7px;
@@ -321,18 +312,6 @@
   letter-spacing: -0.012em;
   text-wrap: balance;
 }
-.links {
-  display: flex;
-  gap: var(--s-5);
-  font-size: var(--t-ui);
-  font-weight: 500;
-}
-.links a {
-  display: inline-flex;
-  align-items: center;
-  height: var(--hit);
-}
-
 .status {
   position: relative;
 }
@@ -389,13 +368,11 @@
     grid-template-columns: 1fr;
     gap: var(--s-3);
   }
-  .links {
-    margin-left: 0;
-    gap: var(--s-5);
-    flex-wrap: wrap;
-  }
   .last,
-  .snd {
+  .state em {
     display: none;
+  }
+  .state {
+    padding: 0 8px;
   }
 }

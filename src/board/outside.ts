@@ -204,7 +204,9 @@ export async function startOutside() {
   let ink = tone("--ink");
   let guide = tone("--guide");
   let markC = tone("--mark");
-  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+  document.addEventListener("themechange", () => {
+    const css = getComputedStyle(document.documentElement);
+    const tone = (name: string) => css.getPropertyValue(name).trim();
     paper = tone("--paper");
     ink = tone("--ink");
     guide = tone("--guide");
