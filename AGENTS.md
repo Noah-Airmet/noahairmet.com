@@ -139,7 +139,9 @@ From Noah: King Follett and Hymn Parts stay unlisted.
 Noah reads and owns every published word. The lede is from the previous
 edition. He asked (2026-11-12) for each project pitch to say why the thing is
 needed, not only what it is, and wrote both himself the same day. Catchword's
-is his as written. CitationBench's is his with one clause changed to match
+is his as written, plus a last part he asked for later that day ("explains
+why using Catchword is better than just asking the questions shown in the
+demo to ChatGPT in the web"), which is a draft for him to rewrite. CitationBench's is his with one clause changed to match
 the data: he had "they still get small, crucial wording details wrong", but
 the 40 to 67% is how often an agent's supported / not supported verdict on a
 real citing sentence is right, and quoted wording is where agents do well
