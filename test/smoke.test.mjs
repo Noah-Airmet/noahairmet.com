@@ -20,6 +20,7 @@ test("the build emits every route, data file and control file", () => {
     "favicon.svg", "favicon.ico", "apple-touch-icon.png", "og/card.png", "boot.js",
     "_headers", "_redirects", "robots.txt", "data/last-out.json",
     "media/citationbench-replay.mp4", "media/citationbench-replay.webp",
+    "card/index.html", "media/card.mp4",
   ]) assert.ok(existsSync(join(dist, file)), `${file} should exist in dist`);
 });
 
@@ -42,8 +43,12 @@ test("pages carry the accessibility and metadata basics", () => {
     assert.match(html, /id="main"/, file);
     assert.match(html, /<meta name="description"/, file);
     assert.match(html, /<link rel="canonical" href="https:\/\/noahairmet\.com\//, file);
-    const m = html.match(/<meta property="og:image" content="https:\/\/noahairmet\.com(\/[^"?]+)/);
-    assert.ok(m && existsSync(join(dist, m[1])), `${file}: og:image exists`);
+    // the share card: a still for everyone, a video for the apps that play og:video (iMessage, Discord)
+    for (const prop of ["og:image", "og:video"]) {
+      const m = html.match(new RegExp(`<meta property="${prop}" content="https://noahairmet\\.com(/[^"?]+)`));
+      assert.ok(m && existsSync(join(dist, m[1])), `${file}: ${prop} exists`);
+    }
+    assert.match(html, /<meta property="og:video:type" content="video\/mp4">/, file);
   }
 });
 

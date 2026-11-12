@@ -652,10 +652,12 @@ function rebinding() {
 
 /** Everything off the page at once. */
 export function scatter() {
+  // thrown as hard as the name is big: gravity is scaled to it too
+  const k = clamp(size / 190, 0.45, 1);
   for (const p of pieces) {
     if (p.state !== "set") continue;
     loosen(p);
-    Body.setVelocity(p.body, { x: rand(-9, 9), y: rand(-14, -4) });
+    Body.setVelocity(p.body, { x: rand(-9, 9) * k, y: rand(-14, -4) * k });
     Body.setAngularVelocity(p.body, rand(-0.2, 0.2));
     callFor(p, 900 + Math.random() * 500);
   }

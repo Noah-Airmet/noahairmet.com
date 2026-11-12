@@ -162,8 +162,16 @@ His pitch notes are in `~/development/writing/safetypage/pitch-notes.md`.
 - `public/_redirects` keeps old addresses alive. A `/resume/*` wildcard loops
   the PDF, so there isn't one.
 - Icon: `scripts/icons.py` then `node scripts/icons.mjs`. Share card:
-  `node scripts/card.mjs` against a running server, then bump `card.image`'s
-  `v` in `src/site.ts`.
+  `/card/` is a small stage (480 by 252) with only the name, the page's state
+  and the agents, drawn larger so they read at the size a chat app shows a
+  link (`src/pages/card.astro`, `src/board/card.ts`, `src/styles/card.css`).
+  `node scripts/card.mjs` against a running server scatters the letters there
+  and records the agents setting them: `public/media/card.mp4`, a loop that
+  ends on the frame it starts on, is the `og:video` iMessage and Discord
+  play; `public/og/card.png`, a frame with about three letters to go, is the
+  `og:image` for everything else. Then bump `card.image`'s and `card.video`'s
+  `v` in `src/site.ts`. The video is in `/media` because the Worker answers
+  Range requests there, which Safari needs to play it.
 
 ## Add a note
 

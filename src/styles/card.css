@@ -1,0 +1,55 @@
+/* The share card's stage (/card/): the home page's hero with everything but
+   the name, the state and the agents taken away, and those drawn larger so
+   they read at the size a chat app shows a link. */
+:root:has(.card) {
+  --gutter: 22px;
+  --bar: 40px;
+  overflow: hidden;
+}
+:root:has(.card) .bar {
+  background: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  justify-content: flex-end;
+}
+:root:has(.card) .bar nav,
+:root:has(.card) .snd {
+  display: none;
+}
+:root:has(.card) .state {
+  font-size: 15px;
+  font-weight: 600;
+  gap: 7px;
+}
+:root:has(.card) .state em {
+  display: inline;
+}
+:root:has(.card) .state i {
+  width: 9px;
+  height: 9px;
+}
+.card .hero {
+  /* the floor the letters land on, a little above the card's edge */
+  height: calc(100svh - 10px);
+  min-height: 0;
+  padding: 20px var(--gutter) 0;
+  display: block;
+}
+/* as wide as the card: the width sets the size, not the height */
+.card .name {
+  --cap: 60;
+}
+/* cursors and their names at one and a half times the site's */
+:root:has(.card) .ag svg {
+  width: 24px;
+  height: 30px;
+}
+:root:has(.card) .ag-tag {
+  left: 19px;
+  top: 25px;
+  padding: 3px 8px 4px;
+  font-size: 14px;
+}
+:root:has(.card) .chip {
+  font-size: 11px;
+}

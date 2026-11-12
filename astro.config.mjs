@@ -6,7 +6,8 @@ import sitemap from "@astrojs/sitemap";
 export default defineConfig({
   output: "static",
   site: "https://noahairmet.com",
-  integrations: [sitemap()],
+  // the share card's stage is a page, but not one to list
+  integrations: [sitemap({ filter: (page) => !page.endsWith("/card/") })],
   devToolbar: { enabled: false },
   build: {
     // The CSP allows only same-origin files: no inline styles or scripts.
