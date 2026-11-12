@@ -1,5 +1,5 @@
 // Records the CitationBench replay shown on the home page: plays one run from
-// SafetyPage's own replay player and encodes it small.
+// Catchword's own replay player and encodes it small.
 //   node scripts/replay-video.mjs [/r/<replay id>]
 // Needs ffmpeg, and the Playwright in ~/development/tools/ui-check. If the
 // replay changes, set `replay` in src/pages/index.astro to match.

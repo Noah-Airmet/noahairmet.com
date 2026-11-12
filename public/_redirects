@@ -22,6 +22,9 @@
 /pulpit.html https://pulpit-archive.org/ 301
 /assets/resume.pdf /resume/noah-airmet-resume.pdf 301
 
-# SafetyPage lives on its own subdomain for now (Noah, 2026-11-09). 302 so it can move.
+# Catchword (named SafetyPage until 2026-11-12) lives on its own subdomain for now
+# (Noah, 2026-11-09). 302 so it can move.
+/catchword https://safetypage.noahairmet.com/ 302
+/catchword/* https://safetypage.noahairmet.com/:splat 302
 /safetypage https://safetypage.noahairmet.com/ 302
 /safetypage/* https://safetypage.noahairmet.com/:splat 302

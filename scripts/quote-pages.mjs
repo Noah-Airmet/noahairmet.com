@@ -1,5 +1,5 @@
 // For each quotation in src/data/quotes.json: verify it against the live
-// library, open SafetyPage's own viewer with the quote highlighted, and keep
+// library, open Catchword's own viewer with the quote highlighted, and keep
 // what the viewer shows: the page image (public/pages/<key>.webp) and where
 // on it the highlight falls (written back into quotes.json as `page`).
 // Run: node scripts/quote-pages.mjs   (Playwright from ~/development/tools/ui-check)

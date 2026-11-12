@@ -262,7 +262,7 @@
   min-height: 2.8em;
 }
 
-/* ---- SafetyPage: the check, and the page it found the words on */
+/* ---- Catchword: the check, and the page it found the words on */
 .check-stage {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));

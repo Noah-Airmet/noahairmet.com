@@ -57,7 +57,7 @@ test("the home page says who Noah is in real text, and how to reach him", () => 
   assert.match(home, /href="mailto:noah\.airmet@icloud\.com"/);
 });
 
-test("the home page shows CitationBench's published runs and a SafetyPage quotation", () => {
+test("the home page shows CitationBench's published runs and a Catchword quotation", () => {
   const home = read("index.html");
   const bench = JSON.parse(readFileSync(join(root, "src/data/citationbench.json"), "utf8"));
   assert.ok(bench.runs.length >= 1);
@@ -100,6 +100,7 @@ test("redirects keep old URLs alive and cannot loop the résumé", () => {
   assert.match(redirects, /^\/commitments\.html \/writing\/professional-commitments\/ 301$/m);
   assert.match(redirects, /^\/pulpit \/ 301$/m);
   assert.match(redirects, /^\/safetypage https:\/\/safetypage\.noahairmet\.com\/ 302$/m);
+  assert.match(redirects, /^\/catchword https:\/\/safetypage\.noahairmet\.com\/ 302$/m);
 });
 
 test("security headers allow exactly what the page calls", () => {

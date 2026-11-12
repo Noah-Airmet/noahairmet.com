@@ -1,4 +1,4 @@
-// SafetyPage's quote check, live, beside the page it found the words on.
+// Catchword's quote check, live, beside the page it found the words on.
 //
 // The quotation is editable; every change goes to the library's own verifier
 // (POST /api/verify, the one its MCP tool calls) and the verdict shown is the
@@ -82,7 +82,7 @@ function cite(loc?: { cite: string; url: string }) {
   }
 }
 
-// ---- the page: SafetyPage's scan of it, moved so the words are in view
+// ---- the page: Catchword's scan of it, moved so the words are in view
 
 function showPage(found: boolean) {
   if (!sheet || !sheetIn || !sheetImg) return;

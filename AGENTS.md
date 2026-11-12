@@ -18,14 +18,14 @@ be put out of place, an agent cursor puts it back, and the bar's state
   loose; double-click to send them all. On a first visit the letters start in
   a heap and the agents set the name. Now and then one slips on its own.
 - **CitationBench**: two floating windows. One is a recording of a real run
-  from SafetyPage's replay player (`public/media/citationbench-replay.mp4`,
+  from Catchword's replay player (`public/media/citationbench-replay.mp4`,
   made by `scripts/replay-video.mjs`; it links to the live replay). Over its
   corner is the leaderboard (`src/board/bench.ts`): the published runs as bars
   with their 95% intervals. A bar's end drags to a number it never scored; an
   agent drags it back. The one sentence above them is the pitch's finding,
   with its numbers computed from the published runs.
-- **SafetyPage** (`src/board/quote.ts`): the check in a card, beside
-  SafetyPage's own scan of the cited page with the library's yellow highlight
+- **Catchword** (`src/board/quote.ts`): the check in a card, beside
+  Catchword's own scan of the cited page with the library's yellow highlight
   on the words. Every wording is checked live against the library's verifier
   (`POST https://safetypage-api.noahairmet.com/api/verify`). Left alone it
   demonstrates itself: an agent gets one word wrong, the check strikes it and
@@ -99,7 +99,10 @@ last frame, the mountain holds still.
 ## What goes on the site
 
 Noah, 2026-11-12: "be clean and careful in what you advertise on my site as
-my 'resume.'" He is proud of CitationBench and SafetyPage. "i'm not
+my 'resume.'" He is proud of CitationBench and SafetyPage, which he renamed
+Catchword the same day ("catchword is great, go for it"); its site, API and
+repo still carry the old name (`safetypage.noahairmet.com`,
+`~/development/safetypage`). "i'm not
 particularly 'proud' of my clip farms and can't really advertise GSA (or even
 pulpit) since they're internal research tools." MTA is "a simple 'Lead
 Technical Fellow @transfigurism' (with the handle hyperlinked to their
@@ -122,12 +125,14 @@ household rule is that health data never leaves owned hardware;
 From Noah: King Follett and Hymn Parts stay unlisted.
 
 Noah reads and owns every published word. The lede is from the previous
-edition. The two project pitches are assembled from his pitch notes
-(`~/development/writing/safetypage/pitch-notes.md`): CitationBench's from the
-"lines to say out loud" drafts, with its numbers computed from the published
-runs; SafetyPage's from his opening line and the product's own tagline ("We
-check that the page says it, and show you the page"). He asked (2026-11-12)
-for each to pitch why the thing is needed, not only say what it is.
+edition. He asked (2026-11-12) for each project pitch to say why the thing is
+needed, not only what it is, and wrote both himself the same day. Catchword's
+is his as written. CitationBench's is his with one clause changed to match
+the data: he had "they still get small, crucial wording details wrong", but
+the 40 to 67% is how often an agent's supported / not supported verdict on a
+real citing sentence is right, and quoted wording is where agents do well
+(quote fidelity 84 to 100%). The range is computed from the published runs.
+His pitch notes are in `~/development/writing/safetypage/pitch-notes.md`.
 
 ## Data
 
@@ -138,7 +143,7 @@ for each to pitch why the thing is needed, not only say what it is.
 - `src/data/quotes.json`: the quotations the check turns through. `node
   scripts/quote-pages.mjs` verifies each against the live library (and that
   its misquote fails), then saves the page scan to `public/pages/` and where
-  SafetyPage's viewer puts the highlight.
+  Catchword's viewer puts the highlight.
 - `public/data/peaks/`: one elevation grid and trail per mountain, built by
   `scripts/peaks.py` from USGS 3DEP and OpenStreetMap. The figure credits both.
 - `public/data/last-out.json` is the Worker's list of areas.
@@ -152,7 +157,7 @@ for each to pitch why the thing is needed, not only say what it is.
   for `/media/*` (Workers static assets ignore them, and Safari won't play an
   MP4 without them).
 - Headers (`public/_headers`): same-origin scripts and styles, Cloudflare Web
-  Analytics, and `connect-src` for the SafetyPage API. Astro would inline
+  Analytics, and `connect-src` for the Catchword API. Astro would inline
   small scripts, so `assetsInlineLimit: 0` stays in `astro.config.mjs`.
 - `public/_redirects` keeps old addresses alive. A `/resume/*` wildcard loops
   the PDF, so there isn't one.

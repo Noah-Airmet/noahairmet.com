@@ -17,11 +17,9 @@ const measures = [
 ] as const;
 const half = (v: number[]) => Math.round((v[2] - v[1]) / 2);
 const first = quotes[0];
-// The verdict alone: on errors the benchmark planted, and on real citing sentences.
-const planted = Math.min(...bench.runs.map((r) => r.planted));
+// The verdict alone (does the source support the sentence?), on real citing sentences.
 const realLo = Math.min(...bench.runs.map((r) => r.real));
 const realHi = Math.max(...bench.runs.map((r) => r.real));
-const plantedLine = planted === 100 ? "Plant an error and every agent catches it" : `Plant an error and agents catch it ${planted}% of the time`;
 // The run the recording shows (public/media/citationbench-replay.mp4).
 const replay = "/r/cc-haiku-5-5-4e1c63-pc-4bd058594c.1";
 ---
@@ -78,9 +76,9 @@ const replay = "/r/cc-haiku-5-5-4e1c63-pc-4bd058594c.1";
         <header class="proj-head">
           <h2 class="title" id="cb-h" data-keep="a heading">CitationBench</h2>
           <p class="say pitch" data-keep="a description">
-            Give an agent a real library and it mostly stops making up sources. It still can’t tell you whether the
-            paper says what the sentence citing it claims. {plantedLine}, but on real citations from published papers
-            they’re right {realLo} to {realHi}% of the time.
+            Agents cite sources in everything they write now. Give one a real library and it stops inventing them, but
+            they still misjudge whether the source says what’s being claimed at an alarming rate. On real citations
+            from published papers the agents we ran were right {realLo} to {realHi}% of the time.
           </p>
           <nav class="proj-links" aria-label="CitationBench">
             <a href={site.citationbench}>Leaderboard</a>
@@ -90,7 +88,7 @@ const replay = "/r/cc-haiku-5-5-4e1c63-pc-4bd058594c.1";
         </header>
 
         <div class="stage bench-stage" data-tilt>
-          <a class="slab replay" data-depth="1" href={`${site.safetypage}${replay}`} aria-label="A CitationBench run, replayed. Open it on SafetyPage">
+          <a class="slab replay" data-depth="1" href={`${site.safetypage}${replay}`} aria-label="A CitationBench run, replayed. Open it on Catchword">
             <video
               id="replay"
               muted
@@ -147,21 +145,22 @@ const replay = "/r/cc-haiku-5-5-4e1c63-pc-4bd058594c.1";
         </div>
       </section>
 
-      <section class="proj" id="safetypage" aria-labelledby="sp-h">
+      <section class="proj" id="catchword" aria-labelledby="cw-h">
         <header class="proj-head">
-          <h2 class="title" id="sp-h" data-keep="a heading">SafetyPage</h2>
+          <h2 class="title" id="cw-h" data-keep="a heading">Catchword</h2>
           <p class="say pitch" data-keep="a description">
-            AI safety guidance comes out faster than anybody can read it, and agents are the ones quoting it now. This
-            is the record in one library, cited to the page. We check that the page says it, and show you the page.
+            AI safety guidance comes out faster than anybody can read it, and agents are the ones quoting it now.
+            Catchword is your entire library of safety documentation and AI policy writing, built to help you stay on
+            top of it and in the loop.
           </p>
-          <nav class="proj-links" aria-label="SafetyPage">
+          <nav class="proj-links" aria-label="Catchword">
             <a href={site.safetypage}>Library</a>
             <a href={site.safetypageRepo}>GitHub</a>
           </nav>
         </header>
 
         <div class="stage check-stage" data-tilt>
-          <a class="slab sheet" id="sheet" data-depth="1" href={first.href} aria-label="The cited page, on SafetyPage">
+          <a class="slab sheet" id="sheet" data-depth="1" href={first.href} aria-label="The cited page, on Catchword">
             <span class="sheet-in" id="sheet-in">
               <img id="sheet-img" src={first.page.img} width={first.page.w} height={first.page.h} alt={`${first.title}, the cited page`} />
             </span>
