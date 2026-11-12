@@ -29,13 +29,20 @@
 .points + .proj-links {
   grid-column: 1 / -1;
 }
-/* what it does that a search doesn't: a name and a line each, across the page */
+/* what it does that a search doesn't: one line that sets it up, then a name and a line each, across the page */
+.points-head {
+  grid-column: 1 / -1;
+  margin-top: var(--s-4);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-wrap: pretty;
+}
 .points {
   grid-column: 1 / -1;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--s-4) var(--s-6);
-  margin-top: var(--s-3);
   font-size: var(--t-ui);
   line-height: 1.4;
 }
