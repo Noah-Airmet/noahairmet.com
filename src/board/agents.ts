@@ -102,6 +102,8 @@ export interface Job {
   key: string;
   /** Lower goes first; ties go to whoever is nearest. */
   rank?: number;
+  /** The agent this is for, by name. If they are tied up for a while, anyone takes it. */
+  who?: string;
   at: () => Pt;
   run(agent: Agent, signal: AbortSignal): Promise<void>;
 }
@@ -109,7 +111,10 @@ export interface Job {
 interface Live extends Job {
   ctl?: AbortController;
   by?: Agent;
+  since?: number;
 }
+/** How long a job waits for the agent it names. */
+const HOLD = 1600;
 
 export const agents: Agent[] = [];
 const queue: Live[] = [];
@@ -123,8 +128,11 @@ export function hire(name: string, tone: string) {
 
 export function post(job: Job) {
   if (queue.some((j) => j.key === job.key)) return;
-  queue.push(job);
+  const live: Live = job;
+  live.since = performance.now();
+  queue.push(live);
   dispatch();
+  if (job.who) setTimeout(dispatch, HOLD + 50);
 }
 
 /** Call a job off, whether it is waiting or under way. */
@@ -145,6 +153,7 @@ function dispatch() {
     let score = Infinity;
     for (const j of queue) {
       if (j.by) continue;
+      if (j.who && j.who !== a.name && performance.now() - (j.since ?? 0) < HOLD) continue;
       const p = j.at();
       const s = (j.rank ?? 0) * 1e6 + Math.hypot(p.x - a.x, p.y - a.y);
       if (s < score) {

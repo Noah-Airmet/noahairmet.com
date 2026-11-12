@@ -1,4 +1,4 @@
-// Catchword's quote check, live, beside the page it found the words on.
+// The quote check, live: the code check CitationBench scores agents with.
 //
 // The quotation is editable; every change goes to the library's own verifier
 // (POST /api/verify, the one its MCP tool calls) and the verdict shown is the
@@ -15,7 +15,7 @@ const API = "https://safetypage-api.noahairmet.com/api/verify";
 /** How long a quotation stays up when nobody is touching it. */
 const TURN = 12500;
 
-interface Verdict {
+export interface Verdict {
   verdict: "exact" | "normalized" | "elsewhere" | "near_miss" | "not_found";
   passed: boolean;
   reason: string;
@@ -30,9 +30,6 @@ const out = document.getElementById("verdict") as HTMLOutputElement;
 const src = document.getElementById("q-src") as HTMLAnchorElement;
 const why = document.getElementById("q-why") as HTMLElement;
 const next = document.getElementById("q-next") as HTMLButtonElement;
-const sheet = document.getElementById("sheet") as HTMLAnchorElement | null;
-const sheetIn = document.getElementById("sheet-in") as HTMLElement | null;
-const sheetImg = document.getElementById("sheet-img") as HTMLImageElement | null;
 
 let cur: Quote = quotes[0];
 let idx = 0;
@@ -50,7 +47,7 @@ const key = (w: string) => w.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
 
 // Each distinct wording is asked of the library once; the loop costs nothing after its first pass.
 const asked = new Map<string, Promise<Verdict>>();
-function verify(quote: string, cite?: string): Promise<Verdict> {
+export function verify(quote: string, cite?: string): Promise<Verdict> {
   const id = `${cite ?? ""}|${quote}`;
   let hit = asked.get(id);
   if (!hit) {
@@ -80,47 +77,6 @@ function cite(loc?: { cite: string; url: string }) {
     src.href = loc.url;
     src.classList.add("raw");
   }
-}
-
-// ---- the page: Catchword's scan of it, moved so the words are in view
-
-function showPage(found: boolean) {
-  if (!sheet || !sheetIn || !sheetImg) return;
-  sheet.href = cur.href;
-  const place = () => {
-    sheetIn.querySelectorAll(".hl").forEach((n) => n.remove());
-    const w = sheetIn.clientWidth;
-    const h = w * (cur.page.h / cur.page.w);
-    const view = sheet.clientHeight;
-    const boxes = cur.page.hl;
-    const top = Math.min(...boxes.map((b) => b[1])) * h;
-    const bottom = Math.max(...boxes.map((b) => b[1] + b[3])) * h;
-    const y = Math.max(0, Math.min(h - view, (top + bottom) / 2 - view * 0.42));
-    sheetIn.style.setProperty("--y", `${-y.toFixed(1)}px`);
-    if (!found) return;
-    for (const [bx, by, bw, bh] of boxes) {
-      const mark = document.createElement("span");
-      mark.className = "hl";
-      mark.style.left = `${bx * 100}%`;
-      mark.style.top = `${by * h}px`;
-      mark.style.width = `${bw * 100}%`;
-      mark.style.height = `${bh * h}px`;
-      sheetIn.append(mark);
-    }
-  };
-  if (sheetImg.getAttribute("src") === cur.page.img) return place();
-  sheetIn.classList.add("swap");
-  sheetIn.querySelectorAll(".hl").forEach((n) => n.remove());
-  setTimeout(() => {
-    sheetImg.onload = () => {
-      place();
-      sheetIn.classList.remove("swap");
-    };
-    sheetImg.alt = `${cur.title}, the cited page`;
-    sheetImg.width = cur.page.w;
-    sheetImg.height = cur.page.h;
-    sheetImg.src = cur.page.img;
-  }, 200);
 }
 
 // ---- what differs from the source, word by word (longest common subsequence)
@@ -234,7 +190,6 @@ async function check() {
   clearTimeout(mend);
   if (!mine) {
     marks.replaceChildren();
-    showPage(false);
     return say("none", "Empty");
   }
   say("busy", "Checking");
@@ -250,7 +205,6 @@ async function check() {
       marks.replaceChildren();
       cite(v.locations[0]);
       flag("quote", false);
-      showPage(!v.locations[0] || v.locations[0].cite === cur.cite);
       return say("ok", v.verdict === "elsewhere" ? "Found elsewhere" : "On the page", v.reason);
     }
     cite();
@@ -258,14 +212,12 @@ async function check() {
     if (v.verdict === "near_miss" && close(ops)) {
       draw(ops);
       flag("quote", true);
-      showPage(true);
       say("miss", "Not what it says", v.reason);
       // a visitor's own misquote gets put right after a while; the demonstration paces its own
       if (!calm && theirs) mend = window.setTimeout(() => post({ key: "quote", at: spot, run: repair }), 4200);
     } else {
       marks.replaceChildren();
       flag("quote", false);
-      showPage(false);
       say("none", "Not found", v.reason);
     }
   } catch {
@@ -390,7 +342,6 @@ export function startQuote() {
     load(idx + 1);
   });
   addEventListener("resize", () => {
-    showPage(out.dataset.v === "ok" || out.dataset.v === "miss");
     if (out.dataset.v === "miss") draw(diff(text(), cur.text));
   });
 

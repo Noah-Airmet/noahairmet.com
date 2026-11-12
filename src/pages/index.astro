@@ -4,6 +4,7 @@ import "../styles/work.css";
 import { getCollection } from "astro:content";
 import bench from "../data/citationbench.json";
 import peaks from "../data/peaks.json";
+import { asks } from "../data/asks";
 import { quotes } from "../data/quotes";
 import Page from "../layouts/Page.astro";
 import Icon from "../components/Icon.astro";
@@ -20,8 +21,6 @@ const first = quotes[0];
 // The verdict alone (does the source support the sentence?), on real citing sentences.
 const realLo = Math.min(...bench.runs.map((r) => r.real));
 const realHi = Math.max(...bench.runs.map((r) => r.real));
-// The run the recording shows (public/media/citationbench-replay.mp4).
-const replay = "/r/cc-haiku-5-5-4e1c63-pc-4bd058594c.1";
 ---
 
 <Page here="home" board>
@@ -88,20 +87,18 @@ const replay = "/r/cc-haiku-5-5-4e1c63-pc-4bd058594c.1";
         </header>
 
         <div class="stage bench-stage" data-tilt>
-          <a class="slab replay" data-depth="1" href={`${site.safetypage}${replay}`} aria-label="A CitationBench run, replayed. Open it on Catchword">
-            <video
-              id="replay"
-              muted
-              loop
-              playsinline
-              preload="metadata"
-              poster="/media/citationbench-replay.webp"
-              width="1200"
-              height="750"
-            >
-              <source src="/media/citationbench-replay.mp4" type="video/mp4" />
-            </video>
-          </a>
+          <figure class="slab check" id="check" data-depth="1">
+            <blockquote class="q-wrap">
+              <p class="q" id="q" spellcheck="false" aria-label="A quotation to check. Edit it.">{first.text}</p>
+              <div class="q-marks" id="q-marks" aria-hidden="true"></div>
+            </blockquote>
+            <figcaption class="check-foot">
+              <output class="verdict" id="verdict" data-v="ok" for="q"><i></i><span>On the page</span></output>
+              <a class="src" id="q-src" href={first.href}>{first.source}</a>
+              <button class="next" id="q-next" type="button"><span>Another</span><i class="timer" aria-hidden="true"></i></button>
+              <span class="why" id="q-why"></span>
+            </figcaption>
+          </figure>
 
           <figure class="slab bench" id="bench" data-depth="1.7" aria-labelledby="bench-says">
             <div class="seg" role="group" aria-label="Measure">
@@ -159,23 +156,32 @@ const replay = "/r/cc-haiku-5-5-4e1c63-pc-4bd058594c.1";
           </nav>
         </header>
 
-        <div class="stage check-stage" data-tilt>
-          <a class="slab sheet" id="sheet" data-depth="1" href={first.href} aria-label="The cited page, on Catchword">
+        <div class="stage ask-stage" data-tilt>
+          <a class="slab sheet" id="sheet" data-depth="1" href={asks[0].href} aria-label="The cited page, on Catchword">
             <span class="sheet-in" id="sheet-in">
-              <img id="sheet-img" src={first.page.img} width={first.page.w} height={first.page.h} alt={`${first.title}, the cited page`} />
+              <img id="sheet-img" src={asks[0].page.img} width={asks[0].page.w} height={asks[0].page.h} alt={`${asks[0].title}, the cited page`} />
             </span>
           </a>
 
-          <figure class="slab check" id="check" data-depth="1.7">
-            <blockquote class="q-wrap">
-              <p class="q" id="q" spellcheck="false" aria-label="A quotation to check. Edit it.">{first.text}</p>
-              <div class="q-marks" id="q-marks" aria-hidden="true"></div>
-            </blockquote>
+          <figure class="slab ask" id="ask" data-depth="1.7">
+            <div class="ask-set">
+              {
+                asks.map((a, i) => (
+                  <div class:list={["ask-item", { on: i === 0 }]}>
+                    <p class="ask-q">
+                      <span class="ask-text"><span class="ask-typed">{a.ask}</span><span class="ask-rest" /></span>
+                      <i class="ask-send" aria-hidden="true">↵</i>
+                    </p>
+                    <p class="ask-lead">{a.lead}</p>
+                    <blockquote class="ask-quote" cite={a.href}>{a.quote}</blockquote>
+                  </div>
+                ))
+              }
+            </div>
             <figcaption class="check-foot">
-              <output class="verdict" id="verdict" data-v="ok" for="q"><i></i><span>On the page</span></output>
-              <a class="src" id="q-src" href={first.href}>{first.source}</a>
-              <button class="next" id="q-next" type="button"><span>Another</span><i class="timer" aria-hidden="true"></i></button>
-              <span class="why" id="q-why"></span>
+              <output class="verdict" id="ask-verdict" data-v="ok"><i></i><span>On the page</span></output>
+              <a class="src" id="ask-src" href={asks[0].href}>{asks[0].source}</a>
+              <button class="next" id="ask-next" type="button"><span>Another</span><i class="timer" aria-hidden="true"></i></button>
             </figcaption>
           </figure>
         </div>

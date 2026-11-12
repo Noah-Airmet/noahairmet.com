@@ -1,0 +1,103 @@
+{
+  "asks": [
+    {
+      "key": "nist-red-teaming",
+      "ask": "What’s NIST’s guidance on red-teaming generative AI?",
+      "lead": "NIST AI 600-1, the Generative AI Profile, July 2024:",
+      "quote": "For best results, AI red teams should demonstrate domain expertise, and awareness of socio-cultural aspects within the deployment context.",
+      "cite": "nist:nist.ai.600-1/r1/p54",
+      "source": "NIST AI 600-1, p. 54",
+      "title": "Generative Artificial Intelligence Profile (NIST AI 600-1)",
+      "href": "https://safetypage.noahairmet.com/d/nist/nist.ai.600-1/r1/p54?q=For%20best%20results%2C%20AI%20red%20teams%20should%20demonstrate%20domain%20expertise%2C%20and%20awareness%20of%20socio-cultural%20aspects%20within%20the%20deployment%20context",
+      "page": {
+        "img": "/pages/nist-red-teaming.webp",
+        "w": 1100,
+        "h": 1424,
+        "hl": [
+          [
+            0.4147,
+            0.6223,
+            0.4252,
+            0.0134
+          ],
+          [
+            0.116,
+            0.6405,
+            0.6006,
+            0.0139
+          ]
+        ]
+      }
+    },
+    {
+      "key": "sandbagging",
+      "ask": "Which paper showed that models can hide their capabilities during testing?",
+      "lead": "“AI Sandbagging: Language Models can Strategically Underperform on Evaluations,” van der Weij et al., ICLR 2025:",
+      "quote": "we find that models can be fine-tuned, on a synthetic dataset, to hide specific capabilities unless given a password.",
+      "cite": "arxiv:2406.07358/v4/p1",
+      "source": "van der Weij et al. 2024, p. 1",
+      "title": "AI Sandbagging: Language Models can Strategically Underperform on Evaluations",
+      "href": "https://safetypage.noahairmet.com/d/arxiv/2406.07358/v4/p1?q=we%20find%20that%20models%20can%20be%20fine-tuned%2C%20on%20a%20synthetic%20dataset%2C%20to%20hide%20specific%20capabilities%20unless%20given%20a%20password",
+      "page": {
+        "img": "/pages/sandbagging.webp",
+        "w": 1100,
+        "h": 1424,
+        "hl": [
+          [
+            0.6059,
+            0.4381,
+            0.1613,
+            0.0107
+          ],
+          [
+            0.2327,
+            0.452,
+            0.5346,
+            0.0133
+          ],
+          [
+            0.2327,
+            0.4658,
+            0.0699,
+            0.0131
+          ]
+        ]
+      }
+    },
+    {
+      "key": "evidence-dilemma",
+      "ask": "What is the “evidence dilemma” in the International AI Safety Report?",
+      "lead": "International AI Safety Report 2025:",
+      "quote": "pre-emptive risk mitigation measures based on limited evidence might turn out to be ineffective or unnecessary. On the other hand, waiting for stronger evidence of impending risk could leave society unprepared or even make mitigation impossible",
+      "cite": "iasr:international_ai_safety_report_2025_english/r1/p14",
+      "source": "International AI Safety Report 2025, p. 14",
+      "title": "International AI Safety Report 2025",
+      "href": "https://safetypage.noahairmet.com/d/iasr/international_ai_safety_report_2025_english/r1/p14?q=pre-emptive%20risk%20mitigation%20measures%20based%20on%20limited%20evidence%20might%20turn%20out%20to%20be%20ineffective%20or%20unnecessary.%20On%20the%20other%20hand%2C%20waiting%20for%20stronger%20evidence%20of%20impending%20risk%20could%20leave%20society%20unprepared%20or%20even%20make%20mitigation%20impossible",
+      "page": {
+        "img": "/pages/evidence-dilemma.webp",
+        "w": 1100,
+        "h": 1556,
+        "hl": [
+          [
+            0.2222,
+            0.3034,
+            0.6859,
+            0.0142
+          ],
+          [
+            0.0999,
+            0.3229,
+            0.8238,
+            0.0144
+          ],
+          [
+            0.1006,
+            0.3424,
+            0.6175,
+            0.0144
+          ]
+        ]
+      }
+    }
+  ]
+}

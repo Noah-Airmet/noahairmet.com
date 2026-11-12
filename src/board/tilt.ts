@@ -54,17 +54,3 @@ export function startTilt() {
     }
   });
 }
-
-/** The replay plays while it is on screen, and rests when it isn't. */
-export function startReplay() {
-  const video = document.getElementById("replay") as HTMLVideoElement | null;
-  if (!video || calm || still) return;
-  new IntersectionObserver(
-    (entries) => {
-      const on = entries.some((e) => e.isIntersecting);
-      if (on) void video.play().catch(() => {});
-      else video.pause();
-    },
-    { threshold: 0.35 },
-  ).observe(video);
-}

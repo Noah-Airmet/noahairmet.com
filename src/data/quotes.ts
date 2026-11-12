@@ -1,6 +1,6 @@
-// Quotations for the Catchword check. src/data/quotes.json is the source;
-// `node scripts/quote-pages.mjs` verifies each against the live library and
-// fills in `href` and `page` (the scan and where the quote sits on it).
+// Quotations for the quote check in the CitationBench section.
+// src/data/quotes.json is the source; `node scripts/quote-pages.mjs` verifies
+// each against the live library (and that its slip fails) and fills in `href`.
 import data from "./quotes.json";
 
 export interface Quote {
@@ -13,7 +13,6 @@ export interface Quote {
   /** One word a careless quoter gets wrong, and what they write instead. */
   slip: [string, string];
   href: string;
-  page: { img: string; w: number; h: number; hl: number[][] };
 }
 
 export const quotes = data.quotes as unknown as Quote[];

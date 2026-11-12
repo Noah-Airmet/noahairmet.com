@@ -1,5 +1,6 @@
 // The home page's board: hire the agents, set the name, then start the exhibits.
 import { agents, hire, watchPointer } from "./agents";
+import { startAsk } from "./ask";
 import { startBench } from "./bench";
 import { startDaybar } from "./daybar";
 import { startGuard } from "./guard";
@@ -8,15 +9,15 @@ import { startName } from "./name";
 import { startOutside } from "./outside";
 import { startQuote } from "./quote";
 import { startSound } from "./sound";
-import { startReplay, startTilt } from "./tilt";
+import { startTilt } from "./tilt";
 
 const hero = document.getElementById("top") as HTMLElement;
 
 startSound();
 startTilt();
-startReplay();
 startBench();
 startQuote();
+startAsk();
 void startOutside();
 startDaybar();
 

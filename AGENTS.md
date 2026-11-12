@@ -17,21 +17,33 @@ be put out of place, an agent cursor puts it back, and the bar's state
   cut from the glyph's own outline. Pull one off, throw it, knock the others
   loose; double-click to send them all. On a first visit the letters start in
   a heap and the agents set the name. Now and then one slips on its own.
-- **CitationBench**: two floating windows. One is a recording of a real run
-  from Catchword's replay player (`public/media/citationbench-replay.mp4`,
-  made by `scripts/replay-video.mjs`; it links to the live replay). Over its
-  corner is the leaderboard (`src/board/bench.ts`): the published runs as bars
-  with their 95% intervals. A bar's end drags to a number it never scored; an
-  agent drags it back. The one sentence above them is the pitch's finding,
-  with its numbers computed from the published runs.
-- **Catchword** (`src/board/quote.ts`): the check in a card, beside
-  Catchword's own scan of the cited page with the library's yellow highlight
-  on the words. Every wording is checked live against the library's verifier
+- **CitationBench**: two floating windows. One is the quote check
+  (`src/board/quote.ts`), the code check the benchmark scores quotations
+  with: every wording is checked live against the library's verifier
   (`POST https://safetypage-api.noahairmet.com/api/verify`). Left alone it
   demonstrates itself: an agent gets one word wrong, the check strikes it and
   writes what the source says, another agent restores it, and the next
   quotation comes up (the line under `Another` is the time left). Touch it
-  and the demonstration stops.
+  and the demonstration stops. Beside it is the leaderboard
+  (`src/board/bench.ts`): the published runs as bars with their 95%
+  intervals. A bar's end drags to a number it never scored; an agent drags it
+  back. Noah, 2026-11-12, on why the check is here and not under Catchword:
+  "this is a demo that makes more sense for CitationBench, where an agent is
+  shown catching an error"; the recording of a replay that used to be here
+  was "a very messy screen with a lot going on. too hard to follow".
+- **Catchword** (`src/board/ask.ts`): a question typed into a field by fable
+  and sent, answered by opus in the source's own words, which arrive a word
+  at a time; opus then presses the citation and the cited page comes up
+  beside the card (`src/board/sheet.ts`: Catchword's own scan, with the
+  library's yellow on the quoted words) while the quote is checked live.
+  Three questions turn. It is the demo from Noah's pitch notes ("a window
+  where you ask the chatbot ... and the agent answers"), as he asked for it
+  here: "a clear example of a question being asked about safety policy and
+  an agent giving the answer-- it could be the fable cursor typing a
+  question and the opus cursor answering. a cleaned up simplified interface
+  that works on a card, with smoot animations, text fading in nicely as it
+  answers". An answer is the document's name and a quotation, nothing else,
+  so nothing on the card is anybody's paraphrase.
 - **Text** (`src/board/guard.ts`): anything marked `data-keep` that gets
   rewritten (from the console, say) is typed back. A second check sweeps
   every few seconds for what an observer can't see, such as the whole element
@@ -140,10 +152,13 @@ His pitch notes are in `~/development/writing/safetypage/pitch-notes.md`.
   runs committed in `~/development/safetypage/citationbench/results` (the ones
   the public leaderboard shows). Uncommitted result files are work in
   progress and are left out.
-- `src/data/quotes.json`: the quotations the check turns through. `node
-  scripts/quote-pages.mjs` verifies each against the live library (and that
-  its misquote fails), then saves the page scan to `public/pages/` and where
-  Catchword's viewer puts the highlight.
+- `src/data/quotes.json`: the quotations the check turns through, each with
+  the one word its demonstration gets wrong. `src/data/asks.json`: the
+  Catchword card's questions, each with the document it names and the quote
+  that answers it. `node scripts/quote-pages.mjs` verifies every quote
+  against the live library (and that each misquote fails), writes the links,
+  and for the asks saves the page scan to `public/pages/` and where the
+  library's viewer puts the highlight.
 - `public/data/peaks/`: one elevation grid and trail per mountain, built by
   `scripts/peaks.py` from USGS 3DEP and OpenStreetMap. The figure credits both.
 - `public/data/last-out.json` is the Worker's list of areas.

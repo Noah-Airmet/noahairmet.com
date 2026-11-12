@@ -91,28 +91,16 @@
   color: var(--paper);
 }
 
-/* ---- CitationBench: a run replayed, and the board over its corner */
+/* ---- CitationBench: the check it scores with, and the board beside it */
 .bench-stage {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   align-items: start;
 }
-.replay {
-  grid-column: 1 / 9;
-  grid-row: 1;
-  overflow: hidden;
-  aspect-ratio: 1200 / 750;
-}
-.replay video {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
 .bench {
   grid-column: 8 / 13;
   grid-row: 1;
-  margin-top: 13%;
+  margin-top: 7%;
   padding: var(--s-5);
   z-index: 1;
 }
@@ -262,8 +250,8 @@
   min-height: 2.8em;
 }
 
-/* ---- Catchword: the check, and the page it found the words on */
-.check-stage {
+/* ---- Catchword: a question answered, and the page the answer is on */
+.ask-stage {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   align-items: center;
@@ -306,13 +294,139 @@
     scale: 1.04 1.3;
   }
 }
-.check {
+.ask {
   grid-column: 1 / 7;
   grid-row: 1;
   /* over the page's own margin, never its words */
   margin-right: -56px;
   padding: var(--s-6);
   z-index: 1;
+}
+/* every question and answer shares one cell: the card is as tall as its longest */
+.ask-set {
+  display: grid;
+}
+.ask-item {
+  grid-area: 1 / 1;
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity var(--d-pop) linear,
+    visibility 0s linear var(--d-pop);
+}
+.ask-item.on {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity var(--d-pop) linear;
+}
+/* the question, in the field it is typed into */
+.ask-q {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  padding: 12px 12px 12px 16px;
+  border-radius: 10px;
+  background: var(--paper-2);
+  font-size: 1.0625rem;
+  font-weight: 500;
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+.ask-text {
+  flex: 1;
+  min-width: 0;
+}
+.ask-rest {
+  visibility: hidden;
+}
+.typing .ask-typed::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1.05em;
+  margin: 0 -2px 0 0;
+  vertical-align: -0.16em;
+  background: var(--guide);
+}
+.ask-send {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  background: var(--sheet);
+  box-shadow: 0 0 0 1px var(--rule);
+  color: var(--ink-3);
+  font: 500 var(--t-xs) / 1 var(--mono);
+  font-style: normal;
+}
+.ask-lead {
+  margin-top: var(--s-5);
+  font-size: var(--t-ui);
+  line-height: 1.4;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+.ask-quote {
+  margin: var(--s-2) 0 0;
+  font-family: var(--serif);
+  font-size: clamp(1.25rem, 0.85rem + 1.05vw, 1.75rem);
+  line-height: 1.32;
+  letter-spacing: -0.012em;
+  text-wrap: pretty;
+}
+.ask-quote::before {
+  content: "“";
+}
+.ask-quote::after {
+  content: "”";
+}
+/* before it is answered, and as the answer arrives a word at a time */
+.ask-item.wait .ask-lead,
+.ask-item.wait .ask-quote {
+  opacity: 0;
+}
+.ask-item.in .ask-lead {
+  animation: word 420ms var(--ease) both;
+}
+.ask-item.in .ask-quote::before,
+.ask-item.in .w {
+  animation: word 520ms var(--ease) both;
+  animation-delay: calc(var(--i, 0) * 44ms + 260ms);
+}
+.ask-item.in .ask-quote::after {
+  animation: word 520ms var(--ease) both;
+  animation-delay: calc(var(--n, 40) * 44ms + 260ms);
+}
+.w {
+  display: inline-block;
+}
+@keyframes word {
+  from {
+    opacity: 0;
+    translate: 0 0.22em;
+    filter: blur(4px);
+  }
+}
+/* the citation and its verdict come up once there is an answer to cite */
+.ask .verdict,
+.ask .src {
+  transition: opacity var(--d-pop) linear;
+}
+.ask.pending .verdict,
+.ask.pending .src {
+  opacity: 0;
+  pointer-events: none;
+}
+.ask.pending .verdict {
+  transition-duration: 0s;
+}
+.check {
+  grid-column: 1 / 8;
+  grid-row: 1;
+  margin-right: var(--s-5);
+  padding: var(--s-6);
 }
 .q-wrap {
   position: relative;
@@ -727,25 +841,26 @@
   }
   /* windows stack: the thing in action first, then the part you can change */
   .bench-stage,
-  .check-stage {
+  .ask-stage {
     display: grid;
     grid-template-columns: 1fr;
     gap: var(--s-4);
   }
-  .replay,
   .bench,
   .sheet,
-  .check {
+  .check,
+  .ask {
     grid-column: 1;
     grid-row: auto;
     margin-top: 0;
   }
   .bench,
-  .check {
+  .check,
+  .ask {
     padding: var(--s-4);
     margin-right: 0;
   }
-  .check {
+  .ask {
     order: -1;
   }
   .track {

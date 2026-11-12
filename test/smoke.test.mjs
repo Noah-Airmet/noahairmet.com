@@ -19,7 +19,6 @@ test("the build emits every route, data file and control file", () => {
     "rss.xml", "sitemap-index.xml", "resume/noah-airmet-resume.pdf", "bee/index.html", "bee/sw.js",
     "favicon.svg", "favicon.ico", "apple-touch-icon.png", "og/card.png", "boot.js",
     "_headers", "_redirects", "robots.txt", "data/last-out.json",
-    "media/citationbench-replay.mp4", "media/citationbench-replay.webp",
     "card/index.html", "media/card.mp4",
   ]) assert.ok(existsSync(join(dist, file)), `${file} should exist in dist`);
 });
@@ -62,7 +61,7 @@ test("the home page says who Noah is in real text, and how to reach him", () => 
   assert.match(home, /href="mailto:noah\.airmet@icloud\.com"/);
 });
 
-test("the home page shows CitationBench's published runs and a Catchword quotation", () => {
+test("the home page shows CitationBench's published runs, a quotation to check, and Catchword's questions", () => {
   const home = read("index.html");
   const bench = JSON.parse(readFileSync(join(root, "src/data/citationbench.json"), "utf8"));
   assert.ok(bench.runs.length >= 1);
@@ -71,14 +70,21 @@ test("the home page shows CitationBench's published runs and a Catchword quotati
     assert.ok(run.correct[1] <= run.correct[0] && run.correct[0] <= run.correct[2], `${run.model} interval brackets its mean`);
   }
   assert.match(home, /id="q"[^>]*>AI risk management is a key component/);
-  assert.match(home, /safetypage\.noahairmet\.com\/d\/nist\//);
-  // every quotation has its page scan and at least one highlight on it
   const { quotes } = JSON.parse(readFileSync(join(root, "src/data/quotes.json"), "utf8"));
   assert.ok(quotes.length >= 3);
   for (const q of quotes) {
-    assert.ok(existsSync(join(dist, q.page.img)), `${q.key}: ${q.page.img}`);
-    assert.ok(q.page.hl.length >= 1, `${q.key}: a highlight`);
+    assert.match(q.href, /^https:\/\/safetypage\.noahairmet\.com\/d\//, `${q.key}: a link to the page`);
     assert.ok(q.text.match(new RegExp(`\\b${q.slip[0]}\\b`)), `${q.key}: the slipped word is in the text`);
+  }
+  // every question is in the page with its answer, and has its page scan with a highlight on it
+  const { asks } = JSON.parse(readFileSync(join(root, "src/data/asks.json"), "utf8"));
+  assert.ok(asks.length >= 1);
+  const text = home.replace(/&#39;|&#x27;/g, "'").replace(/&quot;/g, '"');
+  for (const a of asks) {
+    for (const part of [a.ask, a.lead, a.quote]) assert.ok(text.includes(part), `${a.key}: ${part.slice(0, 40)}`);
+    assert.match(a.href, /^https:\/\/safetypage\.noahairmet\.com\/d\//, `${a.key}: a link to the page`);
+    assert.ok(existsSync(join(dist, a.page.img)), `${a.key}: ${a.page.img}`);
+    assert.ok(a.page.hl.length >= 1, `${a.key}: a highlight`);
   }
 });
 
