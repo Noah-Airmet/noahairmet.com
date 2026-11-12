@@ -211,6 +211,7 @@ function build() {
           const cut = (ys[0][1] + ys[1][0]) / 2 + (base - slot.y);
           glyph.style.clipPath = pi === 0 ? `inset(-50% -50% ${slot.h - cut}px -50%)` : `inset(${cut}px -50% -50% -50%)`;
         }
+        node.dataset.s = "set";
         holder.append(node);
         const piece: Piece = {
           id: `${ch}${li}${i}${pi}`,
@@ -578,7 +579,7 @@ function slip() {
   }, 900);
 }
 
-export function startName(opts: { intro: boolean }) {
+export function startName(opts: { intro: boolean; slips: boolean }) {
   if (calm) return { ready: Promise.resolve() };
   fit();
   document.documentElement.classList.add("set");
@@ -607,6 +608,7 @@ export function startName(opts: { intro: boolean }) {
   }
 
   void ready.then(async () => {
+    if (!opts.slips) return;
     await wait(5200);
     slip();
     setInterval(() => Math.random() < 0.5 && slip(), 38000);

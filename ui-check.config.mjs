@@ -3,13 +3,13 @@
 export default {
   base: 'http://127.0.0.1:4321',
   pages: [
-    { name: 'home', path: '/' },
+    { name: 'home', path: '/?still' },
     { name: 'writing', path: '/writing/' },
     { name: 'essay', path: '/writing/professional-commitments/' },
   ],
   widths: [1440, 390],
   // the board has finished setting the name
   ready: "!document.documentElement.classList.contains('live') || (document.querySelectorAll('.pc').length > 0 && [...document.querySelectorAll('.pc')].every((p) => p.dataset.s === 'set'))",
-  // things that move or tick: the agents' cursors and lines, the last log line, the quote's live verdict
-  mask: ['.board', '#last', '.check-foot', '#peak'],
+  // things that tick or come from the network: the last log line, the quote and its live verdict, the mountain
+  mask: ['#last', '.check-foot', '#peak', '.q'],
 };

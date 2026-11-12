@@ -45,7 +45,9 @@ async function start() {
   const root = document.documentElement;
   const late = !root.classList.contains("live");
   root.classList.add("live");
-  const seen = late || sessionStorage.getItem("set") === "1";
+  // ?still holds the board at rest (no intro, nothing slips): for screenshots and checks.
+  const still = new URLSearchParams(location.search).has("still");
+  const seen = still || late || sessionStorage.getItem("set") === "1";
   if (seen) {
     for (const a of agents) {
       const p = a.post();
@@ -57,7 +59,7 @@ async function start() {
     opus.set(-40, foot() - 200);
     opus2.set(W() * 0.5, foot() + 60);
   }
-  const { ready } = startName({ intro: !seen });
+  const { ready } = startName({ intro: !seen, slips: !still });
   watchPointer();
   startGuard();
   await ready;

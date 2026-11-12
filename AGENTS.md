@@ -111,8 +111,9 @@ npm run dev       # http://localhost:4321 (the mountain falls back to Timp: no W
 npm run verify    # astro check, build, tests
 npm run preview   # the built site under Wrangler, with the Worker and the real headers
 npx wrangler versions upload   # a preview URL, without touching production
-npm run deploy    # verify, then production
+npm run deploy    # verify, then production: only with Noah's explicit authorization (carried over from the previous guide)
 ```
 
 Pushing to GitHub does not deploy. `ui-check` (`ui-check.config.mjs`) runs the
-geometry, axe and screenshot checks.
+geometry, axe and screenshot checks against the dev server; it opens the home
+page as `/?still`, which holds the board at rest (no intro, nothing slips).
