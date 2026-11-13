@@ -123,7 +123,10 @@ with the fact that i do pentesting and write ai safety policy." On
 2026-11-13 he asked for "a little more emphasis on that than just 'pentesting
 and ai policy'", naming automated internal pentesting tools and "soc2
 compliance stuff"; the line under that role is the result, and it names kinds
-of work only, nothing found inside the company. And: "a
+of work only, nothing found inside the company. The same day he replaced
+the role itself: 'change the overly specific "Pentesting and AI safety
+policy" line on my website to "Development and AI Security"', keeping the
+detail line. And: "a
 personal site is for the things youre proud of, not an official job
 application or comprehensive inventory." `test/smoke.test.mjs` checks the
 built site for the names that stay off it.
