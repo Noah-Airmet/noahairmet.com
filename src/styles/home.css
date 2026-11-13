@@ -296,6 +296,19 @@
 .roles a:hover {
   color: var(--ink);
 }
+.roles .what {
+  max-width: 36ch;
+  margin-top: var(--s-1);
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+/* Between the phone layout and a full desktop the notch beside "Noah" is too
+   shallow for the extra lines. */
+@media (min-width: 861px) and (max-width: 999px) {
+  .roles .what {
+    display: none;
+  }
+}
 
 .foot {
   align-self: end;

@@ -2,7 +2,7 @@ export const site = {
   name: "Noah Airmet",
   url: "https://noahairmet.com",
   description:
-    "Noah Airmet does pentesting and writes AI safety policy at Simplicity Group, is Lead Technical Fellow at the Mormon Transhumanist Association, and studies cybersecurity at BYU.",
+    "Noah Airmet does pentesting, SOC 2 compliance and AI safety policy at Simplicity Group, is Lead Technical Fellow at the Mormon Transhumanist Association, and studies cybersecurity at BYU.",
   email: "noah.airmet@icloud.com",
   github: "https://github.com/Noah-Airmet",
   linkedin: "https://www.linkedin.com/in/noah-airmet",
