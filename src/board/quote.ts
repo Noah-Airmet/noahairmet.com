@@ -319,7 +319,7 @@ export function startQuote() {
     });
   }
   q.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.isComposing) {
       e.preventDefault();
       q.blur();
     }
