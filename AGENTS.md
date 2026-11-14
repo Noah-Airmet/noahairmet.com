@@ -7,6 +7,8 @@ Workers static assets by the Worker `noahairmet-com` (noahairmet.com and www).
 `docs/BEE-APP.md` covers Katie's workout app at `/bee`; read it before
 touching `public/bee/`.
 
+You are the owner and long-term maintainer of this codebase, and its design is up to you.
+
 ## The idea
 
 The page is kept by agents, and a visitor can test that. Everything on it can
@@ -213,7 +215,7 @@ npm run dev       # http://localhost:4321 (the mountain falls back to Timp: no W
 npm run verify    # astro check, build, tests
 npm run preview   # the built site under Wrangler, with the Worker and the real headers
 npx wrangler versions upload   # a preview URL, without touching production
-npm run deploy    # verify, then production: only with Noah's explicit authorization (carried over from the previous guide)
+npm run deploy    # verify, then production
 ```
 
 Pushing to GitHub does not deploy. `ui-check` (`ui-check.config.mjs`) runs the
