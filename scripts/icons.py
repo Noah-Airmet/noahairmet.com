@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Draw the site's icon: the name's N, slipped a few degrees off its blue baseline.
+"""Draw the site's icon: n/a, Noah Airmet's initials, with the slash running
+corner to corner and a letter on each side of it.
 
-Writes public/favicon.svg from the glyph outline in src/fonts/roboto-flex.woff2
-(weight 1000, width 151, optical size 144: the hero's setting). The PNG and ICO
-come from scripts/icons.mjs, which renders the SVG. Needs: pip install fonttools brotli
+Writes public/favicon.svg from the outlines of n and a in src/fonts/geist.woff2
+at weight 700. The PNG and ICO come from scripts/icons.mjs, which renders the
+SVG. Run: uv run --with fonttools --with brotli python scripts/icons.py
 """
 import os
 from fontTools.ttLib import TTFont
@@ -13,23 +14,32 @@ from fontTools.pens.transformPen import TransformPen
 from fontTools.pens.boundsPen import BoundsPen
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
-font = instancer.instantiateVariableFont(TTFont(os.path.join(ROOT, "src/fonts/roboto-flex.woff2")), {"wght": 1000, "wdth": 151, "opsz": 144})
+font = instancer.instantiateVariableFont(TTFont(os.path.join(ROOT, "src/fonts/geist.woff2")), {"wght": 700})
 glyphs = font.getGlyphSet()
-g = glyphs[font.getBestCmap()[ord("N")]]
-b = BoundsPen(glyphs); g.draw(b)
-x0, y0, x1, y1 = b.bounds
-w, h = x1 - x0, y1 - y0
-scale = 21.5 / w                      # the N spans 21.5 of the 32 units
-ox = (32 - w * scale) / 2 - x0 * scale
-base = 24.5                           # baseline, in icon units
-pen = SVGPathPen(glyphs, ntos=lambda v: f"{v:.2f}".rstrip("0").rstrip("."))
-g.draw(TransformPen(pen, (scale, 0, 0, -scale, ox, base)))
+cmap = font.getBestCmap()
+SIZE = 15.5 / font["head"].unitsPerEm      # the letters are set at 15.5 of the 32 units
+num = lambda v: f"{v:.2f}".rstrip("0").rstrip(".")
+
+
+def letter(ch, baseline, left=None, right=None):
+    """The glyph's path with its ink's left (or right) edge at the given x."""
+    g = glyphs[cmap[ord(ch)]]
+    b = BoundsPen(glyphs)
+    g.draw(b)
+    x0, _, x1, _ = b.bounds
+    ox = left - x0 * SIZE if left is not None else right - x1 * SIZE
+    pen = SVGPathPen(glyphs, ntos=num)
+    g.draw(TransformPen(pen, (SIZE, 0, 0, -SIZE, ox, baseline)))
+    return pen.getCommands()
+
+
+# The slash runs from (22.5, 5) to (9.5, 27). Each letter keeps clear of it.
 svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- The name's N, a few degrees off its baseline. Drawn by scripts/icons.py. -->
-  <style>.bg{{fill:#ecede8}}.ink{{fill:#121311}}.guide{{fill:#1e9bd6}}@media (prefers-color-scheme:dark){{.bg{{fill:#0b1a3c}}.ink{{fill:#eef2fa}}.guide{{fill:#63cdf7}}}}</style>
-  <rect class="bg" width="32" height="32" rx="7"/>
-  <rect class="guide" x="0" y="{base - 0.75}" width="32" height="1.5"/>
-  <path class="ink" transform="rotate(-9 16 {base - h * scale / 2:.2f}) translate(0 -1.2)" d="{pen.getCommands()}"/>
+  <!-- n/a: Noah Airmet. Drawn by scripts/icons.py. -->
+  <rect width="32" height="32" rx="7" fill="#121311"/>
+  <path d="M22.5 5 9.5 27" fill="none" stroke="#ecede8" stroke-width="2.2" stroke-linecap="round"/>
+  <path fill="#ecede8" d="{letter("n", 15.3, right=13.6)}"/>
+  <path fill="#ecede8" d="{letter("a", 26.7, left=17.7)}"/>
 </svg>
 '''
 open(os.path.join(ROOT, "public/favicon.svg"), "w").write(svg)

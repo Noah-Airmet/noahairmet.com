@@ -179,7 +179,12 @@ His pitch notes are in `~/development/writing/safetypage/pitch-notes.md`.
   small scripts, so `assetsInlineLimit: 0` stays in `astro.config.mjs`.
 - `public/_redirects` keeps old addresses alive. A `/resume/*` wildcard loops
   the PDF, so there isn't one.
-- Icon: `scripts/icons.py` then `node scripts/icons.mjs`. Share card:
+- Icon: n/a, Noah's initials, with the slash corner to corner and a letter
+  on each side (Geist at weight 700). Noah, 2026-11-16, of the first sketch:
+  "the n/a is hilarious and easily the best", and of this split version, "5
+  rocks go for it"; a big letter N he called "super generic".
+  `uv run --with fonttools --with brotli python scripts/icons.py`, then
+  `node scripts/icons.mjs`. Share card:
   `/card/` is the name, one line and the three roles composed at 1200 by 630
   (`src/pages/card.astro`, `src/styles/card.css`). `node scripts/card.mjs`
   against a running server photographs it into `public/og/card.png`; then
