@@ -1,30 +1,22 @@
 ---
-// The share card's stage: the name, the page's state and the agents, sized
-// for a link preview (480x252, which scripts/card.mjs records at 2.5x). It is
-// the same board as the home page, so the letters can be thrown here too.
+// The share card (/card/): the name and what he does, composed at 1200 by 630
+// for a link preview. `node scripts/card.mjs` photographs it into
+// public/og/card.png.
 import Page from "../layouts/Page.astro";
 import "../styles/home.css";
 import "../styles/card.css";
 ---
 
-<Page title="Card" path="/card/" noindex board>
-  <div class="status" slot="bar">
-    <button class="state" id="state" type="button" data-state="ok">
-      <i></i><span>Intact</span>
-    </button>
-  </div>
-
+<Page title="Card" path="/card/" noindex>
   <main id="main" class="card">
-    <section class="hero" id="top">
-      <h1 class="name" id="name" aria-label="Noah Airmet">
-        <span class="ln">Noah</span>
-        <span class="ln">Airmet</span>
-      </h1>
-      <button class="sr-key" id="scatter" type="button">Scatter the letters</button>
-    </section>
+    <h1 class="name" aria-label="Noah Airmet">
+      <span class="ln">Noah Airmet</span>
+    </h1>
+    <p class="card-lede">Securing and governing AI systems.</p>
+    <ul class="card-roles">
+      <li><b>Development and AI Security</b> Simplicity Group</li>
+      <li><b>Lead Technical Fellow</b> @transfigurism</li>
+      <li><b>Cybersecurity</b> BYU</li>
+    </ul>
   </main>
 </Page>
-
-<script>
-  import "../board/card.ts";
-</script>

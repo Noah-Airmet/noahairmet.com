@@ -14,7 +14,7 @@ const { note } = Astro.props;
 const { Content } = await render(note);
 ---
 
-<Page here="writing" title={note.data.title} description={note.data.description} path={`/writing/${note.id}/`}>
+<Page here="writing" reading title={note.data.title} description={note.data.description} path={`/writing/${note.id}/`}>
   <main id="main" class="page">
     <article>
       <header class="article-head">

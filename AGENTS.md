@@ -11,73 +11,63 @@ You are the owner and long-term maintainer of this codebase, and its design is u
 
 ## The idea
 
-The page is kept by agents, and a visitor can test that. Everything on it can
-be put out of place, an agent cursor puts it back, and the bar's state
-(`Intact` / `2 out of place`) and its log say what happened.
+A page an employer can be shown: who Noah is, the two things he built working
+live on the page, his writing, and how to reach him. Noah, 2026-11-16, on the
+edition before this one (a physics name that could be thrown apart, agent
+cursors putting the page back, a status log and sound): "kinda fun right now
+... but it feels a little too gimmicky. i would not want to put it in front of
+an employer. there's a way to balance smooth clean web modern animations and
+impressive use of the latest web technologies + taste without the gimmicks of
+an exploding name and all these cursors flying around." That edition is in git
+up to b3c1732 if any of it is ever wanted.
 
-- **The name** (`src/board/name.ts`): each letter is a rigid body (Matter.js)
-  cut from the glyph's own outline. Pull one off, throw it, knock the others
-  loose; double-click to send them all. On a first visit the letters start in
-  a heap and the agents set the name. Now and then one slips on its own.
-- **CitationBench**: two floating windows. One is the quote check
+What moves, and why:
+
+- **The name** comes up from behind its own baseline once, on arrival, and
+  the sentence and the row of roles come up after it (`src/styles/home.css`).
+- **Scroll** (`src/styles/base.css`, `work.css`; CSS scroll timelines, no
+  script): the bar takes the name once the hero has gone by, the two windows
+  of a project rise at different depths, and an essay's bar carries a line as
+  long as what has been read.
+  Moving between pages is a cross-document view transition with the bar held
+  still. All of it is extra; a browser without these shows the page at rest.
+- **CitationBench**: two windows. One is the quote check
   (`src/board/quote.ts`), the code check the benchmark scores quotations
   with: every wording is checked live against the library's verifier
   (`POST https://safetypage-api.noahairmet.com/api/verify`). Left alone it
-  demonstrates itself: an agent gets one word wrong, the check strikes it and
-  writes what the source says, another agent restores it, and the next
+  demonstrates itself: one word is typed over wrongly, the check strikes it
+  and writes what the source says, the word is put right, and the next
   quotation comes up (the line under `Another` is the time left). Touch it
   and the demonstration stops. Beside it is the leaderboard
   (`src/board/bench.ts`): the published runs as bars with their 95%
-  intervals. A bar's end drags to a number it never scored; an agent drags it
-  back. Noah, 2026-11-12, on why the check is here and not under Catchword:
-  "this is a demo that makes more sense for CitationBench, where an agent is
-  shown catching an error"; the recording of a replay that used to be here
-  was "a very messy screen with a lot going on. too hard to follow".
-- **Catchword** (`src/board/ask.ts`): a question typed into a field by fable
-  and sent, answered by opus in the source's own words, which arrive a word
-  at a time; opus then presses the citation and the cited page comes up
-  beside the card (`src/board/sheet.ts`: Catchword's own scan, with the
-  library's yellow on the quoted words) while the quote is checked live.
-  Three questions turn. It is the demo from Noah's pitch notes ("a window
-  where you ask the chatbot ... and the agent answers"), as he asked for it
-  here: "a clear example of a question being asked about safety policy and
-  an agent giving the answer-- it could be the fable cursor typing a
-  question and the opus cursor answering. a cleaned up simplified interface
-  that works on a card, with smoot animations, text fading in nicely as it
-  answers". An answer is the document's name and a quotation, nothing else,
-  so nothing on the card is anybody's paraphrase.
-- **Text** (`src/board/guard.ts`): anything marked `data-keep` that gets
-  rewritten (from the console, say) is typed back. A second check sweeps
-  every few seconds for what an observer can't see, such as the whole element
-  being swapped for another. The console prints one line: an example to try.
+  intervals, drawn one after another the first time they are seen. Noah,
+  2026-11-12, on why the check is here and not under Catchword: "this is a
+  demo that makes more sense for CitationBench, where an agent is shown
+  catching an error"; the recording of a replay that used to be here was "a
+  very messy screen with a lot going on. too hard to follow".
+- **Catchword** (`src/board/ask.ts`): a question typed into a field and sent,
+  answered in the source's own words, which arrive a word at a time; then the
+  cited page comes up beside the card (`src/board/sheet.ts`: Catchword's own
+  scan, with the library's yellow on the quoted words) while the quote is
+  checked live. Three questions turn. It is the demo from Noah's pitch notes
+  ("a window where you ask the chatbot ... and the agent answers"): "a clear
+  example of a question being asked about safety policy and an agent giving
+  the answer ... a cleaned up simplified interface that works on a card, with
+  smoot animations, text fading in nicely as it answers". An answer is the
+  document's name and a quotation, nothing else, so nothing on the card is
+  anybody's paraphrase.
 - **The mountain** (`src/board/outside.ts`): Utah peaks as round-cut stacks of
-  contour sheets, each with a real trail walked from trailhead to summit, the
+  contour sheets, each with a real trail drawn from trailhead to summit, the
   figure turning to the next on its own. A fresh record from `/api/last-out`
   (the last place Noah was out, uploaded by his Ledger app;
   `worker/last-out.js`) comes first when there is one. Drag to turn.
-- The windows turn a little toward the pointer (`src/board/tilt.ts`).
+- The windows turn a little toward the pointer (`src/board/tilt.ts`), which
+  Noah suggested ("a floating rounded rec window that subtly moves as you
+  move your cursor").
 
-`src/board/agents.ts` is the agents themselves: work is posted as jobs, the
-nearest free agent takes one, and a job is an async script that can be called
-off at any await (when a visitor grabs the letter back). The first time each
-exhibit scrolls into view the agents do its opening move too: they pull the
-bars out to their scores, press the quote check, and lift the mountain by its
-summit. `ledger.ts` is the state and the log (the tab title carries the count
-of things out of place); `layer.ts` draws the blue alignment lines and the
-chips; `sound.ts` is the opt-in sound (off until the bar's control is
-pressed), all synthesized.
-
-Why this and not just throwable letters: research on 2026-11-12 found that
-physics letters and fake multiplayer cursors are sold as drop-in components,
-while a page whose agents visibly repair it had no prior example on a
-personal site. The repair, the log and the real data are the point.
-
-The keyboard's way in is a button after the name (visible on focus) that
-scatters the letters.
-
-With `prefers-reduced-motion`, none of the board runs: the name is plain
-text, the chart and the quote check still work, the recording waits on its
-last frame, the mountain holds still.
+`src/board/main.ts` starts the figures; `kit.ts` is the one frame loop they
+share. With `prefers-reduced-motion`, nothing arrives or turns on its own: the
+chart and the quote check still work and the mountain holds still.
 
 ## Design
 
@@ -98,15 +88,16 @@ last frame, the mountain holds still.
   looking at a sky. (A copy of the Apple Watch Solar Dial was built first and
   taken out the same day: Noah found it didn't fit the rest of the site. It
   is in git at 95bce36 if it's ever wanted.)
-- Sound is a word in the bar that says its state (`Sound off` / `Sound on`),
-  not an icon: Noah's preference.
 - Icons are one component, `src/components/Icon.astro`: brand marks for X,
   GitHub and LinkedIn, and a drawn envelope and page for email and résumé.
-- Three faces, one job each, self-hosted in `src/fonts/` with their licences:
-  Roboto Flex (display at weight 1000 and width 150, and the interface),
-  Newsreader (what you read), Martian Mono (values: times, measurements, ids).
-  `roboto-flex.woff2` is a cut of the full font holding only the weight, width
-  and optical-size axes.
+- One family, three cuts, self-hosted in `src/fonts/` with the licence
+  (from the `geist` npm package): Geist Serif (the name, headings and what
+  you read; it has one weight and no italic, so emphasis in an essay is a
+  slanted roman), Geist (the interface), Geist Mono (values: times,
+  measurements, ids). Noah, 2026-11-16: "replacing the gigantic bold
+  stretched hero font with Geist or Geist serif would be a great immediate
+  serious fix as well." The edition before set the name in Roboto Flex at
+  weight 1000 and width 150, filling the first screen.
 - The interface doesn't explain itself: names, values, states of three words
   or fewer, controls. Sentences are for content.
 
@@ -180,28 +171,22 @@ His pitch notes are in `~/development/writing/safetypage/pitch-notes.md`.
 
 ## Other pieces
 
-- `public/boot.js` runs before first paint: with motion allowed it hides the
-  plain name so the pieces can take its place, and brings it back if the board
-  never loads.
-- The Worker (`worker/index.js`) answers `/api/last-out`, and Range requests
-  for `/media/*` (Workers static assets ignore them, and Safari won't play an
-  MP4 without them).
+- `public/boot.js` runs before first paint and sets the sky's colours.
+- The Worker (`worker/index.js`) answers `/api/last-out` (and Range requests
+  for `/media/*`, which holds nothing now).
 - Headers (`public/_headers`): same-origin scripts and styles, Cloudflare Web
   Analytics, and `connect-src` for the Catchword API. Astro would inline
   small scripts, so `assetsInlineLimit: 0` stays in `astro.config.mjs`.
 - `public/_redirects` keeps old addresses alive. A `/resume/*` wildcard loops
   the PDF, so there isn't one.
 - Icon: `scripts/icons.py` then `node scripts/icons.mjs`. Share card:
-  `/card/` is a small stage (480 by 252) with only the name, the page's state
-  and the agents, drawn larger so they read at the size a chat app shows a
-  link (`src/pages/card.astro`, `src/board/card.ts`, `src/styles/card.css`).
-  `node scripts/card.mjs` against a running server scatters the letters there
-  and records the agents setting them: `public/media/card.mp4`, a loop that
-  ends on the frame it starts on, is the `og:video` iMessage and Discord
-  play; `public/og/card.png`, a frame with about three letters to go, is the
-  `og:image` for everything else. Then bump `card.image`'s and `card.video`'s
-  `v` in `src/site.ts`. The video is in `/media` because the Worker answers
-  Range requests there, which Safari needs to play it.
+  `/card/` is the name, one line and the three roles composed at 1200 by 630
+  (`src/pages/card.astro`, `src/styles/card.css`). `node scripts/card.mjs`
+  against a running server photographs it into `public/og/card.png`; then
+  bump `card.image`'s `v` in `src/site.ts`.
+- The résumé PDF (`public/resume/noah-airmet-resume.pdf`) is exported from
+  the Word file in iCloud Drive
+  (`Documents/professional/career/resume/`), which is where Noah edits it.
 
 ## Add a note
 
@@ -220,5 +205,5 @@ npm run deploy    # verify, then production
 
 Pushing to GitHub does not deploy. `ui-check` (`ui-check.config.mjs`) runs the
 geometry, axe and screenshot checks against the dev server; it opens the home
-page as `/?still`, which holds the board at rest (no intro, nothing slips)
-and the sky at noon.
+page as `/?still`, which holds the page at rest (nothing arrives, nothing
+demonstrates itself) and the sky at noon.

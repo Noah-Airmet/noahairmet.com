@@ -103,7 +103,7 @@ button {
   top: var(--s-2);
 }
 
-/* ---- the bar: where you can go on the left, the page's state on the right */
+/* ---- the bar: where you can go on the left, the résumé on the right */
 .bar {
   position: fixed;
   inset: 0 0 auto 0;
@@ -121,9 +121,11 @@ button {
   backdrop-filter: blur(14px);
 }
 .bar nav {
+  --gap: var(--s-5);
   display: flex;
-  gap: var(--s-5);
+  gap: var(--gap);
   margin-left: -10px;
+  min-width: 0;
 }
 .bar a {
   display: inline-flex;
@@ -132,30 +134,38 @@ button {
   padding: 0 10px;
   text-decoration: none;
   color: var(--ink-2);
+  white-space: nowrap;
   transition: color var(--d-fast) var(--ease);
 }
 .bar a:hover,
 .bar a[aria-current] {
   color: var(--ink);
 }
-.bar-end {
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
+.bar .bar-end {
   margin-right: -10px;
-  min-width: 0;
 }
-/* a plain word that is a switch: it says its state */
-.snd {
-  height: var(--hit);
-  padding: 0 10px;
-  color: var(--ink-3);
-  white-space: nowrap;
-  transition: color var(--d-fast) var(--ease);
-}
-.snd:hover,
-.snd[aria-pressed="true"] {
+.bar .home {
   color: var(--ink);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+@media (max-width: 860px) {
+  .bar nav {
+    --gap: 0px;
+    margin-left: -8px;
+  }
+  .bar a {
+    padding: 0 8px;
+  }
+  .bar .bar-end {
+    margin-right: -8px;
+  }
+}
+/* a phone's bar has room for the name or the résumé, and the résumé is in the page's head and foot */
+@media (max-width: 480px) {
+  .bar .bar-end {
+    display: none;
+  }
 }
 .icon {
   display: block;
@@ -203,40 +213,14 @@ button {
 .links .mark:hover {
   color: var(--ink);
 }
-.bar .home {
-  color: var(--ink);
-  font-weight: 600;
-  font-stretch: 130%;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-}
-@media (max-width: 860px) {
-  .bar nav {
-    gap: 0;
-    margin-left: -8px;
-  }
-  .bar a {
-    padding: 0 8px;
-  }
-  .bar-end {
-    gap: 0;
-  }
-  .snd {
-    padding: 0 8px;
-  }
-}
-
-/* ---- the one display title: section headings on the home page, page titles elsewhere */
+/* ---- the one title: section headings on the home page, page titles elsewhere */
 .title {
-  font-family: var(--display);
-  font-weight: 1000;
-  font-stretch: 150%;
-  font-variation-settings: "opsz" 144;
-  font-size: min(calc((100vw - 2 * var(--gutter)) / 9.7), 7.5rem);
-  line-height: 0.86;
-  letter-spacing: -0.03em;
-  margin-left: -0.025em;
-  padding-bottom: 0.14em;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: var(--t-h2);
+  line-height: 1;
+  letter-spacing: -0.025em;
+  padding-bottom: 0.18em;
 }
 /* the serif line that says what a thing is */
 .say {
@@ -248,10 +232,81 @@ button {
   text-wrap: balance;
 }
 
-@view-transition {
-  navigation: auto;
-}
+/* ---- motion tied to the scroll and to moving between pages. All of it is
+   extra: a browser without scroll timelines or page transitions shows the
+   same page at rest. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+  /* the bar stays put while the page under it changes */
+  .bar {
+    view-transition-name: bar;
+  }
+  ::view-transition-old(root) {
+    animation: 160ms ease-in both page-out;
+  }
+  ::view-transition-new(root) {
+    animation: 380ms var(--settle) 60ms both page-in;
+  }
 
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    /* On the home page the name is the hero, so the bar carries it only once
+       the hero has gone by: the links make room as it comes in. */
+    :root[data-here="home"] {
+      timeline-scope: --hero;
+    }
+    .hero {
+      view-timeline: --hero block;
+    }
+    [data-here="home"] .bar .home {
+      overflow: clip;
+      animation: name-in linear both;
+      animation-timeline: --hero;
+      animation-range: exit 45% exit 85%;
+    }
+
+    /* an essay: a line along the bar's foot, as long as what has been read */
+    [data-reading] .bar::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 2px;
+      background: var(--ink);
+      transform-origin: 0 50%;
+      animation: read linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+@keyframes page-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+}
+@keyframes name-in {
+  from {
+    max-width: 0;
+    padding-inline: 0;
+    margin-right: calc(var(--gap) * -1);
+    opacity: 0;
+    visibility: hidden;
+  }
+  to {
+    max-width: 10em;
+  }
+}
+@keyframes read {
+  from {
+    scale: 0 1;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

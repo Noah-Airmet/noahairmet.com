@@ -1,10 +1,9 @@
 # noahairmet.com
 
-Noah Airmet's personal site. The page is kept by agents: pull a letter off the
-name, drag a benchmark bar to a score it never got, or change a word in a
-quotation, and an agent puts it right while the page logs what happened.
-Astro static, a small Matter.js board, strict CSP, served as Cloudflare
-Workers static assets.
+Noah Airmet's personal site: who he is, CitationBench and Catchword working
+live on the page, his writing, and a Utah mountain. Astro static, CSS scroll
+timelines and view transitions, strict CSP, served as Cloudflare Workers
+static assets.
 
 Everything you need is in [AGENTS.md](AGENTS.md).
 

@@ -2,14 +2,12 @@
 //
 // The quotation is editable; every change goes to the library's own verifier
 // (POST /api/verify, the one its MCP tool calls) and the verdict shown is the
-// one it returns. Left alone, the figure demonstrates itself: an agent gets one
-// word wrong the way a careless quoter would, the check catches it and marks
-// what the source says, another agent puts it right, and the next quotation
+// one it returns. Left alone, the figure demonstrates itself: one word goes
+// wrong the way a careless quoter would get it wrong, the check catches it and
+// marks what the source says, the word is put right, and the next quotation
 // comes up. Touch it and the demonstration stops; it is yours.
 import { quotes, type Quote } from "../data/quotes";
-import { post, recall, type Agent } from "./agents";
-import { calm, onTick, pageRect, still, wait } from "./kit";
-import { flag, record } from "./ledger";
+import { calm, onTick, still, wait } from "./kit";
 
 const API = "https://safetypage-api.noahairmet.com/api/verify";
 /** How long a quotation stays up when nobody is touching it. */
@@ -35,7 +33,17 @@ let cur: Quote = quotes[0];
 let idx = 0;
 let seq = 0;
 let timer = 0;
-let mend = 0;
+/** The demonstration's current move, so a visitor (or the next quotation) can call it off. */
+let act: AbortController | null = null;
+const recall = () => {
+  act?.abort();
+  act = null;
+};
+function perform(move: (signal: AbortSignal) => Promise<void>) {
+  recall();
+  const mine = (act = new AbortController());
+  move(mine.signal).catch(() => {});
+}
 /** The visitor has taken over: no more demonstration until they ask for another. */
 let theirs = false;
 let seen = false;
@@ -187,7 +195,6 @@ function draw(ops: Op[]) {
 async function check() {
   const id = ++seq;
   const mine = text();
-  clearTimeout(mend);
   if (!mine) {
     marks.replaceChildren();
     return say("none", "Empty");
@@ -204,20 +211,15 @@ async function check() {
     if (v.passed) {
       marks.replaceChildren();
       cite(v.locations[0]);
-      flag("quote", false);
       return say("ok", v.verdict === "elsewhere" ? "Found elsewhere" : "On the page", v.reason);
     }
     cite();
     const ops = diff(mine, cur.text);
     if (v.verdict === "near_miss" && close(ops)) {
       draw(ops);
-      flag("quote", true);
       say("miss", "Not what it says", v.reason);
-      // a visitor's own misquote gets put right after a while; the demonstration paces its own
-      if (!calm && theirs) mend = window.setTimeout(() => post({ key: "quote", at: spot, run: repair }), 4200);
     } else {
       marks.replaceChildren();
-      flag("quote", false);
       say("none", "Not found", v.reason);
     }
   } catch {
@@ -225,44 +227,10 @@ async function check() {
   }
 }
 
-const spot = () => {
-  const r = pageRect(q!);
-  return { x: r.x + 20, y: r.y + 20 };
-};
-
-const centre = (start: number, end: number) => {
-  const r = rangeAt(start, end).getBoundingClientRect();
-  return { x: r.left + scrollX + r.width / 2, y: r.top + scrollY + r.height * 0.55 };
-};
-
-/** The agent goes to each wrong word and puts back what the source says. */
-async function repair(a: Agent, signal: AbortSignal) {
-  const since = performance.now();
-  const mine = text();
-  const ops = diff(mine, cur.text).filter((o) => o.kind !== "same");
-  for (const o of ops) {
-    await a.moveTo(() => centre(o.at[0], Math.max(o.at[1], o.at[0] + 1)), { signal });
-    await a.click(signal);
-    await wait(140, signal);
-  }
+/** Mark a stretch of the quotation as selected. */
+function select(start: number, end: number) {
   marks.replaceChildren();
-  q!.textContent = cur.text;
-  stage = "mended";
-  record(a.name, "restored", "the quotation", (performance.now() - since) / 1000);
-  void check();
-}
-
-/** The demonstration's misquote: an agent takes the one word and types another. */
-async function slip(a: Agent, signal: AbortSignal) {
-  const [from, to] = cur.slip;
-  const at = cur.text.search(new RegExp(`\\b${from}\\b`));
-  if (at < 0 || text() !== cur.text) return;
-  await a.moveTo(() => centre(at, at + from.length), { signal, tempo: 0.9 });
-  if (theirs) return;
-  await a.click(signal);
-  // the word it has hold of
-  marks.replaceChildren();
-  for (const r of boxes(at, at + from.length)) {
+  for (const r of boxes(start, end)) {
     const sel = document.createElement("u");
     sel.style.left = `${r.x - 2}px`;
     sel.style.top = `${r.y + r.h * 0.12}px`;
@@ -270,28 +238,48 @@ async function slip(a: Agent, signal: AbortSignal) {
     sel.style.height = `${r.h * 0.8}px`;
     marks.append(sel);
   }
-  await wait(260, signal);
+}
+
+/** Replace [at, at + from) with `to`, the way it would be typed over. */
+async function retype(at: number, from: number, to: string, signal: AbortSignal) {
+  const now = text();
+  const head = now.slice(0, at);
+  const tail = now.slice(at + from);
+  select(at, at + from);
+  await wait(420, signal);
   marks.replaceChildren();
-  const head = cur.text.slice(0, at);
-  const tail = cur.text.slice(at + from.length);
   for (let i = 1; i <= to.length; i++) {
     q!.textContent = head + to.slice(0, i) + tail;
-    await wait(42, signal);
+    await wait(46, signal);
   }
-  stage = "slipped";
-  record(a.name, "misquoted", cur.source);
+}
+
+/** The demonstration's misquote: the one word is taken and another typed. */
+async function slip(signal: AbortSignal) {
+  const [from, to] = cur.slip;
+  const at = cur.text.search(new RegExp(`\\b${from}\\b`));
+  if (at < 0 || text() !== cur.text) return;
+  await retype(at, from.length, to, signal);
+  await check();
+}
+
+/** And its correction: what the source says goes back in. */
+async function repair(signal: AbortSignal) {
+  const [from, to] = cur.slip;
+  const at = cur.text.search(new RegExp(`\\b${from}\\b`));
+  if (at < 0 || text() === cur.text) return;
+  await retype(at, to.length, from, signal);
+  q!.textContent = cur.text;
   await check();
 }
 
 function load(i: number) {
   idx = (i + quotes.length) % quotes.length;
   cur = quotes[idx];
-  recall("quote");
-  clearTimeout(mend);
+  recall();
   q!.textContent = cur.text;
   marks.replaceChildren();
   cite();
-  flag("quote", false);
   stage = "fresh";
   clock = 0;
   void check();
@@ -301,7 +289,7 @@ function load(i: number) {
 function take() {
   if (theirs) return;
   theirs = true;
-  recall("quote");
+  recall();
   next.style.setProperty("--t", "0");
   // whatever the demonstration left half-typed is theirs now, and gets checked
   if (text() !== cur.text) void check();
@@ -325,15 +313,10 @@ export function startQuote() {
     }
   });
   q.addEventListener("focus", take);
-  let was = text();
   q.addEventListener("input", () => {
     take();
-    recall("quote");
     clearTimeout(timer);
-    clearTimeout(mend);
     marks.replaceChildren();
-    if (text() !== cur.text && was === cur.text) record("you", "changed", "the quotation");
-    was = text();
     say("busy", "Checking");
     timer = window.setTimeout(check, 450);
   });
@@ -365,14 +348,12 @@ export function startQuote() {
     clock += dt;
     next.style.setProperty("--t", Math.min(1, clock / TURN).toFixed(4));
     if (stage === "fresh" && clock > 2600 && out.dataset.v === "ok") {
-      stage = "slipped"; // claimed; slip() confirms it
-      post({ key: "quote", at: spot, run: slip });
+      stage = "slipped";
+      perform(slip);
     } else if (stage === "slipped" && clock > 7200 && out.dataset.v === "miss") {
       stage = "mended";
-      post({ key: "quote", at: spot, run: repair });
+      perform(repair);
     } else if (clock >= TURN) {
-      // never leave a misquote standing when the turn ends
-      if (text() !== cur.text) recall("quote");
       load(idx + 1);
     }
   });

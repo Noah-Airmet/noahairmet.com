@@ -19,7 +19,7 @@ test("the build emits every route, data file and control file", () => {
     "rss.xml", "sitemap-index.xml", "resume/noah-airmet-resume.pdf", "bee/index.html", "bee/sw.js",
     "favicon.svg", "favicon.ico", "apple-touch-icon.png", "og/card.png", "boot.js",
     "_headers", "_redirects", "robots.txt", "data/last-out.json",
-    "card/index.html", "media/card.mp4",
+    "card/index.html",
   ]) assert.ok(existsSync(join(dist, file)), `${file} should exist in dist`);
 });
 
@@ -42,19 +42,16 @@ test("pages carry the accessibility and metadata basics", () => {
     assert.match(html, /id="main"/, file);
     assert.match(html, /<meta name="description"/, file);
     assert.match(html, /<link rel="canonical" href="https:\/\/noahairmet\.com\//, file);
-    // the share card: a still for everyone, a video for the apps that play og:video (iMessage, Discord)
-    for (const prop of ["og:image", "og:video"]) {
-      const m = html.match(new RegExp(`<meta property="${prop}" content="https://noahairmet\\.com(/[^"?]+)`));
-      assert.ok(m && existsSync(join(dist, m[1])), `${file}: ${prop} exists`);
-    }
-    assert.match(html, /<meta property="og:video:type" content="video\/mp4">/, file);
+    // the share card
+    const m = html.match(/<meta property="og:image" content="https:\/\/noahairmet\.com(\/[^"?]+)/);
+    assert.ok(m && existsSync(join(dist, m[1])), `${file}: og:image exists`);
   }
 });
 
 test("the home page says who Noah is in real text, and how to reach him", () => {
   const home = read("index.html");
   assert.match(home, /<h1 class="name" id="name" aria-label="Noah Airmet">/);
-  assert.match(home, /<span class="ln">Noah<\/span>\s*<span class="ln">Airmet<\/span>/);
+  assert.match(home, /<span class="ln">Noah Airmet<\/span>/);
   assert.match(home, /Lead Technical Fellow/);
   assert.match(home, /href="https:\/\/x\.com\/transfigurism"[^>]*>@transfigurism/);
   assert.match(home, /href="\/resume\/noah-airmet-resume\.pdf"/);
@@ -132,7 +129,7 @@ test("styles are external, fonts self-hosted, reduced motion honored", () => {
   assert.match(read("boot.js"), /window\.sky/);
   assert.doesNotMatch(read("index.html"), /id="theme"/);
   assert.match(read("index.html"), /id="daybar"/);
-  assert.ok(assets.filter((f) => f.endsWith(".woff2")).length >= 4, "four font files are self-hosted");
+  assert.ok(assets.filter((f) => f.endsWith(".woff2")).length >= 3, "the three Geist cuts are self-hosted");
   assert.match(read("boot.js"), /prefers-reduced-motion/);
 });
 

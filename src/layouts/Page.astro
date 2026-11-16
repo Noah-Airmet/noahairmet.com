@@ -1,7 +1,8 @@
 ---
 import "../styles/tokens.css";
 import "../styles/base.css";
-import flex from "../fonts/roboto-flex.woff2?url";
+import serif from "../fonts/geist-serif.woff2?url";
+import sans from "../fonts/geist.woff2?url";
 import { absoluteUrl, pageTitle, site } from "../site";
 
 interface Props {
@@ -10,16 +11,16 @@ interface Props {
   path?: string;
   noindex?: boolean;
   here?: "home" | "writing";
-  /** The page runs the board (the name in pieces, the agents, sound). */
-  board?: boolean;
+  /** An essay: the bar carries how far through it the reader is. */
+  reading?: boolean;
 }
 
-const { title, description = site.description, path = "/", noindex = false, here, board = false } = Astro.props;
+const { title, description = site.description, path = "/", noindex = false, here, reading = false } = Astro.props;
 const fullTitle = pageTitle(title);
 ---
 
 <!doctype html>
-<html lang="en" data-board={board ? "" : undefined}>
+<html lang="en" data-here={here} data-reading={reading ? "" : undefined}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -39,39 +40,26 @@ const fullTitle = pageTitle(title);
     <meta property="og:image" content={absoluteUrl(site.card.image)} />
     <meta property="og:image:width" content={String(site.card.width)} />
     <meta property="og:image:height" content={String(site.card.height)} />
-    <meta property="og:image:alt" content="The name Noah Airmet, with three cursors named fable and opus setting its last letters in place" />
-    <meta property="og:video" content={absoluteUrl(site.card.video)} />
-    <meta property="og:video:secure_url" content={absoluteUrl(site.card.video)} />
-    <meta property="og:video:type" content="video/mp4" />
-    <meta property="og:video:width" content={String(site.card.width)} />
-    <meta property="og:video:height" content={String(site.card.height)} />
+    <meta property="og:image:alt" content="Noah Airmet: development and AI security at Simplicity Group, Lead Technical Fellow, cybersecurity at BYU" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@AirmetNoah" />
     <meta name="twitter:image" content={absoluteUrl(site.card.image)} />
     <meta name="theme-color" content="#ecede8" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0b1a3c" media="(prefers-color-scheme: dark)" />
-    <link rel="preload" href={flex} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={serif} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={sans} as="font" type="font/woff2" crossorigin />
     <script is:inline src="/boot.js" />
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
     <header class="bar">
       <nav aria-label="Site">
-        {here !== "home" && <a class="home" href="/">Noah Airmet</a>}
+        <a class="home" href="/">Noah Airmet</a>
         <a href="/#work">Work</a>
         <a href="/writing/" aria-current={here === "writing" ? "page" : undefined}>Writing</a>
         <a href="/#outside">Outside</a>
       </nav>
-      <div class="bar-end">
-        <slot name="bar" />
-        {
-          board && (
-            <button class="snd" id="sound" type="button" aria-pressed="false">
-              Sound off
-            </button>
-          )
-        }
-      </div>
+      <a class="bar-end" href={site.resume}>Résumé</a>
     </header>
     <slot />
   </body>

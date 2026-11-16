@@ -8,8 +8,6 @@ export default {
     { name: 'essay', path: '/writing/professional-commitments/' },
   ],
   widths: [1440, 390],
-  // the board has finished setting the name
-  ready: "!document.documentElement.classList.contains('live') || (document.querySelectorAll('.pc').length > 0 && [...document.querySelectorAll('.pc')].every((p) => p.dataset.s === 'set'))",
-  // things that tick or come from the network: the last log line, the quote and the live verdicts, the cited page, the mountain, the day bar (it reads the clock)
-  mask: ['#last', '.check-foot', '#peak', '.q', '#sheet', '#sky'],
+  // things that tick or come from the network: the quote and the live verdicts, the cited page, the mountain, the day bar (it reads the clock)
+  mask: ['.check-foot', '#peak', '.q', '#sheet', '#sky'],
 };

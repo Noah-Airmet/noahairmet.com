@@ -1,290 +1,62 @@
-/* ---- the board: cursors, lines and measurements, drawn over the page */
-.board {
-  position: absolute;
-  inset: 0 auto auto 0;
-  width: 0;
-  height: 0;
-  z-index: 40;
-  pointer-events: none;
-}
-.board > * {
-  position: absolute;
-  left: 0;
-  top: 0;
-  will-change: transform;
-}
-
-.ag {
-  opacity: 0;
-  transition: opacity var(--d-pop) var(--ease);
-}
-.ag.on {
-  opacity: 1;
-}
-.ag svg {
-  display: block;
-  margin: -1px 0 0 -1px;
-  fill: var(--c);
-  stroke: var(--paper);
-  stroke-width: 1.4;
-  stroke-linejoin: round;
-  paint-order: stroke;
-  overflow: visible;
-  transform-origin: 2px 2px;
-  transition: transform 90ms var(--ease);
-}
-.ag.down svg {
-  transform: scale(0.84);
-}
-.ag-tag {
-  position: absolute;
-  left: 13px;
-  top: 17px;
-  padding: 2px 6px 3px;
-  border-radius: var(--r);
-  background: var(--c);
-  color: var(--on-agent);
-  font: 600 var(--t-xs) / 1.2 var(--sans);
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-}
-.ag-ring {
-  width: 28px;
-  height: 28px;
-  margin: -14px 0 0 -14px;
-  border: 1.5px solid var(--c);
-  border-radius: 50%;
-  animation: ring 420ms var(--ease) forwards;
-}
-@keyframes ring {
-  from {
-    scale: 0.2;
-    opacity: 0.9;
-  }
-  to {
-    scale: 1;
-    opacity: 0;
-  }
-}
-
-.gl {
-  background: var(--guide);
-  opacity: 0;
-  transition: opacity 90ms linear;
-}
-.gl.on {
-  opacity: 1;
-}
-.gl:not(.on) {
-  transition-duration: var(--d-slow);
-}
-.gl.h {
-  width: var(--len);
-  height: 1px;
-}
-.gl.v {
-  width: 1px;
-  height: var(--len);
-}
-
-.chip {
-  padding: 2px 5px;
-  border-radius: 2px;
-  background: var(--guide-ink);
-  color: var(--paper);
-  font: 500 10px/1.3 var(--mono);
-  font-stretch: 87.5%;
-  white-space: nowrap;
-  opacity: 0;
-  transition: opacity var(--d-fast) linear;
-}
-.chip.on {
-  opacity: 1;
-}
-.chip.mark {
-  background: var(--mark);
-}
-.chip.pass {
-  background: var(--pass);
-}
-
-/* ---- the page's state, top right */
-.status {
-  display: flex;
-  align-items: center;
-  gap: var(--s-4);
-  min-width: 0;
-}
-/* shown only to the keyboard: the way to play without a pointer */
-.sr-key {
-  position: absolute;
-  left: var(--gutter);
-  top: calc(var(--bar) + var(--s-2));
-  z-index: 6;
-  padding: var(--s-2) var(--s-3);
-  border-radius: var(--r);
-  background: var(--ink);
-  color: var(--paper);
-  font-size: var(--t-sm);
-  font-weight: 500;
-  opacity: 0;
-  pointer-events: none;
-}
-.sr-key:focus-visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-.state {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s-2);
-  height: var(--hit);
-  padding: 0 10px;
-  color: var(--ink);
-  white-space: nowrap;
-}
-.state em {
-  font-style: normal;
-}
-.state i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--pass);
-  transition: background var(--d-pop) var(--ease);
-}
-.state[data-state="off"] i {
-  background: var(--mark);
-}
-.last {
-  min-width: 0;
-  overflow: hidden;
-  opacity: 0;
-}
-.last.on {
-  animation: last 4.2s linear both;
-}
-@keyframes last {
-  0%,
-  94% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-.log-row {
-  display: flex;
-  gap: 1ch;
-  align-items: baseline;
-  font: 400 var(--t-xs) / 1.6 var(--mono);
-  font-stretch: 87.5%;
-  color: var(--ink-2);
-  white-space: nowrap;
-}
-.log-row time {
-  color: var(--ink-3);
-}
-.log-row b {
-  font-weight: 600;
-  color: var(--ink);
-}
-.log-row i {
-  font-style: normal;
-  color: var(--ink-3);
-}
-
-/* ---- hero */
+/* ---- hero: the name, one sentence, and under a rule what he does and how to
+   reach him. It sits at the foot of the first screen with the page's air
+   above it. */
 .hero {
-  --name: min(calc((100vw - 2 * var(--gutter)) / 4.34), 37svh);
-  position: relative;
-  min-height: 100svh;
-  padding: calc(var(--bar) + 1svh) var(--gutter) var(--gutter);
+  min-height: 94svh;
+  padding: calc(var(--bar) + var(--s-7)) var(--gutter) var(--s-6);
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: 1fr auto auto;
+  align-content: end;
 }
 
 .name {
-  position: relative;
-  font-family: var(--display);
-  font-size: var(--name);
-  font-weight: 1000;
-  font-stretch: 150%;
-  font-variation-settings: "opsz" 144;
-  line-height: 0.8;
-  letter-spacing: -0.03em;
-  --cap: 37;
-  white-space: nowrap;
-  padding-top: 0.06em;
-  user-select: none;
-  -webkit-user-select: none;
+  align-self: end;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(3.75rem, 1rem + 11.2vw, 11.5rem);
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+  /* the N's stem sits on the margin, not its side bearing */
+  margin-left: -0.012em;
+  /* the line comes up from behind this edge on arrival */
+  overflow: clip;
+  overflow-clip-margin: 0.04em;
+  padding-bottom: 0.08em;
 }
 .name .ln {
   display: block;
 }
-.live .name .ln {
-  color: transparent;
-}
-.probe {
-  display: inline-block;
-  width: 0;
-  height: 0;
-}
-.pieces {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 5;
-}
-.pc {
-  position: absolute;
-  display: block;
-  white-space: pre;
-  pointer-events: auto;
-  cursor: grab;
-  touch-action: none;
-  will-change: transform;
-  transition: filter var(--d-pop) var(--ease);
-}
-.pc-g {
-  display: block;
-}
-.pc[data-s="held"] {
-  cursor: grabbing;
-  z-index: 3;
-}
-.pc[data-s="held"],
-.pc[data-s="carried"],
-.pc[data-s="placing"] {
-  filter: drop-shadow(var(--lift));
-  z-index: 2;
-}
-/* Off the page, a letter is a cut-out: a paper edge keeps a heap readable. */
-.pc[data-s]:not([data-s="set"]) .pc-g {
-  -webkit-text-stroke: 0.014em var(--paper);
-  paint-order: stroke fill;
-}
-.pc.tick .pc-g {
-  animation: tick 160ms var(--ease);
-}
-@keyframes tick {
-  40% {
-    scale: 0.985;
-  }
+
+.lede {
+  max-width: 30ch;
+  margin-top: var(--s-5);
+  font-family: var(--serif);
+  font-size: var(--t-lede);
+  line-height: 1.14;
+  letter-spacing: -0.012em;
+  text-wrap: balance;
 }
 
-.roles {
-  position: absolute;
-  top: calc(var(--bar) + 1svh + var(--name) * 0.076);
-  left: var(--notch, calc(var(--gutter) + var(--name) * 3.4));
-  right: var(--gutter);
+.about {
   display: grid;
-  gap: var(--s-4);
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--s-5) var(--s-7);
+  margin-top: var(--s-8);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--rule);
+}
+.roles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-5) var(--s-6);
+  max-width: 62rem;
   font-size: var(--t-ui);
-  line-height: 1.3;
+  line-height: 1.35;
 }
 .roles li {
   display: grid;
+  align-content: start;
 }
 .roles span {
   font-weight: 600;
@@ -297,95 +69,60 @@
   color: var(--ink);
 }
 .roles .what {
-  max-width: 36ch;
+  max-width: 30ch;
   margin-top: var(--s-1);
   color: var(--ink-2);
   text-wrap: pretty;
 }
-/* Between the phone layout and a full desktop the notch beside "Noah" is too
-   shallow for the extra lines. */
-@media (min-width: 861px) and (max-width: 999px) {
-  .roles .what {
-    display: none;
-  }
-}
-
-.foot {
-  align-self: end;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: last baseline;
-  gap: var(--s-6);
-}
-.lede {
-  max-width: 21ch;
-  font-family: var(--serif);
-  font-size: var(--t-lede);
-  line-height: 1.12;
-  letter-spacing: -0.012em;
-  text-wrap: balance;
-}
-.status {
-  position: relative;
-}
-.log {
-  position: absolute;
-  top: calc(100% - 4px);
-  right: -10px;
-  width: min(26rem, calc(100vw - 2 * var(--gutter) + 20px));
-  max-height: min(60svh, 28rem);
-  overflow: auto;
-  padding: var(--s-3) var(--s-4);
-  border-radius: 10px;
-  background: var(--ink);
-  box-shadow: 0 12px 40px #0003;
-}
-.log[hidden] {
-  display: none;
-}
-.log .log-row {
-  color: color-mix(in srgb, var(--paper) 70%, transparent);
-  line-height: 1.9;
-}
-.log .log-row time,
-.log .log-row i {
-  color: color-mix(in srgb, var(--paper) 42%, transparent);
-}
-.log .log-row b {
-  color: var(--paper);
-}
-.log .log-row i {
-  margin-left: auto;
-}
-.log-none {
-  font: 400 var(--t-xs) / 1.9 var(--mono);
-  font-stretch: 87.5%;
-  color: color-mix(in srgb, var(--paper) 55%, transparent);
-}
-.log-list:not(:empty) + .log-none {
-  display: none;
+/* the links' first line sits level with the roles' */
+.about .links {
+  margin-top: -11px;
 }
 
 @media (max-width: 860px) {
   .hero {
-    --name: calc((100vw - 2 * var(--gutter)) / 4.34);
-    grid-template-rows: auto auto 1fr;
-    /* room for the letters to land, and the next heading showing under it */
-    min-height: 88svh;
+    min-height: 86svh;
+    padding-top: calc(var(--bar) + var(--s-6));
+  }
+  .about {
+    grid-template-columns: 1fr;
+    margin-top: var(--s-7);
   }
   .roles {
-    position: static;
-    margin-top: var(--s-6);
-  }
-  .foot {
     grid-template-columns: 1fr;
-    gap: var(--s-3);
+    gap: var(--s-4);
   }
-  .last,
-  .state em {
-    display: none;
+  .about .links {
+    margin-top: 0;
   }
-  .state {
-    padding: 0 8px;
+}
+
+/* ---- the one moment on arrival: the name comes up from behind its own
+   baseline, then the sentence and the row under it. ?still (checks and
+   screenshots) holds everything where it ends. */
+@media (prefers-reduced-motion: no-preference) {
+  :root:not(.still) .name .ln {
+    animation: rise-in 1000ms var(--settle) both;
+  }
+  :root:not(.still) .hero .lede,
+  :root:not(.still) .hero .about {
+    animation: arrive 800ms var(--settle) both;
+  }
+  .hero .lede {
+    animation-delay: 220ms;
+  }
+  .hero .about {
+    animation-delay: 380ms;
+  }
+}
+@keyframes rise-in {
+  from {
+    translate: 0 104%;
+  }
+}
+@keyframes arrive {
+  from {
+    opacity: 0;
+    translate: 0 12px;
   }
 }

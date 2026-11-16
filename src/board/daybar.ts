@@ -4,7 +4,6 @@
 // time of day, and Now lets go of it. Sunrise and sunset are marked from the
 // sun's real elevation today, so they move through the year.
 import { clamp } from "./kit";
-import { click } from "./sound";
 
 declare global {
   interface Window {
@@ -100,10 +99,9 @@ export function startDaybar() {
     held = m;
     window.sky.show(m == null ? null : dateAt(m));
     read();
-    // crossing one of the day's marks is felt: a click if sound is on, a tick on phones that can
+    // crossing one of the day's marks is felt on phones that can tick
     const ev = m == null ? "" : (near(m, 0)?.name ?? "");
     if (ev && ev !== lastEvent) {
-      click();
       navigator.vibrate?.(6);
     }
     lastEvent = ev;

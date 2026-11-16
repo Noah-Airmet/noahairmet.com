@@ -3,14 +3,12 @@
 //
 // Every question, answer and page is in the document from the start (the
 // answers stack in one cell, so the card is as tall as its longest). With
-// motion allowed the card acts each one out: fable types the question and
-// sends it, opus answers, then presses the citation, and the page comes up
-// beside it with the words marked. The quote is checked against the library's
+// motion allowed the card acts each one out: the question is typed and sent,
+// the answer arrives a word at a time, and the cited page comes up beside it
+// with the words marked. The quote is checked against the library's
 // verifier when it is cited, and the verdict shown is the one that comes back.
 import { asks } from "../data/asks";
-import { post, recall, type Agent } from "./agents";
-import { calm, onTick, pageRect, run, still, wait } from "./kit";
-import { record } from "./ledger";
+import { calm, onTick, still, wait } from "./kit";
 import { verify } from "./quote";
 import { showPage, unmark } from "./sheet";
 
@@ -30,6 +28,13 @@ let idx = 0;
 let stage: "blank" | "asking" | "asked" | "answering" | "answered" = "answered";
 let clock = 0;
 const live = !calm && !still;
+/** The move being acted out, so the next question can call it off. */
+let act: AbortController | null = null;
+function perform(move: (signal: AbortSignal) => Promise<void>) {
+  act?.abort();
+  const mine = (act = new AbortController());
+  move(mine.signal).catch(() => {});
+}
 
 const part = (sel: string) => items[idx].querySelector(sel) as HTMLElement;
 
@@ -47,8 +52,8 @@ function typed(n: number) {
 
 /** Bring a question up: whole and answered where nothing moves, blank where it is acted out. */
 function load(i: number) {
-  recall("ask");
-  items[idx].classList.remove("on", "typing", "in");
+  act?.abort();
+  items[idx].classList.remove("on", "typing", "in", "sent");
   idx = (i + asks.length) % asks.length;
   const a = asks[idx];
   const item = items[idx];
@@ -86,70 +91,34 @@ async function cite() {
   }
 }
 
-const at = (el: Element, fx: number, fy: number) => () => {
-  const r = pageRect(el);
-  return { x: r.x + r.w * fx, y: r.y + r.h * fy };
-};
-
-/** fable types the question into the field and sends it. */
-async function ask(a: Agent, signal: AbortSignal) {
+/** The question is typed into the field and sent. */
+async function ask(signal: AbortSignal) {
   const item = items[idx];
   const text = asks[idx].ask;
-  await a.moveTo(at(part(".ask-q"), 0.04, 0.5), { signal });
-  await a.click(signal);
   item.classList.add("typing");
-  // the hand keeps just under the caret as the words go in
-  const caret = () => {
-    const r = part(".ask-typed").getClientRects();
-    const last = r[r.length - 1];
-    return last ? { x: last.right + scrollX + 6, y: last.bottom + scrollY + 2 } : at(part(".ask-q"), 0.04, 0.5)();
-  };
   for (let n = 1; n <= text.length; n++) {
     typed(n);
-    const p = caret();
-    a.set(p.x, p.y);
     await wait(text[n - 1] === " " ? 46 : 24, signal);
   }
-  await wait(220, signal);
-  await a.moveTo(at(part(".ask-send"), 0.5, 0.5), { signal });
-  await a.click(signal);
+  await wait(320, signal);
   item.classList.remove("typing");
-  // and stands clear of the key it pressed
-  void a.moveTo(at(part(".ask-send"), 1.2, 1.15), { ms: 260 }).catch(() => {});
+  item.classList.add("sent");
   stage = "asked";
   clock = 0;
-  record(a.name, "asked", "the library");
 }
 
-/** opus answers, then presses the citation: the page comes up with the words marked. */
-async function answer(a: Agent, signal: AbortSignal) {
+/** The answer arrives (the pace is the stylesheet's), then the page it cites comes up with the words marked. */
+async function answer(signal: AbortSignal) {
   const item = items[idx];
-  const lead = part(".ask-lead");
-  const words = [...item.querySelectorAll<HTMLElement>(".w")];
-  await a.moveTo(at(lead, 0, 1), { signal });
+  const words = item.querySelectorAll(".w").length;
   item.classList.remove("wait");
   item.classList.add("in");
-  // the hand runs along under the words as they arrive (the pace is the stylesheet's)
-  const total = LEAD + words.length * WORD + 300;
-  await run(
-    total,
-    (t) => {
-      const k = Math.floor((t * total - LEAD) / WORD);
-      const boxes = (k < 0 ? lead : words[Math.min(k, words.length - 1)]).getClientRects();
-      const r = boxes[boxes.length - 1];
-      if (!r) return;
-      a.set(a.x + (r.right + scrollX + 5 - a.x) * 0.3, a.y + (r.bottom + scrollY - 1 - a.y) * 0.3);
-    },
-    signal,
-  );
+  await wait(LEAD + words * WORD + 300, signal);
   card!.classList.remove("pending");
   await wait(260, signal);
-  await a.moveTo(at(src, 0.5, 0.55), { signal });
-  await a.click(signal);
   showPage(asks[idx], true);
   stage = "answered";
   clock = 0;
-  record(a.name, "cited", asks[idx].source);
   void cite();
 }
 
@@ -194,10 +163,10 @@ export function startAsk() {
     clock += dt;
     if (stage === "blank" && clock > 700) {
       stage = "asking";
-      post({ key: "ask", who: "fable", at: at(part(".ask-q"), 0.04, 0.5), run: ask });
+      perform(ask);
     } else if (stage === "asked" && clock > 520) {
       stage = "answering";
-      post({ key: "ask", who: "opus", at: at(part(".ask-lead"), 0, 0.5), run: answer });
+      perform(answer);
     } else if (stage === "answered") {
       next.style.setProperty("--t", Math.min(1, clock / HOLD).toFixed(4));
       if (clock >= HOLD) load(idx + 1);

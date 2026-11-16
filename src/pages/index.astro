@@ -23,46 +23,31 @@ const realLo = Math.min(...bench.runs.map((r) => r.real));
 const realHi = Math.max(...bench.runs.map((r) => r.real));
 ---
 
-<Page here="home" board>
-  <div class="status" slot="bar">
-    <span class="last" id="last" aria-hidden="true"></span>
-    <button class="state" id="state" type="button" data-state="ok" aria-expanded="false" aria-controls="log">
-      <i></i><span>Intact</span>
-    </button>
-    <aside class="log" id="log" hidden aria-label="What was done to this page, and who put it right">
-      <div class="log-list" id="log-list"></div>
-      <p class="log-none">Nothing yet</p>
-    </aside>
-  </div>
-
+<Page here="home">
   <main id="main">
     <section class="hero" id="top">
       <h1 class="name" id="name" aria-label="Noah Airmet">
-        <span class="ln">Noah</span>
-        <span class="ln">Airmet</span>
+        <span class="ln">Noah Airmet</span>
       </h1>
-      <button class="sr-key" id="scatter" type="button">Scatter the letters</button>
 
-      <ul class="roles">
-        <li>
-          <span data-keep="a role">Development and AI Security</span>
-          <a href={site.simplicity}>Simplicity Group</a>
-          <p class="what" data-keep="a role">
-            Pen test remediation, SOC 2 compliance, AI vendor risk
-          </p>
-        </li>
-        <li>
-          <span data-keep="a role">Lead Technical Fellow</span>
-          <a href={site.mta}>@transfigurism</a>
-        </li>
-        <li>
-          <span data-keep="a role">Cybersecurity, class of 2028</span>
-          <a href={site.byu}>BYU</a>
-        </li>
-      </ul>
+      <p class="lede" id="lede">I’m working toward a career securing and governing AI systems.</p>
 
-      <div class="foot">
-        <p class="lede" id="lede" data-keep="the lede">I’m working toward a career securing and governing AI systems.</p>
+      <div class="about">
+        <ul class="roles">
+          <li>
+            <span>Development and AI Security</span>
+            <a href={site.simplicity}>Simplicity Group</a>
+            <p class="what">Pen test remediation, SOC 2 compliance, AI vendor risk</p>
+          </li>
+          <li>
+            <span>Lead Technical Fellow</span>
+            <a href={site.mta}>@transfigurism</a>
+          </li>
+          <li>
+            <span>Cybersecurity, class of 2028</span>
+            <a href={site.byu}>BYU</a>
+          </li>
+        </ul>
         <nav class="links" aria-label="Elsewhere">
           <a href={site.resume}><Icon name="file" />Résumé</a>
           <a href={`mailto:${site.email}`}><Icon name="mail" />Email</a>
@@ -76,8 +61,8 @@ const realHi = Math.max(...bench.runs.map((r) => r.real));
     <div id="work">
       <section class="proj" id="citationbench" aria-labelledby="cb-h">
         <header class="proj-head">
-          <h2 class="title" id="cb-h" data-keep="a heading">CitationBench</h2>
-          <p class="say pitch" data-keep="a description">
+          <h2 class="title" id="cb-h">CitationBench</h2>
+          <p class="say pitch">
             Agents cite sources in everything they write now. Give one a real library and it stops inventing them, but
             they still misread the source at an alarming rate. On real citations from published papers the agents we
             ran were right {realLo} to {realHi}% of the time.
@@ -130,7 +115,6 @@ const realHi = Math.max(...bench.runs.map((r) => r.real));
                     <div class="track">
                       <i class="fill" />
                       <i class="ci" />
-                      <i class="grip" aria-hidden="true" />
                       <span class="val">
                         <b>{Math.round(r.correct[0])}</b>
                         <i>±{half(r.correct)}</i>
@@ -147,31 +131,31 @@ const realHi = Math.max(...bench.runs.map((r) => r.real));
 
       <section class="proj" id="catchword" aria-labelledby="cw-h">
         <header class="proj-head">
-          <h2 class="title" id="cw-h" data-keep="a heading">Catchword</h2>
-          <p class="say pitch" data-keep="a description">
+          <h2 class="title" id="cw-h">Catchword</h2>
+          <p class="say pitch">
             AI safety guidance comes out faster than anybody can read it, and agents are the ones quoting it now.
             Catchword is your entire library of safety documentation and AI policy writing, built to help you stay on
             top of it and in the loop.
           </p>
-          <p class="points-head" data-keep="a line">
+          <p class="points-head">
             A chatbot with web search can find many of the same documents, but Catchword is built for professionals
             because:
           </p>
           <ul class="points">
             <li>
-              <b data-keep="a point">Cited to the page</b>
+              <b>Cited to the page</b>
               <span>A citation opens the exact page, with the quoted words marked.</span>
             </li>
             <li>
-              <b data-keep="a point">Quotes checked</b>
+              <b>Quotes checked</b>
               <span>Each quote is compared word for word with the page it cites.</span>
             </li>
             <li>
-              <b data-keep="a point">Every version kept</b>
+              <b>Every version kept</b>
               <span>Drafts and revisions stay separate sources. Ten versions of Anthropic’s Responsible Scaling Policy.</span>
             </li>
             <li>
-              <b data-keep="a point">One library</b>
+              <b>One library</b>
               <span>13,898 documents: papers, system cards, safety frameworks, government guidance, evaluator reports.</span>
             </li>
           </ul>
@@ -214,7 +198,7 @@ const realHi = Math.max(...bench.runs.map((r) => r.real));
     </div>
 
     <section class="writing" id="writing" aria-labelledby="w-h">
-      <h2 class="title" id="w-h" data-keep="a heading">Writing</h2>
+      <h2 class="title" id="w-h">Writing</h2>
       <ol class="notes">
         {
           notes.map((n) => (

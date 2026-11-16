@@ -3,7 +3,6 @@
 // behind it, with a real trail traced from trailhead to summit. The figure
 // turns through a few peaks on its own; when Ledger has uploaded a recent
 // day out (/api/last-out), that mountain and that route come first.
-import { free, post, recall, type Agent } from "./agents";
 import { calm, clamp, onTick, run, still } from "./kit";
 
 type Grid = { rows: number; cols: number; elev: number[] };
@@ -405,7 +404,7 @@ export async function startOutside() {
     ctx.moveTo(top[0], top[1]);
     ctx.lineTo(top[0], top[1] - up);
     ctx.stroke();
-    ctx.font = `500 ${11 * dpr}px Martian, monospace`;
+    ctx.font = `500 ${11 * dpr}px "Geist Mono", monospace`;
     ctx.textBaseline = "middle";
     ctx.lineWidth = 5 * dpr;
     ctx.strokeStyle = paper;
@@ -419,8 +418,6 @@ export async function startOutside() {
   async function show(i: number) {
     if (swapping || i === at) return;
     swapping = true;
-    recall("lift");
-    recall("walk");
     const next = load(i);
     try {
       if (!calm && !still) {
@@ -451,45 +448,10 @@ export async function startOutside() {
     void load((i + 1) % loaders.length);
   }
 
-  // The stack starts flat. An agent takes it by the summit and lifts it, and
-  // one walks the trail as it is drawn; with nobody free both happen anyway.
+  // The stack starts flat and stands up the first time it is seen.
   const lift = () => {
-    if (asked) return;
     asked = true;
-    if (!free()) return void (lifting = true);
-    post({
-      key: "lift",
-      at: () => summit,
-      async run(a: Agent, signal: AbortSignal) {
-        try {
-          await a.moveTo(() => summit, { signal, tempo: 0.8 });
-          await a.press(signal, 80);
-          lifting = true;
-          await run(1450, () => a.set(summit.x, summit.y), signal);
-        } finally {
-          lifting = true;
-          a.lift();
-        }
-      },
-    });
-    setTimeout(() => (lifting = true), 1600);
-  };
-  let walking = false;
-  const walk = () => {
-    if (walking || !scene.steps || !free()) return;
-    walking = true;
-    post({
-      key: "walk",
-      at: () => walker,
-      async run(a: Agent, signal: AbortSignal) {
-        try {
-          await a.moveTo(() => walker, { signal, tempo: 0.7 });
-          while (trace < 1 && !signal.aborted) await run(60, () => a.set(walker.x, walker.y), signal);
-        } finally {
-          walking = false;
-        }
-      },
-    });
+    lifting = true;
   };
 
   new IntersectionObserver(
@@ -511,7 +473,6 @@ export async function startOutside() {
     }
     // once it stands, the trail is walked from the trailhead up
     if (rise >= 0.6 && trace < 1 && !swapping && scene.steps) {
-      if (trace === 0) walk();
       trace = Math.min(1, trace + dt / 3600);
       dirty = true;
     }
