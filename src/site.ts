@@ -5,7 +5,7 @@ export const site = {
     "Noah Airmet works in development and AI security at Simplicity Group, is Lead Technical Fellow at the Mormon Transhumanist Association, and studies cybersecurity at BYU.",
   email: "noah.airmet@icloud.com",
   github: "https://github.com/Noah-Airmet",
-  linkedin: "https://www.linkedin.com/in/noah-airmet",
+  linkedin: "https://www.linkedin.com/in/noah-airmet-165669333",
   x: "https://x.com/AirmetNoah",
   resume: "/resume/noah-airmet-resume.pdf",
   simplicity: "https://www.simplicitygroup.com/",
